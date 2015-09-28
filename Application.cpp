@@ -36,8 +36,7 @@ Application::Application()
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
-	_pVertexBuffer = nullptr;
-	_pIndexBuffer = nullptr;
+	squareMesh = new MeshData();
 	_pConstantBuffer = nullptr;
 }
 
@@ -69,6 +68,8 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -3.0f, 0.0f);
 	XMVECTOR lookAt = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.01f, 100.0f);
 
 	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(Eye, lookAt, Up));
 
@@ -167,7 +168,7 @@ HRESULT Application::InitVertexBuffer()
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = vertices;
 
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pVertexBuffer);
+    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->vertexBuffer);
 
     if (FAILED(hr))
         return hr;
@@ -197,8 +198,8 @@ HRESULT Application::InitIndexBuffer()
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = indices;
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pIndexBuffer);
-
+    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->indexBuffer);
+	squareMesh->numIndices = 6;
     if (FAILED(hr))
         return hr;
 
@@ -352,18 +353,6 @@ HRESULT Application::InitDevice()
 
 	InitShadersAndInputLayout();
 
-	InitVertexBuffer();
-
-    // Set vertex buffer
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBuffer, &stride, &offset);
-
-	InitIndexBuffer();
-
-    // Set index buffer
-    _pImmediateContext->IASetIndexBuffer(_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -376,21 +365,25 @@ HRESULT Application::InitDevice()
 	bd.CPUAccessFlags = 0;
     hr = _pd3dDevice->CreateBuffer(&bd, nullptr, &_pConstantBuffer);
 
+	initObjects();
+
     if (FAILED(hr))
         return hr;
 
-	go = GameObject(_pImmediateContext, _pConstantBuffer, _pVertexBuffer, _pIndexBuffer, 6, XMFLOAT3(0, 0, 0)); ////////////////////////////////////////////
-
     return S_OK;
+}
+
+void Application::initObjects()
+{
+	InitVertexBuffer();
+	InitIndexBuffer();
+	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0));
 }
 
 void Application::Cleanup()
 {
     if (_pImmediateContext) _pImmediateContext->ClearState();
-
     if (_pConstantBuffer) _pConstantBuffer->Release();
-    if (_pVertexBuffer) _pVertexBuffer->Release();
-    if (_pIndexBuffer) _pIndexBuffer->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
     if (_pPixelShader) _pPixelShader->Release();
@@ -398,6 +391,7 @@ void Application::Cleanup()
     if (_pSwapChain) _pSwapChain->Release();
     if (_pImmediateContext) _pImmediateContext->Release();
     if (_pd3dDevice) _pd3dDevice->Release();
+	delete squareMesh;
 }
 
 void Application::Update()
@@ -420,6 +414,7 @@ void Application::Update()
         t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
 	go.Update(t);
+	camera.Update();
 }
 
 void Application::Draw()
@@ -430,7 +425,7 @@ void Application::Draw()
     float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 
-	go.Draw(_pPixelShader, _pVertexShader, _view, _projection);
+	go.Draw(_pPixelShader, _pVertexShader, camera);
 
     //
     // Present our back buffer to our front buffer

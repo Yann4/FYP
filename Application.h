@@ -9,6 +9,7 @@
 
 #include "data structs.h"
 #include "GameObject.h"
+#include "Camera.h"
 
 using namespace DirectX;
 
@@ -29,10 +30,10 @@ private:
 	
 	ID3D11InputLayout*      _pVertexLayout;
 	
-	ID3D11Buffer*           _pVertexBuffer;
-	ID3D11Buffer*           _pIndexBuffer;
+	MeshData* squareMesh;
 	ID3D11Buffer*           _pConstantBuffer;
 
+	Camera camera;
 	XMFLOAT4X4              _view;
 	XMFLOAT4X4              _projection;
 
@@ -47,6 +48,8 @@ private:
 
 	HRESULT InitVertexBuffer();
 	HRESULT InitIndexBuffer();
+
+	void initObjects();
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;

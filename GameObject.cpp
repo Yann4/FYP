@@ -1,0 +1,123 @@
+#include "GameObject.h"
+
+using namespace DirectX;
+
+GameObject::GameObject()
+{
+	context = nullptr;
+	constBuffer = nullptr;
+
+	mesh = nullptr;
+
+	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
+	std::stack<XMFLOAT4X4> translations = std::stack<XMFLOAT4X4>();
+
+	position = DirectX::XMFLOAT3(0, 0, 0);
+	rotation = XMFLOAT3(0, 0, 0);
+}
+
+GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0, 0, 0))
+	:context(devContext), constBuffer(constantBuffer), mesh(mesh), position(pos)
+{
+	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
+	std::stack<XMFLOAT4X4> translations = std::stack<XMFLOAT4X4>();
+	XMFLOAT3 rotation = XMFLOAT3(0, 0, 0);
+}
+
+GameObject::~GameObject()
+{
+	context = nullptr;
+	constBuffer = nullptr;
+	mesh = nullptr;
+}
+
+
+#pragma region Translations
+void GameObject::setScale(float x, float y, float z)
+{
+	XMFLOAT4X4 temp;
+	XMStoreFloat4x4(&temp, XMMatrixScaling(x, y, z));
+	translations.push(temp);
+}
+
+void GameObject::setRotation(float x, float y, float z)
+{
+	XMFLOAT4X4 temp;
+
+	XMFLOAT3 pos = position;
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(pos.x, pos.y, pos.z));
+	translations.push(temp);
+
+	XMStoreFloat4x4(&temp, XMMatrixRotationX(x) * XMMatrixRotationY(y) * XMMatrixRotationZ(z));
+	rotation.x += x;
+	rotation.y += y;
+	rotation.z += z;
+	translations.push(temp);
+
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(-pos.x, -pos.y, -pos.z));
+	translations.push(temp);
+}
+
+void GameObject::setTranslation(float x, float y, float z)
+{
+	XMFLOAT4X4 temp;
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(x, y, z));
+	translations.push(temp);
+}
+
+void GameObject::UpdateMatrix()
+{
+	if (!translations.empty())
+	{
+		XMMATRIX tr;
+		XMFLOAT4X4 temp = translations.top();
+		translations.pop();
+		tr = XMLoadFloat4x4(&temp);
+
+		while (!translations.empty())
+		{
+			temp = translations.top();
+			XMMATRIX tempMat = XMLoadFloat4x4(&temp);
+			tr *= tempMat;
+			translations.pop();
+		}
+		XMMATRIX p = XMLoadFloat4x4(&objMatrix);
+		p *= tr;
+		XMStoreFloat4x4(&objMatrix, p);
+	}
+}
+#pragma endregion
+
+void GameObject::Update(float deltaTime)
+{
+	setRotation(0, 0, deltaTime);
+	UpdateMatrix();
+}
+
+void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)
+{
+	context->VSSetShader(vShader, nullptr, 0);
+	context->VSSetConstantBuffers(0, 1, &constBuffer);
+	context->PSSetShader(pShader, nullptr, 0);
+	context->PSSetConstantBuffers(0, 1, &constBuffer);
+
+	UINT stride = sizeof(SimpleVertex);
+	UINT offset = 0;
+
+	ID3D11Buffer* indBuff = mesh->indexBuffer;
+	context->IASetVertexBuffers(0, 1, &mesh->vertexBuffer, &stride, &offset);
+	context->IASetIndexBuffer(indBuff, DXGI_FORMAT_R16_UINT, 0);
+
+	XMMATRIX worldMat = XMLoadFloat4x4(&objMatrix);
+	XMMATRIX viewMat = cam.getView();
+	XMMATRIX projectionMat = cam.getProjection();
+
+	ConstantBuffer cb;
+	cb.mWorld = XMMatrixTranspose(worldMat);
+	cb.mView = XMMatrixTranspose(viewMat);
+	cb.mProjection = XMMatrixTranspose(projectionMat);
+
+	context->UpdateSubresource(constBuffer, 0, nullptr, &cb, 0, 0);
+
+	context->DrawIndexed(mesh->numIndices, 0, 0);
+}

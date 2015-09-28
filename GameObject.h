@@ -7,17 +7,15 @@
 #include <stack>
 
 #include "data structs.h"
+#include "Camera.h"
 
 class GameObject
 {
-private:
+protected:
 	ID3D11DeviceContext* context;
 	ID3D11Buffer* constBuffer;
 
-	//Mesh data
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
-	int numIndices;
+	MeshData* mesh;
 
 	std::stack<DirectX::XMFLOAT4X4> translations;
 	DirectX::XMFLOAT3 rotation;
@@ -27,15 +25,13 @@ private:
 
 public:
 	GameObject();
-	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* vertexBuff, ID3D11Buffer* indexBuff, int indexCount,
-		DirectX::XMFLOAT3 pos);
+	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos);
 	~GameObject();
 
 	void Update(float deltaTime);
+	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
 
-	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, DirectX::XMFLOAT4X4& view, DirectX::XMFLOAT4X4& projection);
-
-private:
+protected:
 	void setScale(float x, float y, float z);
 	void setRotation(float x, float y, float z);
 	void setTranslation(float x, float y, float z);
