@@ -29,8 +29,7 @@ private:
 	
 	ID3D11InputLayout*      _pVertexLayout;
 	
-	ID3D11Buffer*           _pVertexBuffer;
-	ID3D11Buffer*           _pIndexBuffer;
+	MeshData* squareMesh;
 	ID3D11Buffer*           _pConstantBuffer;
 
 	XMFLOAT4X4              _view;

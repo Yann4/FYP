@@ -15,9 +15,7 @@ private:
 	ID3D11Buffer* constBuffer;
 
 	//Mesh data
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
-	int numIndices;
+	MeshData* mesh;
 
 	std::stack<DirectX::XMFLOAT4X4> translations;
 	DirectX::XMFLOAT3 rotation;
@@ -27,8 +25,7 @@ private:
 
 public:
 	GameObject();
-	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* vertexBuff, ID3D11Buffer* indexBuff, int indexCount,
-		DirectX::XMFLOAT3 pos);
+	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* meshData, DirectX::XMFLOAT3 pos);
 	~GameObject();
 
 	void Update(float deltaTime);

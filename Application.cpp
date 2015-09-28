@@ -36,8 +36,7 @@ Application::Application()
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
-	_pVertexBuffer = nullptr;
-	_pIndexBuffer = nullptr;
+	squareMesh = new MeshData(nullptr, nullptr, 6);
 	_pConstantBuffer = nullptr;
 }
 
@@ -167,7 +166,7 @@ HRESULT Application::InitVertexBuffer()
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = vertices;
 
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pVertexBuffer);
+    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->vertexBuffer);
 
     if (FAILED(hr))
         return hr;
@@ -197,7 +196,7 @@ HRESULT Application::InitIndexBuffer()
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = indices;
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &_pIndexBuffer);
+    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->indexBuffer);
 
     if (FAILED(hr))
         return hr;
@@ -353,16 +352,7 @@ HRESULT Application::InitDevice()
 	InitShadersAndInputLayout();
 
 	InitVertexBuffer();
-
-    // Set vertex buffer
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
-    _pImmediateContext->IASetVertexBuffers(0, 1, &_pVertexBuffer, &stride, &offset);
-
 	InitIndexBuffer();
-
-    // Set index buffer
-    _pImmediateContext->IASetIndexBuffer(_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -379,7 +369,7 @@ HRESULT Application::InitDevice()
     if (FAILED(hr))
         return hr;
 
-	go = GameObject(_pImmediateContext, _pConstantBuffer, _pVertexBuffer, _pIndexBuffer, 6, XMFLOAT3(0, 0, 0)); ////////////////////////////////////////////
+	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0)); ////////////////////////////////////////////
 
     return S_OK;
 }
@@ -389,8 +379,6 @@ void Application::Cleanup()
     if (_pImmediateContext) _pImmediateContext->ClearState();
 
     if (_pConstantBuffer) _pConstantBuffer->Release();
-    if (_pVertexBuffer) _pVertexBuffer->Release();
-    if (_pIndexBuffer) _pIndexBuffer->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
     if (_pPixelShader) _pPixelShader->Release();
@@ -398,6 +386,7 @@ void Application::Cleanup()
     if (_pSwapChain) _pSwapChain->Release();
     if (_pImmediateContext) _pImmediateContext->Release();
     if (_pd3dDevice) _pd3dDevice->Release();
+	delete squareMesh;
 }
 
 void Application::Update()
