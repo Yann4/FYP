@@ -9,6 +9,7 @@
 
 #include "data structs.h"
 #include "GameObject.h"
+#include "Camera.h"
 
 using namespace DirectX;
 
@@ -32,8 +33,7 @@ private:
 	MeshData* squareMesh;
 	ID3D11Buffer*           _pConstantBuffer;
 
-	XMFLOAT4X4              _view;
-	XMFLOAT4X4              _projection;
+	Camera camera;
 
 	GameObject go;
 private:
@@ -46,6 +46,8 @@ private:
 
 	HRESULT InitVertexBuffer();
 	HRESULT InitIndexBuffer();
+
+	void initObjects();
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;

@@ -94,7 +94,7 @@ void GameObject::Update(float deltaTime)
 	UpdateMatrix();
 }
 
-void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, DirectX::XMFLOAT4X4& view, DirectX::XMFLOAT4X4& projection)
+void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)
 {
 	context->VSSetShader(vShader, nullptr, 0);
 	context->VSSetConstantBuffers(0, 1, &constBuffer);
@@ -109,8 +109,8 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, D
 	context->IASetIndexBuffer(indBuff, DXGI_FORMAT_R16_UINT, 0);
 
 	XMMATRIX worldMat = XMLoadFloat4x4(&objMatrix);
-	XMMATRIX viewMat = XMLoadFloat4x4(&view);
-	XMMATRIX projectionMat = XMLoadFloat4x4(&projection);
+	XMMATRIX viewMat = cam.getView();
+	XMMATRIX projectionMat = cam.getProjection();
 
 	ConstantBuffer cb;
 	cb.mWorld = XMMatrixTranspose(worldMat);

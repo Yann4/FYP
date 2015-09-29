@@ -36,7 +36,7 @@ Application::Application()
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
-	squareMesh = new MeshData(nullptr, nullptr, 6);
+	squareMesh = new MeshData();
 	_pConstantBuffer = nullptr;
 }
 
@@ -64,15 +64,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
         return E_FAIL;
     }
 
-    // Initialize the view matrix
-	XMVECTOR Eye = XMVectorSet(0.0f, 0.0f, -3.0f, 0.0f);
-	XMVECTOR lookAt = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(Eye, lookAt, Up));
-
-    // Initialize the projection matrix
-	XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovLH(XM_PIDIV2, _WindowWidth / (FLOAT) _WindowHeight, 0.01f, 100.0f));
+	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.01f, 100.0f);
 
 	return S_OK;
 }
@@ -197,7 +189,7 @@ HRESULT Application::InitIndexBuffer()
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = indices;
     hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->indexBuffer);
-
+	squareMesh->numIndices = 6;
     if (FAILED(hr))
         return hr;
 
@@ -351,9 +343,6 @@ HRESULT Application::InitDevice()
 
 	InitShadersAndInputLayout();
 
-	InitVertexBuffer();
-	InitIndexBuffer();
-
     // Set primitive topology
     _pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -366,18 +355,24 @@ HRESULT Application::InitDevice()
 	bd.CPUAccessFlags = 0;
     hr = _pd3dDevice->CreateBuffer(&bd, nullptr, &_pConstantBuffer);
 
+	initObjects();
+
     if (FAILED(hr))
         return hr;
 
-	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0)); ////////////////////////////////////////////
-
     return S_OK;
+}
+
+void Application::initObjects()
+{
+	InitVertexBuffer();
+	InitIndexBuffer();
+	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0));
 }
 
 void Application::Cleanup()
 {
     if (_pImmediateContext) _pImmediateContext->ClearState();
-
     if (_pConstantBuffer) _pConstantBuffer->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
@@ -409,6 +404,7 @@ void Application::Update()
         t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
 	go.Update(t);
+	camera.Update();
 }
 
 void Application::Draw()
@@ -419,7 +415,7 @@ void Application::Draw()
     float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 
-	go.Draw(_pPixelShader, _pVertexShader, _view, _projection);
+	go.Draw(_pPixelShader, _pVertexShader, camera);
 
     //
     // Present our back buffer to our front buffer
