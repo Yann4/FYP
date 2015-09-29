@@ -34,8 +34,6 @@ private:
 	ID3D11Buffer*           _pConstantBuffer;
 
 	Camera camera;
-	XMFLOAT4X4              _view;
-	XMFLOAT4X4              _projection;
 
 	GameObject go;
 private:

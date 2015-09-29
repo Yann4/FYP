@@ -67,33 +67,22 @@ void Camera::Yaw(float delta)
 
 void Camera::Update()
 {
-	if (GetAsyncKeyState('W') & 0x8000)
-	{
-		Walk(10.0f);
-	}
-	if (GetAsyncKeyState('S') & 0x8000)
-	{
-		Walk(-10.0f);
-	}
-	if (GetAsyncKeyState('A') & 0x8000)
-	{
-		Strafe(10.0f);
-	}
-	if (GetAsyncKeyState('D') & 0x8000)
-	{
-		Strafe(-10.0f);
-	}
 	UpdateViewMatrix();
 }
 
 void Camera::UpdateViewMatrix()
 {
-	XMVECTOR rightV = XMLoadFloat4(&right);
+	//XMVECTOR rightV = XMLoadFloat4(&right);
 	XMVECTOR upV = XMLoadFloat4(&up);
 	XMVECTOR lookV = XMLoadFloat4(&lookAt);
 	XMVECTOR posV = XMLoadFloat4(&position);
+	
+	XMStoreFloat4x4(&view, XMMatrixLookAtLH(posV, lookV, upV));
+	
+	//Think this is how it's supposed to be done, but doesn't work for some reason.
+	//XMMatrixLookAtLH does a similar thing to the commented section
 
-	//Normalise right, up and look vectors
+	/*//Normalise right, up and look vectors
 	lookV = XMVector4Normalize(lookV);
 	upV = XMVector4Normalize(XMVector3Cross(lookV, rightV));
 	rightV = XMVector3Cross(upV, lookV);
@@ -124,7 +113,7 @@ void Camera::UpdateViewMatrix()
 	view(0, 3) = 0.0f;
 	view(1, 3) = 0.0f;
 	view(2, 3) = 0.0f;
-	view(3, 3) = 1.0f;
+	view(3, 3) = 1.0f;*/
 }
 
 XMMATRIX Camera::getView() const
