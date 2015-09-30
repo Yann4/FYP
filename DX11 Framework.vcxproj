@@ -378,6 +378,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DX11 Framework.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11 Framework.fx" />
@@ -387,6 +388,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="data structs.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Input.h" />
     <CLInclude Include="resource.h" />
     <ResourceCompile Include="DX11 Framework.rc" />
   </ItemGroup>

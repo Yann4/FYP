@@ -1,5 +1,7 @@
 #include "Application.h"
 
+std::queue<Event> Application::inputEventQueue;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
@@ -65,6 +67,8 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
     }
 
 	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.01f, 100.0f);
+
+	input = Input("input_map.txt");
 
 	return S_OK;
 }
@@ -384,6 +388,30 @@ void Application::Cleanup()
 	delete squareMesh;
 }
 
+void Application::pushEvent(Event toPush)
+{
+	inputEventQueue.push(toPush);
+}
+
+void Application::handleMessages()
+{
+	while (!inputEventQueue.empty())
+	{
+		Event next = inputEventQueue.front();
+
+		switch (next)
+		{
+		case DUMMY_EVENT:
+			break;
+		case NO_SUCH_EVENT:
+			break;
+		default:
+			break;
+		}
+		inputEventQueue.pop();
+	}
+}
+
 void Application::Update()
 {
     // Update our time
@@ -403,6 +431,9 @@ void Application::Update()
 
         t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
+
+	input.handleInput(&Application::pushEvent);
+	handleMessages();
 	go.Update(t);
 	camera.Update();
 }

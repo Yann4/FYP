@@ -10,6 +10,9 @@
 #include "data structs.h"
 #include "GameObject.h"
 #include "Camera.h"
+#include "Input.h"
+
+#include <queue>
 
 using namespace DirectX;
 
@@ -36,6 +39,10 @@ private:
 	Camera camera;
 
 	GameObject go;
+
+	Input input;
+	static std::queue<Event> inputEventQueue;
+
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
@@ -48,6 +55,9 @@ private:
 	HRESULT InitIndexBuffer();
 
 	void initObjects();
+
+	static void pushEvent(Event toPush);
+	void handleMessages();
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;
