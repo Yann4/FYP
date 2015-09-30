@@ -9,7 +9,7 @@ nearZ(0), farZ(0), aspect(0), yFov(0), nearWindHeight(0), farWindHeight(0)
 	XMStoreFloat4x4(&projection, XMMatrixIdentity());
 }
 
-Camera::Camera(float fovY, float aspect, float znear, float zfar) : position(XMFLOAT4(0, 0, -3, 0)), lookAt(XMFLOAT4(0, 0, 0, 0)), right(XMFLOAT4(1, 0, 0, 0)),
+Camera::Camera(float fovY, float aspect, float znear, float zfar) : position(XMFLOAT4(0, 0, -3, 0)), lookAt(XMFLOAT4(0, 0, 1, 0)), right(XMFLOAT4(1, 0, 0, 0)),
 up(XMFLOAT4(0, 1, 0, 0))
 {
 	setLens(fovY, aspect, znear, zfar);
@@ -72,17 +72,12 @@ void Camera::Update()
 
 void Camera::UpdateViewMatrix()
 {
-	//XMVECTOR rightV = XMLoadFloat4(&right);
+	XMVECTOR rightV = XMLoadFloat4(&right);
 	XMVECTOR upV = XMLoadFloat4(&up);
 	XMVECTOR lookV = XMLoadFloat4(&lookAt);
 	XMVECTOR posV = XMLoadFloat4(&position);
-	
-	XMStoreFloat4x4(&view, XMMatrixLookAtLH(posV, lookV, upV));
-	
-	//Think this is how it's supposed to be done, but doesn't work for some reason.
-	//XMMatrixLookAtLH does a similar thing to the commented section
 
-	/*//Normalise right, up and look vectors
+	//Normalise right, up and look vectors
 	lookV = XMVector4Normalize(lookV);
 	upV = XMVector4Normalize(XMVector3Cross(lookV, rightV));
 	rightV = XMVector3Cross(upV, lookV);
@@ -113,7 +108,7 @@ void Camera::UpdateViewMatrix()
 	view(0, 3) = 0.0f;
 	view(1, 3) = 0.0f;
 	view(2, 3) = 0.0f;
-	view(3, 3) = 1.0f;*/
+	view(3, 3) = 1.0f;
 }
 
 XMMATRIX Camera::getView() const

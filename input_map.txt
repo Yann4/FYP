@@ -2,4 +2,7 @@
 #{char} {Event name}
 #where char is a pressable character, and Event name matches a value in the enum "Event", defined in the file "Input.h"
 
-W DUMMY_EVENT
+W WALK_FORWARDS
+S WALK_BACKWARDS
+A STRAFE_LEFT
+D STRAFE_RIGHT

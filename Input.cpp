@@ -50,9 +50,21 @@ bool Input::initialiseKeys(string dataFile)
 
 Event Input::eventValueFromString(string eventName)
 {
-	if (eventName == "DUMMY_EVENT")
+	if (eventName == "WALK_FORWARDS")
 	{
-		return DUMMY_EVENT;
+		return WALK_FORWARDS;
+	}
+	else if (eventName == "WALK_BACKWARDS")
+	{
+		return WALK_BACKWARDS;
+	}
+	else if (eventName == "STRAFE_LEFT")
+	{
+		return STRAFE_LEFT;
+	}
+	else if (eventName == "STRAFE_RIGHT")
+	{
+		return STRAFE_RIGHT;
 	}
 	else
 	{

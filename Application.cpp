@@ -401,10 +401,19 @@ void Application::handleMessages()
 
 		switch (next)
 		{
-		case DUMMY_EVENT:
+		case WALK_FORWARDS:
+			camera.Walk(0.001f);
+			break;
+		case WALK_BACKWARDS:
+			camera.Walk(-0.001f);
+			break;
+		case STRAFE_LEFT:
+			camera.Strafe(-0.001f);
+			break;
+		case STRAFE_RIGHT:
+			camera.Strafe(0.001f);
 			break;
 		case NO_SUCH_EVENT:
-			break;
 		default:
 			break;
 		}
