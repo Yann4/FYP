@@ -66,6 +66,22 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return STRAFE_RIGHT;
 	}
+	else if (eventName == "YAW_RIGHT")
+	{
+		return YAW_RIGHT;
+	}
+	else if (eventName == "YAW_LEFT")
+	{
+		return YAW_LEFT;
+	}
+	else if (eventName == "PITCH_UP")
+	{
+		return PITCH_UP;
+	}
+	else if (eventName == "PITCH_DOWN")
+	{
+		return PITCH_DOWN;
+	}
 	else
 	{
 		return NO_SUCH_EVENT;
