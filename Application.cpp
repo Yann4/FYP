@@ -138,7 +138,18 @@ HRESULT Application::InitShadersAndInputLayout()
 	return hr;
 }
 
-HRESULT Application::InitVertexBuffer()
+HRESULT Application::instantiateCube()
+{
+	HRESULT hr = InitCubeVertexBuffer();
+	if (hr != S_OK)
+	{
+		return hr;
+	}
+
+	return InitCubeIndexBuffer();
+}
+
+HRESULT Application::InitCubeVertexBuffer()
 {
 	HRESULT hr;
 
@@ -175,7 +186,7 @@ HRESULT Application::InitVertexBuffer()
 	return S_OK;
 }
 
-HRESULT Application::InitIndexBuffer()
+HRESULT Application::InitCubeIndexBuffer()
 {
 	HRESULT hr;
 
@@ -184,19 +195,14 @@ HRESULT Application::InitIndexBuffer()
     {
         0,1,2,
         2,1,3,
-		
 		3,1,5,
 		7,3,5,
-
 		1,0,4,
 		1,4,5,
-
 		6,2,3,
 		3,7,6,
-
 		4,0,2,
 		2,6,4,
-
 		7,5,4,
 		4,6,7,
     };
@@ -213,7 +219,9 @@ HRESULT Application::InitIndexBuffer()
 	ZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = indices;
     hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->indexBuffer);
+
 	squareMesh->numIndices = 36;
+
     if (FAILED(hr))
         return hr;
 
@@ -389,8 +397,7 @@ HRESULT Application::InitDevice()
 
 void Application::initObjects()
 {
-	InitVertexBuffer();
-	InitIndexBuffer();
+	instantiateCube();
 	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0));
 }
 
@@ -405,6 +412,7 @@ void Application::Cleanup()
     if (_pSwapChain) _pSwapChain->Release();
     if (_pImmediateContext) _pImmediateContext->Release();
     if (_pd3dDevice) _pd3dDevice->Release();
+
 	delete squareMesh;
 }
 
@@ -436,14 +444,14 @@ void Application::handleMessages()
 		case YAW_LEFT:
 			camera.Yaw(-0.001f);
 			break;
-		case PITCH_UP:
-			camera.Pitch(0.001f);
-			break;
-		case PITCH_DOWN:
-			camera.Pitch(-0.001f);
-			break;
 		case YAW_RIGHT:
 			camera.Yaw(0.001f);
+			break;
+		case PITCH_UP:
+			camera.Pitch(-0.001f);
+			break;
+		case PITCH_DOWN:
+			camera.Pitch(0.001f);
 			break;
 		case NO_SUCH_EVENT:
 		default:
