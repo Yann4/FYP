@@ -16,12 +16,15 @@ GameObject::GameObject()
 	rotation = XMFLOAT3(0, 0, 0);
 }
 
-GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(0, 0, 0))
+GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos)
 	:context(devContext), constBuffer(constantBuffer), mesh(mesh), position(pos)
 {
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
 	std::stack<XMFLOAT4X4> translations = std::stack<XMFLOAT4X4>();
 	XMFLOAT3 rotation = XMFLOAT3(0, 0, 0);
+
+	setTranslation(pos.x, pos.y, pos.z);
+	UpdateMatrix();
 }
 
 GameObject::~GameObject()
@@ -90,7 +93,6 @@ void GameObject::UpdateMatrix()
 
 void GameObject::Update(float deltaTime)
 {
-	setRotation(0, 0, deltaTime);
 	UpdateMatrix();
 }
 

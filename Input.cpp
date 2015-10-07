@@ -82,6 +82,10 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return PITCH_DOWN;
 	}
+	else if (eventName == "TOGGLE_WIREFRAME")
+	{
+		return TOGGLE_WIREFRAME;
+	}
 	else
 	{
 		return NO_SUCH_EVENT;

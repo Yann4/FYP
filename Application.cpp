@@ -119,7 +119,7 @@ HRESULT Application::InitShadersAndInputLayout()
     D3D11_INPUT_ELEMENT_DESC layout[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -156,15 +156,15 @@ HRESULT Application::InitCubeVertexBuffer()
     // Create vertex buffer
     SimpleVertex vertices[] =
     {
-        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT4( 0.0f, 0.0f, 1.0f, 1.0f ) },
-        { XMFLOAT3( 1.0f, 1.0f, -1.0f ), XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f ) },
-        { XMFLOAT3( -1.0f, -1.0f, -1.0f ), XMFLOAT4( 0.0f, 1.0f, 1.0f, 1.0f ) },
-        { XMFLOAT3( 1.0f, -1.0f, -1.0f ), XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) },
+        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3( -1.0f/3.0f, 1.0f/3.0f, -1.0f/3.0f) },
+		{ XMFLOAT3( 1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, -1.0f / 3.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f) },
 		
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f) },
+		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f) },
     };
 
     D3D11_BUFFER_DESC bd;
@@ -361,7 +361,23 @@ HRESULT Application::InitDevice()
     if (FAILED(hr))
         return hr;
 
-    _pImmediateContext->OMSetRenderTargets(1, &_pRenderTargetView, nullptr);
+	D3D11_TEXTURE2D_DESC ds_desc;
+	ds_desc.Width = _WindowWidth;
+	ds_desc.Height = _WindowHeight;
+	ds_desc.MipLevels = 1;
+	ds_desc.ArraySize = 1;
+	ds_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	ds_desc.SampleDesc.Count = 1;
+	ds_desc.SampleDesc.Quality = 0;
+	ds_desc.Usage = D3D11_USAGE_DEFAULT;
+	ds_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	ds_desc.CPUAccessFlags = 0;
+	ds_desc.MiscFlags = 0;
+
+	_pd3dDevice->CreateTexture2D(&ds_desc, nullptr, &_depthStencilBuffer);
+	_pd3dDevice->CreateDepthStencilView(_depthStencilBuffer, nullptr, &_depthStencilView);
+
+    _pImmediateContext->OMSetRenderTargets(1, &_pRenderTargetView, _depthStencilView);
 
     // Setup the viewport
     D3D11_VIEWPORT vp;
@@ -387,6 +403,21 @@ HRESULT Application::InitDevice()
 	bd.CPUAccessFlags = 0;
     hr = _pd3dDevice->CreateBuffer(&bd, nullptr, &_pConstantBuffer);
 
+	D3D11_RASTERIZER_DESC wf;
+	ZeroMemory(&wf, sizeof(D3D11_RASTERIZER_DESC));
+	wf.FillMode = D3D11_FILL_WIREFRAME;
+	wf.CullMode = D3D11_CULL_NONE;
+	_pd3dDevice->CreateRasterizerState(&wf, &_wireFrame);
+
+	D3D11_RASTERIZER_DESC sol;
+	ZeroMemory(&sol, sizeof(D3D11_RASTERIZER_DESC));
+	sol.FillMode = D3D11_FILL_SOLID;
+	sol.CullMode = D3D11_CULL_NONE;
+	_pd3dDevice->CreateRasterizerState(&sol, &_solid);
+
+	_pImmediateContext->RSSetState(_solid);
+	wfRender = false;
+
 	initObjects();
 
     if (FAILED(hr))
@@ -399,6 +430,17 @@ void Application::initObjects()
 {
 	instantiateCube();
 	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0));
+	go1 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 2, 2));
+	go2 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 4, 4));
+	go3 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 6, 6));
+
+	// Light direction from surface (XYZ)
+	lightDirection = XMFLOAT3(0.25f, 0.5f, -1.0f);
+	// Diffuse material properties (RGBA)
+	diffuseMtl = XMFLOAT4(0.8f, 0.5f, 0.5f, 1.0f);
+	// Diffuse light colour (RGBA)
+	diffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
 }
 
 void Application::Cleanup()
@@ -412,6 +454,10 @@ void Application::Cleanup()
     if (_pSwapChain) _pSwapChain->Release();
     if (_pImmediateContext) _pImmediateContext->Release();
     if (_pd3dDevice) _pd3dDevice->Release();
+	if (_depthStencilView) _depthStencilView->Release();
+	if (_depthStencilBuffer) _depthStencilBuffer->Release();
+	if (_wireFrame) _wireFrame->Release();
+	if (_solid) _solid->Release();
 
 	delete squareMesh;
 }
@@ -453,6 +499,17 @@ void Application::handleMessages()
 		case PITCH_DOWN:
 			camera.Pitch(0.001f);
 			break;
+		case TOGGLE_WIREFRAME:
+			if (!wfRender)
+			{
+				_pImmediateContext->RSSetState(_wireFrame);
+				wfRender = true;
+			}
+			else
+			{
+				_pImmediateContext->RSSetState(_solid);
+				wfRender = false;
+			}
 		case NO_SUCH_EVENT:
 		default:
 			break;
@@ -483,7 +540,6 @@ void Application::Update()
 
 	input.handleInput(&Application::pushEvent);
 	handleMessages();
-	//go.Update(t);
 	camera.Update();
 }
 
@@ -494,8 +550,13 @@ void Application::Draw()
     //
     float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
+	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 
 	go.Draw(_pPixelShader, _pVertexShader, camera);
+	go1.Draw(_pPixelShader, _pVertexShader, camera);
+	go2.Draw(_pPixelShader, _pVertexShader, camera);
+	go3.Draw(_pPixelShader, _pVertexShader, camera);
 
     //
     // Present our back buffer to our front buffer

@@ -5,7 +5,7 @@
 struct SimpleVertex
 {
 	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT4 Color;
+	DirectX::XMFLOAT3 Normal;
 };
 
 struct ConstantBuffer
@@ -13,6 +13,10 @@ struct ConstantBuffer
 	DirectX::XMMATRIX mWorld;
 	DirectX::XMMATRIX mView;
 	DirectX::XMMATRIX mProjection;
+
+	DirectX::XMFLOAT4 diffuseMtl;
+	DirectX::XMFLOAT4 diffuseLight;
+	DirectX::XMFLOAT3 lightVecW;
 };
 
 struct MeshData
