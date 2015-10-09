@@ -15,6 +15,15 @@ cbuffer ConstantBuffer : register( b0 )
 
 	float4 DiffuseMtl;
 	float4 DiffuseLight;
+
+	float4 AmbientMtl;
+	float4 AmbientLight;
+
+	float4 SpecularMtl;
+	float4 SpecularLight;
+	float SpecularPower;
+	float3 EyePosW;
+
 	float3 LightVecW;
 }
 
@@ -22,19 +31,30 @@ cbuffer ConstantBuffer : register( b0 )
 struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
-    float4 Color : COLOR0;
+    float3 PosW : POSITION;
+	float3 Norm : NORMAL;
 };
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
-VS_OUTPUT VS( float4 Pos : POSITION, float3 Norm : NORMAL )
+VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL )
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     output.Pos = mul( Pos, World );
+
+	//Get normalised vector to camera position in world coordinates
+	output.PosW = normalize(EyePosW - output.Pos.xyz);
+
     output.Pos = mul( output.Pos, View );
     output.Pos = mul( output.Pos, Projection );
-    output.Color = Color;
+    
+	//Getting normalised surface normal
+	float3 normalW = mul(float4(NormalL, 0.0f), World).xyz;
+	normalW = normalize(normalW);
+	output.Norm = normalW;
+	
+
     return output;
 }
 
@@ -44,5 +64,26 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 Norm : NORMAL )
 //--------------------------------------------------------------------------------------
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
-    return input.Color;
+	input.Norm = normalize(input.Norm);
+
+	//Calculate reflection vector
+	float3 reflectVect = reflect(-LightVecW, input.Norm);
+
+	//How much specular light makes it to the camera
+	float specularAmount = pow(max(dot(reflectVect, input.PosW), 0.0f), SpecularPower);
+
+	//Calculate Specular light
+	float3 specular = specularAmount * (SpecularMtl * SpecularLight).rgb;
+
+	//Calculate Diffuse light
+	float diffuseAmount = max(dot(LightVecW, input.Norm), 0.0f);
+	float3 diffuse = diffuseAmount * (DiffuseMtl * DiffuseLight).rgb;
+
+	//Calculate Ambient light
+	float3 ambient = AmbientMtl * AmbientLight;
+
+	float4 colour;
+	colour.rgb = diffuse + ambient + specular;
+	colour.a = DiffuseMtl.a;
+	return colour;
 }

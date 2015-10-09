@@ -96,7 +96,7 @@ void GameObject::Update(float deltaTime)
 	UpdateMatrix();
 }
 
-void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)
+void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, Light& light)
 {
 	context->VSSetShader(vShader, nullptr, 0);
 	context->VSSetConstantBuffers(0, 1, &constBuffer);
@@ -118,6 +118,19 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, C
 	cb.mWorld = XMMatrixTranspose(worldMat);
 	cb.mView = XMMatrixTranspose(viewMat);
 	cb.mProjection = XMMatrixTranspose(projectionMat);
+
+	cb.diffuseLight = light.diffuse;
+	cb.diffuseMtl = mesh->material.diffuse;
+
+	cb.ambientLight = light.ambient;
+	cb.ambientMtl = mesh->material.ambient;
+
+	cb.specularLight = light.specular;
+	cb.specularMtl = mesh->material.specular;
+	cb.specularPower = light.specularPower;
+	cb.cameraPosW = XMFLOAT3(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
+
+	cb.lightVecW = light.lightVecW;
 
 	context->UpdateSubresource(constBuffer, 0, nullptr, &cb, 0, 0);
 

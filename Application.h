@@ -46,12 +46,9 @@ private:
 
 	Camera camera;
 
-	XMFLOAT4 diffuseLight;
-	XMFLOAT4 diffuseMtl;
-	XMFLOAT3 lightDirection;
-
 	MeshData* squareMesh;
 
+	Light light;
 	GameObject go, go1, go2, go3;
 
 	Input input;

@@ -140,6 +140,10 @@ HRESULT Application::InitShadersAndInputLayout()
 
 HRESULT Application::instantiateCube()
 {
+	squareMesh->material.diffuse = XMFLOAT4(0.8f, 0.5f, 0.5f, 1.0f);
+	squareMesh->material.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	squareMesh->material.ambient = XMFLOAT4(0.2, 0.2, 0.2, 0.2);
+
 	HRESULT hr = InitCubeVertexBuffer();
 	if (hr != S_OK)
 	{
@@ -434,13 +438,7 @@ void Application::initObjects()
 	go2 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 4, 4));
 	go3 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 6, 6));
 
-	// Light direction from surface (XYZ)
-	lightDirection = XMFLOAT3(0.25f, 0.5f, -1.0f);
-	// Diffuse material properties (RGBA)
-	diffuseMtl = XMFLOAT4(0.8f, 0.5f, 0.5f, 1.0f);
-	// Diffuse light colour (RGBA)
-	diffuseLight = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
+	light = Light(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.2, 0.2, 0.2, 0.2), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
 }
 
 void Application::Cleanup()
@@ -553,10 +551,10 @@ void Application::Draw()
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 
-	go.Draw(_pPixelShader, _pVertexShader, camera);
-	go1.Draw(_pPixelShader, _pVertexShader, camera);
-	go2.Draw(_pPixelShader, _pVertexShader, camera);
-	go3.Draw(_pPixelShader, _pVertexShader, camera);
+	go.Draw(_pPixelShader, _pVertexShader, camera, light);
+	go1.Draw(_pPixelShader, _pVertexShader, camera, light);
+	go2.Draw(_pPixelShader, _pVertexShader, camera, light);
+	go3.Draw(_pPixelShader, _pVertexShader, camera, light);
 
     //
     // Present our back buffer to our front buffer
