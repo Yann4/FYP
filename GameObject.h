@@ -29,7 +29,7 @@ public:
 	~GameObject();
 
 	void Update(float deltaTime);
-	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
+	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, Light& light);
 
 protected:
 	void setScale(float x, float y, float z);

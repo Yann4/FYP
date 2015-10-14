@@ -20,6 +20,7 @@ enum Event
 	YAW_RIGHT,
 	PITCH_UP,
 	PITCH_DOWN,
+	TOGGLE_WIREFRAME,
 	NO_SUCH_EVENT = -1,
 };
 

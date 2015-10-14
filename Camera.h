@@ -34,6 +34,8 @@ public:
 	DirectX::XMMATRIX getView() const;
 	DirectX::XMMATRIX getProjection() const;
 
+	inline DirectX::XMFLOAT4 getPosition() { return position; };
+
 private:
 	void UpdateViewMatrix();
 };
