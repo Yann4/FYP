@@ -1,5 +1,6 @@
 #include "Application.h"
 
+//This is a static variable that's been declared in Application.h
 std::queue<Event> Application::inputEventQueue;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -138,6 +139,8 @@ HRESULT Application::InitShadersAndInputLayout()
 	return hr;
 }
 
+//Group of functions that define a multicoloured cube
+#pragma region Define_Cube
 HRESULT Application::instantiateCube()
 {
 	HRESULT hr = InitCubeVertexBuffer();
@@ -227,6 +230,7 @@ HRESULT Application::InitCubeIndexBuffer()
 
 	return S_OK;
 }
+#pragma endregion
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
 {

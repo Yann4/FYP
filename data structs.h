@@ -1,5 +1,4 @@
 #pragma once
-
 #include <directxmath.h>
 
 struct SimpleVertex
@@ -15,6 +14,7 @@ struct ConstantBuffer
 	DirectX::XMMATRIX mProjection;
 };
 
+//One instance of MeshData should be used per object type, and referenced in each gameobject
 struct MeshData
 {
 	ID3D11Buffer* vertexBuffer;

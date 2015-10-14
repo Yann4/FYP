@@ -8,6 +8,8 @@
 
 #include <Windows.h>
 
+//A new event value needs to also be declared in the eventValueFromString() function. 
+//This is so that when it is read from file it can be properly assigned.
 enum Event
 {
 	WALK_FORWARDS,
@@ -33,11 +35,13 @@ class Input
 {
 private:
 	std::vector<KeyEvent> usedKeys;
+
 public:
 	Input();
 	Input(std::string keyMapFileName);
 	void handleInput(void(*handleEvent)(Event e));
+
 private:
-	bool initialiseKeys(std::string dataFile);
+	void initialiseKeys(std::string dataFile);
 	Event eventValueFromString(std::string eventName);
 };

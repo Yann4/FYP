@@ -16,6 +16,7 @@ up(XMFLOAT4(0, 1, 0, 0))
 	UpdateViewMatrix();
 }
 
+//Sets up the projection matrix
 void Camera::setLens(float fovY, float aspect, float znear, float zfar)
 {
 	nearZ = znear;
@@ -65,6 +66,8 @@ void Camera::Yaw(float delta)
 }
 #pragma endregion
 
+//UpdateViewMatrix() should be left in, as it essentially flushes any other update logic done on the camera
+//to the biew matrix
 void Camera::Update()
 {
 	UpdateViewMatrix();

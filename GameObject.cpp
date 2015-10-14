@@ -32,7 +32,9 @@ GameObject::~GameObject()
 }
 
 
-#pragma region Translations
+#pragma region Transformations
+//All transformations are pushed onto a stack and then resolved at the end of the Update function
+//This is to reduce the number of operations done on the world matrix
 void GameObject::setScale(float x, float y, float z)
 {
 	XMFLOAT4X4 temp;
@@ -88,9 +90,9 @@ void GameObject::UpdateMatrix()
 }
 #pragma endregion
 
+//UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix
 void GameObject::Update(float deltaTime)
 {
-	setRotation(0, 0, deltaTime);
 	UpdateMatrix();
 }
 
@@ -104,9 +106,8 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, C
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 
-	ID3D11Buffer* indBuff = mesh->indexBuffer;
 	context->IASetVertexBuffers(0, 1, &mesh->vertexBuffer, &stride, &offset);
-	context->IASetIndexBuffer(indBuff, DXGI_FORMAT_R16_UINT, 0);
+	context->IASetIndexBuffer(mesh->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
 	XMMATRIX worldMat = XMLoadFloat4x4(&objMatrix);
 	XMMATRIX viewMat = cam.getView();

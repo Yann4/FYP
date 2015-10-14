@@ -10,14 +10,14 @@ Input::Input()
 Input::Input(string keyMapFileName)
 {
 	usedKeys = std::vector<KeyEvent>();
-
-	if (!initialiseKeys(keyMapFileName))
-	{
-		exit(1);
-	}
+	initialiseKeys(keyMapFileName);
 }
 
-bool Input::initialiseKeys(string dataFile)
+//Reads in keymap from file. The keymap has to be of a specific format
+//i.e {CHAR} {EVENT}
+//e.g W WALK_FORWARDS
+//'#' is the comment line character.
+void Input::initialiseKeys(string dataFile)
 {
 	std::ifstream file(dataFile);
 	string line;
@@ -45,9 +45,11 @@ bool Input::initialiseKeys(string dataFile)
 		}
 		
 	}
-	return true;
 }
 
+//Helper function for the initialiseKeys() function
+//The keymap file should have the Event enum name included with a character.
+//This needs to be converted from being a string to being an Event value
 Event Input::eventValueFromString(string eventName)
 {
 	if (eventName == "WALK_FORWARDS")
@@ -88,6 +90,9 @@ Event Input::eventValueFromString(string eventName)
 	}
 }
 
+//The result of the input shouldn't be handled here, so here each event
+//is passed to an eventHandler function higher up the hierarchy. This
+//just abstracts the event itself and sends a signal to the appropriate function.
 void Input::handleInput(void(*handleEvent)(Event e))
 {
 	for (KeyEvent e : usedKeys)
