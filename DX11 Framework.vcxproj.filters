@@ -18,6 +18,12 @@
     <Filter Include="Input">
       <UniqueIdentifier>{cce08f47-646f-4c4f-b3a0-a46ec1aeeeb4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TextureLoader">
+      <UniqueIdentifier>{0b928527-6e5e-4d37-8856-9bad75d273f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Textures">
+      <UniqueIdentifier>{5009c21a-55e2-4dd7-a79e-d568737d1fbc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -31,6 +37,9 @@
     <ClInclude Include="Input.h">
       <Filter>Input</Filter>
     </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>TextureLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -43,6 +52,9 @@
     </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>TextureLoader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,5 +76,10 @@
     <Text Include="input_map.txt">
       <Filter>Input</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Crate_COLOR.dds">
+      <Filter>Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

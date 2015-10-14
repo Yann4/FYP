@@ -41,6 +41,7 @@ Application::Application()
 	_pVertexLayout = nullptr;
 	squareMesh = new MeshData();
 	_pConstantBuffer = nullptr;
+	samplerLinear = nullptr;
 }
 
 Application::~Application()
@@ -121,6 +122,7 @@ HRESULT Application::InitShadersAndInputLayout()
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -153,6 +155,8 @@ HRESULT Application::instantiateCube()
 		return hr;
 	}
 
+	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
+
 	return InitCubeIndexBuffer();
 }
 
@@ -163,15 +167,15 @@ HRESULT Application::InitCubeVertexBuffer()
     // Create vertex buffer
     SimpleVertex vertices[] =
     {
-        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3( -1.0f/3.0f, 1.0f/3.0f, -1.0f/3.0f) },
-		{ XMFLOAT3( 1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, -1.0f / 3.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f) },
+        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3( -1.0f/3.0f, 1.0f/3.0f, -1.0f/3.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, -1.0f / 3.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f), XMFLOAT2(0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f), XMFLOAT2(1.0f, 1.0f) },
 		
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f) },
+		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(1.0f, 1.0f) },
     };
 
     D3D11_BUFFER_DESC bd;
@@ -426,6 +430,19 @@ HRESULT Application::InitDevice()
 	_pImmediateContext->RSSetState(_solid);
 	wfRender = false;
 
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
+	sampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	_pd3dDevice->CreateSamplerState(&sampDesc, &samplerLinear);
+	_pImmediateContext->PSSetSamplers(0, 1, &samplerLinear);
+
 	initObjects();
 
     if (FAILED(hr))
@@ -553,7 +570,6 @@ void Application::Draw()
     float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
 
 	go.Draw(_pPixelShader, _pVertexShader, camera, light);
 	go1.Draw(_pPixelShader, _pVertexShader, camera, light);

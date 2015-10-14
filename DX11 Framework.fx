@@ -33,12 +33,16 @@ struct VS_OUTPUT
     float4 Pos : SV_POSITION;
     float3 PosW : POSITION;
 	float3 Norm : NORMAL;
+	float2 TexC : TEXCOORD;
 };
+
+Texture2D texDiffuse : register(t0);
+SamplerState samLinear: register(s0);
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
-VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL )
+VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXCOORD )
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     output.Pos = mul( Pos, World );
@@ -54,6 +58,7 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL )
 	normalW = normalize(normalW);
 	output.Norm = normalW;
 	
+	output.TexC = TexC;
 
     return output;
 }
@@ -65,6 +70,8 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL )
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
 	input.Norm = normalize(input.Norm);
+
+	float4 texCol = texDiffuse.Sample(samLinear, input.TexC);
 
 	//Calculate reflection vector
 	float3 reflectVect = reflect(-LightVecW, input.Norm);
@@ -83,7 +90,7 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float3 ambient = AmbientMtl * AmbientLight;
 
 	float4 colour;
-	colour.rgb = diffuse + ambient + specular;
+	colour.rgb = texCol.rgb * (diffuse + ambient) + specular;
 	colour.a = DiffuseMtl.a;
 	return colour;
 }

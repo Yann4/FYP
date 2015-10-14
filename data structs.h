@@ -5,6 +5,7 @@ struct SimpleVertex
 {
 	DirectX::XMFLOAT3 Pos;
 	DirectX::XMFLOAT3 Normal;
+	DirectX::XMFLOAT2 TexC;
 };
 
 struct ConstantBuffer
@@ -70,12 +71,14 @@ struct MeshData
 	ID3D11Buffer* indexBuffer;
 	int numIndices;
 
+	ID3D11ShaderResourceView* textureRV;
 	Material material;
 
-	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material())
+	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr)
 	{}
 
-	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, Material mat) : vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat)
+	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, Material mat, ID3D11ShaderResourceView* texRV) : 
+		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), textureRV(texRV)
 	{}
 
 	~MeshData()
@@ -88,6 +91,11 @@ struct MeshData
 		if (indexBuffer)
 		{
 			indexBuffer->Release();
+		}
+
+		if (textureRV)
+		{
+			textureRV->Release();
 		}
 	}
 };

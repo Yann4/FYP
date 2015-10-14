@@ -6,6 +6,7 @@
 #include <directxmath.h>
 #include <directxcolors.h>
 #include "resource.h"
+#include "DDSTextureLoader.h"
 
 #include "data structs.h"
 #include "GameObject.h"
@@ -41,6 +42,8 @@ private:
 	ID3D11RasterizerState*	_wireFrame;
 	ID3D11RasterizerState*	_solid;
 	bool					wfRender;
+
+	ID3D11SamplerState* samplerLinear;
 
 	ID3D11Buffer*           _pConstantBuffer;
 
