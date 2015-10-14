@@ -107,6 +107,7 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, C
 	context->PSSetConstantBuffers(0, 1, &constBuffer);
 
 	context->PSSetShaderResources(0, 1, &mesh->textureRV);
+	context->PSSetShaderResources(1, 1, &mesh->specularRV);
 
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;

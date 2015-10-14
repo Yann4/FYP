@@ -399,6 +399,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Crate_COLOR.dds" />
+    <Image Include="Crate_SPEC.dds" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

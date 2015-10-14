@@ -72,13 +72,14 @@ struct MeshData
 	int numIndices;
 
 	ID3D11ShaderResourceView* textureRV;
+	ID3D11ShaderResourceView* specularRV;
 	Material material;
 
-	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr)
+	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr)
 	{}
 
-	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, Material mat, ID3D11ShaderResourceView* texRV) : 
-		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), textureRV(texRV)
+	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, Material mat, ID3D11ShaderResourceView* texRV, ID3D11ShaderResourceView* specRV) : 
+		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), textureRV(texRV), specularRV(specRV)
 	{}
 
 	~MeshData()
@@ -96,6 +97,11 @@ struct MeshData
 		if (textureRV)
 		{
 			textureRV->Release();
+		}
+
+		if (specularRV)
+		{
+			specularRV->Release();
 		}
 	}
 };

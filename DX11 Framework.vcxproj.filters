@@ -81,5 +81,8 @@
     <Image Include="Crate_COLOR.dds">
       <Filter>Textures</Filter>
     </Image>
+    <Image Include="Crate_SPEC.dds">
+      <Filter>Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

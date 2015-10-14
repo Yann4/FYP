@@ -37,6 +37,8 @@ struct VS_OUTPUT
 };
 
 Texture2D texDiffuse : register(t0);
+Texture2D texSpec : register(t1);
+
 SamplerState samLinear: register(s0);
 
 //--------------------------------------------------------------------------------------
@@ -77,7 +79,7 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float3 reflectVect = reflect(-LightVecW, input.Norm);
 
 	//How much specular light makes it to the camera
-	float specularAmount = pow(max(dot(reflectVect, input.PosW), 0.0f), SpecularPower);
+	float specularAmount = pow(max(dot(reflectVect, input.PosW), 0.0f), texSpec.Sample(samLinear, input.TexC).r);
 
 	//Calculate Specular light
 	float3 specular = specularAmount * (SpecularMtl * SpecularLight).rgb;

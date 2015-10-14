@@ -1,5 +1,7 @@
 #include "Application.h"
 
+using namespace DirectX;
+
 //This is a static variable that's been declared in Application.h
 std::queue<Event> Application::inputEventQueue;
 
@@ -156,6 +158,7 @@ HRESULT Application::instantiateCube()
 	}
 
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
+	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(squareMesh->specularRV));
 
 	return InitCubeIndexBuffer();
 }
@@ -432,7 +435,7 @@ HRESULT Application::InitDevice()
 
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(D3D11_SAMPLER_DESC));
-	sampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
