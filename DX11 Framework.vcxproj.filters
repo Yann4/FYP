@@ -40,6 +40,7 @@
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>TextureLoader</Filter>
     </ClInclude>
+    <ClInclude Include="Parser.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -56,6 +57,7 @@
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>TextureLoader</Filter>
     </ClCompile>
+    <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">
@@ -76,12 +78,16 @@
     <Text Include="input_map.txt">
       <Filter>Input</Filter>
     </Text>
+    <Text Include="cube.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Crate_COLOR.dds">
       <Filter>Textures</Filter>
     </Image>
     <Image Include="Crate_SPEC.dds">
+      <Filter>Textures</Filter>
+    </Image>
+    <Image Include="Crate_NRM.dds">
       <Filter>Textures</Filter>
     </Image>
   </ItemGroup>

@@ -374,6 +374,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="cube.txt" />
     <Text Include="input_map.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -383,6 +384,7 @@
     <ClCompile Include="DX11 Framework.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11 Framework.fx" />
@@ -394,11 +396,13 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
     <ResourceCompile Include="DX11 Framework.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Crate_COLOR.dds" />
+    <Image Include="Crate_NRM.dds" />
     <Image Include="Crate_SPEC.dds" />
   </ItemGroup>
   <ItemGroup>

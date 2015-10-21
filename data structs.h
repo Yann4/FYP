@@ -1,6 +1,7 @@
 #pragma once
 #include <directxmath.h>
-
+#include <string>
+#include <vector>
 struct SimpleVertex
 {
 	DirectX::XMFLOAT3 Pos;
@@ -34,6 +35,7 @@ struct Material
 	DirectX::XMFLOAT4 ambient;
 	DirectX::XMFLOAT4 specular;
 
+	std::string name;
 	Material()
 	{
 		diffuse = DirectX::XMFLOAT4(0, 0, 0, 0);
@@ -64,22 +66,37 @@ struct Light
 	Light(DirectX::XMFLOAT4 spec, DirectX::XMFLOAT4 amb, DirectX::XMFLOAT4 diff, float specPow, DirectX::XMFLOAT3 lightVW) : specular(spec), ambient(amb), diffuse(diff), specularPower(specPow), lightVecW(lightVW) {}
 };
 
+struct MeshSection
+{
+	std::string materialName;
+	std::string sectionName;
+	Material* material;
+	int startIndex, endIndex;
+	DirectX::XMFLOAT3 centre;
+
+	MeshSection(){ materialName = ""; sectionName = ""; material = nullptr; startIndex = 0; endIndex = 0; centre = DirectX::XMFLOAT3(0, 0, 0); }
+	MeshSection(std::string materialName, std::string sectionName, Material* material, int startIndex, int endIndex, DirectX::XMFLOAT3 centre) :
+		materialName(materialName), sectionName(sectionName), material(material), startIndex(startIndex), endIndex(endIndex), centre(centre){}
+	~MeshSection(){ material = nullptr; }
+};
+
 //One instance of MeshData should be used per object type, and referenced in each gameobject
 struct MeshData
 {
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 	int numIndices;
+	std::vector<MeshSection> parts;
 
 	ID3D11ShaderResourceView* textureRV;
 	ID3D11ShaderResourceView* specularRV;
 	Material material;
 
-	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr)
+	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr), parts(std::vector<MeshSection>())
 	{}
 
-	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, Material mat, ID3D11ShaderResourceView* texRV, ID3D11ShaderResourceView* specRV) : 
-		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), textureRV(texRV), specularRV(specRV)
+	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, std::vector<MeshSection> parts, Material mat, ID3D11ShaderResourceView* texRV, ID3D11ShaderResourceView* specRV) : 
+		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), parts(parts), textureRV(texRV), specularRV(specRV)
 	{}
 
 	~MeshData()

@@ -151,16 +151,20 @@ HRESULT Application::instantiateCube()
 	squareMesh->material.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	squareMesh->material.ambient = XMFLOAT4(0.2, 0.2, 0.2, 0.2);
 
-	HRESULT hr = InitCubeVertexBuffer();
-	if (hr != S_OK)
+	//HRESULT hr = InitCubeVertexBuffer();
+	/*if (hr != S_OK)
 	{
 		return hr;
-	}
+	}*/
 
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(squareMesh->specularRV));
 
-	return InitCubeIndexBuffer();
+	//return InitCubeIndexBuffer();
+	D3D11_BUFFER_DESC bd;
+	Parser p;
+	p.readFile(_pd3dDevice, &bd, "cube.txt", squareMesh, nullptr);
+	return S_OK;
 }
 
 HRESULT Application::InitCubeVertexBuffer()
@@ -170,21 +174,43 @@ HRESULT Application::InitCubeVertexBuffer()
     // Create vertex buffer
     SimpleVertex vertices[] =
     {
-        { XMFLOAT3( -1.0f, 1.0f, -1.0f ), XMFLOAT3( -1.0f/3.0f, 1.0f/3.0f, -1.0f/3.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, -1.0f / 3.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 0.0f, 0.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 0.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 0.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2( 1.0f, 0.0f) },
+
+		{ XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT3( -1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+
+		{ XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT3( -1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+
+		{ XMFLOAT3( 0.0f, 1.0f, 1.0f), XMFLOAT3( -1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 0.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 0.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
 		
-		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f / 3.0f, -1.0f / 3.0f, 1.0f / 3.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+
+		{ XMFLOAT3( 1.0f, 0.0f, 1.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3( 1.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
+
+		{ XMFLOAT3( 1.0f, 1.0f, 0.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+
+		{ XMFLOAT3( 1.0f, 1.0f, 1.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+		{ XMFLOAT3( 1.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
     };
 
     D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
     bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 8;
+    bd.ByteWidth = sizeof(SimpleVertex) * 24;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 
@@ -207,18 +233,18 @@ HRESULT Application::InitCubeIndexBuffer()
     // Create index buffer
     WORD indices[] =
     {
-        0,1,2,
-        2,1,3,
-		3,1,5,
-		7,3,5,
-		1,0,4,
-		1,4,5,
-		6,2,3,
-		3,7,6,
-		4,0,2,
-		2,6,4,
-		7,5,4,
-		4,6,7,
+		2,20,14,
+		2,8,20,
+		0,9,6,
+		0,3,9,
+		7,22,19,
+		7,10,22,
+		12,18,21,
+		12,21,16,
+		2,13,16,
+		2,16,4,
+		5,17,23,
+		5,23,11,
     };
 
 	D3D11_BUFFER_DESC bd;

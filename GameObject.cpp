@@ -24,6 +24,7 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBu
 	XMFLOAT3 rotation = XMFLOAT3(0, 0, 0);
 
 	setTranslation(pos.x, pos.y, pos.z);
+	setScale(2, 2, 2);
 	UpdateMatrix();
 }
 

@@ -12,6 +12,7 @@
 #include "GameObject.h"
 #include "Camera.h"
 #include "Input.h"
+#include "Parser.h"
 
 #include <queue>
 
