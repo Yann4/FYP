@@ -38,6 +38,7 @@ struct VS_OUTPUT
 
 Texture2D texDiffuse : register(t0);
 Texture2D texSpec : register(t1);
+Texture2D texNormMap : register(t2);
 
 SamplerState samLinear: register(s0);
 
@@ -71,7 +72,7 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXC
 //--------------------------------------------------------------------------------------
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
-	input.Norm = normalize(input.Norm);
+	input.Norm = texNormMap.Sample(samLinear, input.TexC);//normalize(input.Norm);
 
 	float4 texCol = texDiffuse.Sample(samLinear, input.TexC);
 
@@ -92,7 +93,7 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float3 ambient = AmbientMtl * AmbientLight;
 
 	float4 colour;
-	colour.rgb = texCol.rgb * (diffuse + ambient) + specular;
+	colour.rgb = texCol * (diffuse + ambient) + specular;
 	colour.a = DiffuseMtl.a;
 	return colour;
 }

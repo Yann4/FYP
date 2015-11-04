@@ -90,6 +90,7 @@ struct MeshData
 
 	ID3D11ShaderResourceView* textureRV;
 	ID3D11ShaderResourceView* specularRV;
+	ID3D11ShaderResourceView* normalMapRV;
 	Material material;
 
 	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr), parts(std::vector<MeshSection>())
@@ -119,6 +120,11 @@ struct MeshData
 		if (specularRV)
 		{
 			specularRV->Release();
+		}
+
+		if (normalMapRV)
+		{
+			normalMapRV->Release();
 		}
 	}
 };

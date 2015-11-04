@@ -159,7 +159,7 @@ HRESULT Application::instantiateCube()
 
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(squareMesh->specularRV));
-
+	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(squareMesh->normalMapRV));
 	//return InitCubeIndexBuffer();
 	D3D11_BUFFER_DESC bd;
 	Parser p;
@@ -488,7 +488,7 @@ void Application::initObjects()
 	go2 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 4, 4));
 	go3 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 6, 6));
 
-	light = Light(XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.2, 0.2, 0.2, 0.2), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
+	light = Light(XMFLOAT4(0.2, 0.2, 0.2, 1.0), XMFLOAT4(0.7f, 0.7f, 0.7f, 0.7f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
 }
 
 void Application::Cleanup()
