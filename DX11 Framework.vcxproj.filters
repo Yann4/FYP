@@ -41,6 +41,7 @@
       <Filter>TextureLoader</Filter>
     </ClInclude>
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="Skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -58,6 +59,7 @@
       <Filter>TextureLoader</Filter>
     </ClCompile>
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">
@@ -66,6 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11 Framework.fx">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="SkyBox.fx">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -88,6 +93,9 @@
       <Filter>Textures</Filter>
     </Image>
     <Image Include="Crate_NRM.dds">
+      <Filter>Textures</Filter>
+    </Image>
+    <Image Include="snowcube.dds">
       <Filter>Textures</Filter>
     </Image>
   </ItemGroup>

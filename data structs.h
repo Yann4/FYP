@@ -2,6 +2,7 @@
 #include <directxmath.h>
 #include <string>
 #include <vector>
+
 struct SimpleVertex
 {
 	DirectX::XMFLOAT3 Pos;

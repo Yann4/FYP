@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Parser.h"
+#include "Skybox.h"
 
 #include <queue>
 
@@ -36,6 +37,11 @@ private:
 	ID3D11VertexShader*     _pVertexShader;
 	ID3D11PixelShader*      _pPixelShader;
 	
+	ID3D11VertexShader*     skyboxVS;
+	ID3D11PixelShader*      skyboxPS;
+
+	Skybox skybox;
+
 	ID3D11InputLayout*      _pVertexLayout;
 	
 	ID3D11RasterizerState*	_wireFrame;

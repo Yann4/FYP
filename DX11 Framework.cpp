@@ -5,9 +5,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-	Application * theApp = new Application();
+	Application theApp = Application();
 
-	if (FAILED(theApp->Initialise(hInstance, nCmdShow)))
+	if (FAILED(theApp.Initialise(hInstance, nCmdShow)))
 	{
 		return -1;
 	}
@@ -24,13 +24,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         }
         else
         {
-			theApp->Update();
-            theApp->Draw();
+			theApp.Update();
+            theApp.Draw();
         }
     }
-
-	delete theApp;
-	theApp = nullptr;
 
     return (int) msg.wParam;
 }

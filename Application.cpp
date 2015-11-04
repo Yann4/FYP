@@ -119,6 +119,16 @@ HRESULT Application::InitShadersAndInputLayout()
     if (FAILED(hr))
         return hr;
 
+	ID3DBlob* skyboxVSBuffer = nullptr;
+	ID3DBlob* skyboxPSBuffer = nullptr;
+
+	//Skybox
+	hr = CompileShaderFromFile(L"SkyBox.fx", "SKYMAP_VS", "vs_4_0", &skyboxVSBuffer);
+	hr = CompileShaderFromFile(L"SkyBox.fx", "SKYMAP_PS", "ps_4_0", &skyboxPSBuffer);
+
+	hr = _pd3dDevice->CreateVertexShader(skyboxVSBuffer->GetBufferPointer(), skyboxVSBuffer->GetBufferSize(), NULL, &skyboxVS);
+	hr = _pd3dDevice->CreatePixelShader(skyboxPSBuffer->GetBufferPointer(), skyboxPSBuffer->GetBufferSize(), NULL, &skyboxPS);
+
     // Define the input layout
     D3D11_INPUT_ELEMENT_DESC layout[] =
     {
@@ -151,16 +161,10 @@ HRESULT Application::instantiateCube()
 	squareMesh->material.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	squareMesh->material.ambient = XMFLOAT4(0.2, 0.2, 0.2, 0.2);
 
-	//HRESULT hr = InitCubeVertexBuffer();
-	/*if (hr != S_OK)
-	{
-		return hr;
-	}*/
-
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(squareMesh->specularRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(squareMesh->normalMapRV));
-	//return InitCubeIndexBuffer();
+
 	D3D11_BUFFER_DESC bd;
 	Parser p;
 	p.readFile(_pd3dDevice, &bd, "cube.txt", squareMesh, nullptr);
@@ -489,6 +493,9 @@ void Application::initObjects()
 	go3 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 6, 6));
 
 	light = Light(XMFLOAT4(0.2, 0.2, 0.2, 1.0), XMFLOAT4(0.7f, 0.7f, 0.7f, 0.7f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
+
+	skybox = Skybox();
+	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 }
 
 void Application::Cleanup()
@@ -506,6 +513,8 @@ void Application::Cleanup()
 	if (_depthStencilBuffer) _depthStencilBuffer->Release();
 	if (_wireFrame) _wireFrame->Release();
 	if (_solid) _solid->Release();
+	if (skyboxPS) skyboxPS->Release();
+	if (skyboxVS) skyboxVS->Release();
 
 	delete squareMesh;
 }
@@ -589,6 +598,7 @@ void Application::Update()
 	input.handleInput(&Application::pushEvent);
 	handleMessages();
 	camera.Update();
+	skybox.Update(&camera);
 }
 
 void Application::Draw()
@@ -605,6 +615,7 @@ void Application::Draw()
 	go2.Draw(_pPixelShader, _pVertexShader, camera, light);
 	go3.Draw(_pPixelShader, _pVertexShader, camera, light);
 
+	skybox.Draw(skyboxVS, skyboxPS, &camera);
     //
     // Present our back buffer to our front buffer
     //

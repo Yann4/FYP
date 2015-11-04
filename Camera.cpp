@@ -3,10 +3,10 @@
 using namespace DirectX;
 
 Camera::Camera() : position(XMFLOAT4(0, 0, 0, 0)), lookAt(XMFLOAT4(0, 0, 0, 0)), right(XMFLOAT4(0, 0, 0, 0)), up(XMFLOAT4(0,0,0,0)),
-nearZ(0), farZ(0), aspect(0), yFov(0), nearWindHeight(0), farWindHeight(0)
+nearZ(0.01f), farZ(10), aspect(0.5f), yFov(XM_PIDIV2), nearWindHeight(0), farWindHeight(0)
 {
 	XMStoreFloat4x4(&view, XMMatrixIdentity());
-	XMStoreFloat4x4(&projection, XMMatrixIdentity());
+	setLens(yFov, aspect, nearZ, farZ);
 }
 
 Camera::Camera(float fovY, float aspect, float znear, float zfar) : position(XMFLOAT4(0, 0, -3, 0)), lookAt(XMFLOAT4(0, 0, 1, 0)), right(XMFLOAT4(1, 0, 0, 0)),
@@ -67,7 +67,7 @@ void Camera::Yaw(float delta)
 #pragma endregion
 
 //UpdateViewMatrix() should be left in, as it essentially flushes any other update logic done on the camera
-//to the biew matrix
+//to the view matrix
 void Camera::Update()
 {
 	UpdateViewMatrix();
@@ -116,7 +116,8 @@ void Camera::UpdateViewMatrix()
 
 XMMATRIX Camera::getView() const
 {
-	return XMLoadFloat4x4(&view);
+	XMMATRIX r = XMLoadFloat4x4(&view);
+	return r;
 }
 
 XMMATRIX Camera::getProjection() const
