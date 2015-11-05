@@ -23,9 +23,9 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 
 	std::string mtlFileName;
 
-	int vIndexOffset = 9999999;
-	int vnIndexOffset = 9999999;
-	int vtIndexOffset = 9999999;
+	float vIndexOffset = 9999999.0f;
+	float vnIndexOffset = 9999999.0f;
+	float vtIndexOffset = 9999999.0f;
 
 	int count = 0;
 	int currentPart = 0;
@@ -114,25 +114,43 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 			sscanf_s(line, "f %f/%f/%f %f/%f/%f %f/%f/%f", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
 
 			if (v1 < vIndexOffset)
+			{
 				vIndexOffset = v1;
+			}
 			if (v2 < vIndexOffset)
+			{
 				vIndexOffset = v2;
+			}
 			if (v3 < vIndexOffset)
+			{
 				vIndexOffset = v3;
+			}
 
 			if (vn1 < vnIndexOffset)
+			{
 				vnIndexOffset = vn1;
+			}
 			if (vn2 < vnIndexOffset)
+			{
 				vnIndexOffset = vn2;
+			}
 			if (vn3 < vnIndexOffset)
+			{
 				vnIndexOffset = vn3;
+			}
 
 			if (vt1 < vtIndexOffset)
+			{
 				vtIndexOffset = vt1;
+			}
 			if (vt2 < vtIndexOffset)
+			{
 				vtIndexOffset = vt2;
+			}
 			if (vt3 < vtIndexOffset)
+			{
 				vtIndexOffset = vt3;
+			}
 
 			vertexIndices.push_back(XMFLOAT3(v1, v2, v3));
 			vnIndices.push_back(XMFLOAT3(vn1, vn2, vn3));
@@ -150,50 +168,50 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 
 	count = 0;
 
-	for (int i = 0; i < vertexIndices.size(); i++)
+	for (WORD i = 0; i < vertexIndices.size(); i++)
 	{
 		//X index
-		indices[count] = count;
+		indices[count] = (WORD)count;
+		
 		SimpleVertex temp;
-		temp.Normal = vertexNormals[vnIndices[i].x - vnIndexOffset];
-		temp.Pos = verticesVector[vertexIndices[i].x - vIndexOffset];
+		temp.Normal = vertexNormals[(unsigned int)(vnIndices[i].x - vnIndexOffset)];
+		temp.Pos = verticesVector[(unsigned int)(vertexIndices[i].x - vIndexOffset)];
 
 		//NOT READING IN Z
-		temp.TexC.x = uvCoords[uvIndices[i].x - vtIndexOffset].x;
-		temp.TexC.y = uvCoords[uvIndices[i].x - vtIndexOffset].y;
+		temp.TexC.x = uvCoords[(unsigned int)(uvIndices[i].x - vtIndexOffset)].x;
+		temp.TexC.y = uvCoords[(unsigned int)(uvIndices[i].x - vtIndexOffset)].y;
 
 		vertices[count] = temp;
 		count++;
 
 		//Y index
-		indices[count] = count;
+		indices[count] = (WORD)count;
 
-		temp.Normal = vertexNormals[vnIndices[i].y - vnIndexOffset];
-		temp.Pos = verticesVector[vertexIndices[i].y - vIndexOffset];
+		temp.Normal = vertexNormals[(unsigned int)(vnIndices[i].y - vnIndexOffset)];
+		temp.Pos = verticesVector[(unsigned int)(vertexIndices[i].y - vIndexOffset)];
 
 		//NOT READING IN Z
-		temp.TexC.x = uvCoords[uvIndices[i].y - vtIndexOffset].x;
-		temp.TexC.y = uvCoords[uvIndices[i].y - vtIndexOffset].y;
+		temp.TexC.x = uvCoords[(unsigned int)(uvIndices[i].y - vtIndexOffset)].x;
+		temp.TexC.y = uvCoords[(unsigned int)(uvIndices[i].y - vtIndexOffset)].y;
 
 		vertices[count] = temp;
 		count++;
 
 		//Z index
-		indices[count] = count;
+		indices[count] = (WORD)count;
 
-		temp.Normal = vertexNormals[vnIndices[i].z - vnIndexOffset];
-		temp.Pos = verticesVector[vertexIndices[i].z - vIndexOffset];
+		temp.Normal = vertexNormals[(unsigned int)(vnIndices[i].z - vnIndexOffset)];
+		temp.Pos = verticesVector[(unsigned int)(vertexIndices[i].z - vIndexOffset)];
 
 		//NOT READING IN Z
-		temp.TexC.x = uvCoords[uvIndices[i].z - vtIndexOffset].x;
-		temp.TexC.y = uvCoords[uvIndices[i].z - vtIndexOffset].y;
+		temp.TexC.x = uvCoords[(unsigned int)(uvIndices[i].z - vtIndexOffset)].x;
+		temp.TexC.y = uvCoords[(unsigned int)(uvIndices[i].z - vtIndexOffset)].y;
 
 		vertices[count] = temp;
 		count++;
 	}
 
-	D3D11_BUFFER_DESC bud;
-	ZeroMemory(bd, sizeof(bud));
+	ZeroMemory(bd, sizeof(D3D11_BUFFER_DESC));
 	bd->Usage = D3D11_USAGE_DEFAULT;
 	bd->ByteWidth = sizeof(SimpleVertex) * count;
 	bd->BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -203,12 +221,9 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = vertices;
 
-	HRESULT hr = _pd3dDevice->CreateBuffer(bd, &InitData, &(mesh->vertexBuffer));
+	_pd3dDevice->CreateBuffer(bd, &InitData, &(mesh->vertexBuffer));
 
-	if (FAILED(hr))
-		return hr;
-
-	ZeroMemory(bd, sizeof(bud));
+	ZeroMemory(bd, sizeof(D3D11_BUFFER_DESC));
 	bd->Usage = D3D11_USAGE_DEFAULT;
 	bd->ByteWidth = sizeof(WORD) * count;
 	bd->BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -217,10 +232,8 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = indices;
-	hr = _pd3dDevice->CreateBuffer(bd, &InitData, &(mesh->indexBuffer));
+	_pd3dDevice->CreateBuffer(bd, &InitData, &(mesh->indexBuffer));
 
-	if (FAILED(hr))
-		return hr;
 	mesh->numIndices = count;
 	mesh->parts = parts;
 
@@ -228,10 +241,9 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 	{
 		readMtlFile(mtlFileName, materials);
 
-
-		for (int i = 0; i < mesh->parts.size(); i++)
+		for (unsigned int i = 0; i < mesh->parts.size(); i++)
 		{
-			int j = 0;
+			unsigned int j = 0;
 			std::string mtlName = mesh->parts[i].materialName;
 			std::string comp = materials->at(j).name;
 
@@ -250,7 +262,8 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 			}
 		}
 	}
-	for (int i = 0; i < mesh->parts.size(); i++)
+	
+	for (unsigned int i = 0; i < mesh->parts.size(); i++)
 	{
 		float maxX = NULL, maxY = NULL, maxZ = NULL;
 		float minX = NULL, minY = NULL, minZ = NULL;
@@ -269,21 +282,33 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 			}
 
 			if (vertices[j].Pos.x > maxX)
+			{
 				maxX = vertices[j].Pos.x;
+			}
 			if (vertices[j].Pos.y > maxY)
+			{
 				maxY = vertices[j].Pos.y;
+			}
 			if (vertices[j].Pos.z > maxZ)
+			{
 				maxZ = vertices[j].Pos.z;
+			}
 
 			if (vertices[j].Pos.x < minX)
+			{
 				minX = vertices[j].Pos.x;
+			}
 			if (vertices[j].Pos.y < minY)
+			{
 				minY = vertices[j].Pos.y;
+			}
 			if (vertices[j].Pos.z < minZ)
+			{
 				minZ = vertices[j].Pos.z;
+			}
 		}
 
-		mesh->parts.at(i).centre = XMFLOAT3(minX + ((maxX - minX) / 2.0), minY + ((maxY - minY) / 2.0), minZ + ((maxZ - minZ) / 2.0));
+		mesh->parts.at(i).centre = XMFLOAT3(minX + ((maxX - minX) / 2.0f), minY + ((maxY - minY) / 2.0f), minZ + ((maxZ - minZ) / 2.0f));
 	}
 
 	return 0;

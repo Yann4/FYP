@@ -100,13 +100,14 @@ void Skybox::CreateSphere(ID3D11Device* _pd3dDevice, int LatLines, int LongLines
 	vertices[0].Pos.z = 1.0f;
 
 	DirectX::XMMATRIX Rotationx, Rotationy;
-	for (DWORD i = 0; i < LatLines - 2; ++i)
+	for (int i = 0; i < LatLines - 2; ++i)
 	{
-		spherePitch = (i + 1) * (3.14 / (LatLines - 1));
+		spherePitch = (i + 1) * (3.14f / (LatLines - 1));
 		Rotationx = DirectX::XMMatrixRotationX(spherePitch);
-		for (DWORD j = 0; j < LongLines; ++j)
+
+		for (int j = 0; j < LongLines; ++j)
 		{
-			sphereYaw = j * (6.28 / (LongLines));
+			sphereYaw = j * (6.28f / (LongLines));
 			Rotationy = DirectX::XMMatrixRotationZ(sphereYaw);
 			currVertPos = XMVector3TransformNormal(DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), (Rotationx * Rotationy));
 			currVertPos = DirectX::XMVector3Normalize(currVertPos);
@@ -140,7 +141,7 @@ void Skybox::CreateSphere(ID3D11Device* _pd3dDevice, int LatLines, int LongLines
 	std::vector<DWORD> indices(noSphereFace * 3);
 
 	int k = 0;
-	for (DWORD l = 0; l < LongLines - 1; ++l)
+	for (int l = 0; l < LongLines - 1; ++l)
 	{
 		indices[k] = 0;
 		indices[k + 1] = l + 1;
@@ -153,9 +154,9 @@ void Skybox::CreateSphere(ID3D11Device* _pd3dDevice, int LatLines, int LongLines
 	indices[k + 2] = 1;
 	k += 3;
 
-	for (DWORD i = 0; i < LatLines - 3; ++i)
+	for (int i = 0; i < LatLines - 3; ++i)
 	{
-		for (DWORD j = 0; j < LongLines - 1; ++j)
+		for (int j = 0; j < LongLines - 1; ++j)
 		{
 			indices[k] = i*LongLines + j + 1;
 			indices[k + 1] = i*LongLines + j + 2;
@@ -179,7 +180,7 @@ void Skybox::CreateSphere(ID3D11Device* _pd3dDevice, int LatLines, int LongLines
 		k += 6;
 	}
 
-	for (DWORD l = 0; l < LongLines - 1; ++l)
+	for (int l = 0; l < LongLines - 1; ++l)
 	{
 		indices[k] = noSphereVert - 1;
 		indices[k + 1] = (noSphereVert - 1) - (l + 1);
@@ -195,7 +196,7 @@ void Skybox::CreateSphere(ID3D11Device* _pd3dDevice, int LatLines, int LongLines
 	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(DWORD) * noSphereFace * 3;
+	indexBufferDesc.ByteWidth = sizeof(int) * noSphereFace * 3;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	indexBufferDesc.CPUAccessFlags = 0;
 	indexBufferDesc.MiscFlags = 0;

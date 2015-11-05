@@ -44,6 +44,10 @@ Application::Application()
 	squareMesh = new MeshData();
 	_pConstantBuffer = nullptr;
 	samplerLinear = nullptr;
+	_depthStencilBuffer = nullptr;
+	_depthStencilView = nullptr;
+	_solid = nullptr;
+	samplerLinear = nullptr;
 }
 
 Application::~Application()
@@ -320,17 +324,16 @@ HRESULT Application::CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoin
     dwShaderFlags |= D3DCOMPILE_DEBUG;
 #endif
 
-    ID3DBlob* pErrorBlob;
-    hr = D3DCompileFromFile(szFileName, nullptr, nullptr, szEntryPoint, szShaderModel, 
-        dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
+    ID3DBlob* pErrorBlob = nullptr;
+    hr = D3DCompileFromFile(szFileName, nullptr, nullptr, szEntryPoint, szShaderModel, dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 
     if (FAILED(hr))
     {
-        if (pErrorBlob != nullptr)
-            OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-
-        if (pErrorBlob) pErrorBlob->Release();
-
+		if (pErrorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			pErrorBlob->Release();
+		}
         return hr;
     }
 
@@ -586,11 +589,13 @@ void Application::Update()
     }
     else
     {
-        static DWORD dwTimeStart = 0;
-        DWORD dwTimeCur = GetTickCount();
+        static ULONGLONG dwTimeStart = 0;
+        ULONGLONG dwTimeCur = GetTickCount64();
 
-        if (dwTimeStart == 0)
-            dwTimeStart = dwTimeCur;
+		if (dwTimeStart == 0)
+		{
+			dwTimeStart = dwTimeCur;
+		}
 
         t = (dwTimeCur - dwTimeStart) / 1000.0f;
     }
