@@ -70,7 +70,7 @@ private:
 	HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 	HRESULT InitShadersAndInputLayout();
 
-	HRESULT instantiateCube();
+	HRESULT initialiseCube();
 	HRESULT InitCubeVertexBuffer();
 	HRESULT InitCubeIndexBuffer();
 

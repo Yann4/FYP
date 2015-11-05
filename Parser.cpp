@@ -1,7 +1,7 @@
 #include "Parser.h"
 using namespace DirectX;
 
-int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::string fileName, MeshData* mesh, std::vector<Material>* materials)
+int Parser::readFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshData* mesh, std::vector<Material>* materials)
 {
 	std::ifstream inf(fileName);
 
@@ -29,13 +29,16 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 
 	int count = 0;
 	int currentPart = 0;
+	char cLine[100];
 
 	while (!inf.eof())
 	{
-		char line[100];
-		inf.getline(line, 100);
+		ZeroMemory(&cLine, 100);
 
-		if (line[0] == 'm' && line[1] == 't' && line[2] == 'l' && line[3] == 'l' && line[4] == 'i' && line[5] == 'b')
+		inf.getline(cLine, 100);
+		std::string line(cLine);
+		
+		if (line.find("mtllib") != std::string::npos)
 		{
 			int i = 7;
 			while (line[i] != '.')
@@ -47,7 +50,7 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 			mtlFileName.append(".txt");
 		}
 
-		if (line[0] == 'u' && line[1] == 's' && line[2] == 'e' && line[3] == 'm' && line[4] == 't' && line[5] == 'l')
+		if (line.find("usemtl") != std::string::npos)
 		{
 			std::string mtlName;
 			int i = 7;
@@ -61,7 +64,7 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 			currentPart++;
 		}
 
-		if (line[0] == 'g')
+		if (line.find("g ") != std::string::npos)
 		{
 			MeshSection ms;
 			ms.startIndex = count;
@@ -84,34 +87,34 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 			parts.push_back(ms);
 		}
 
-		if (line[0] == 'v' && line[1] == ' ')
+		if (line.find("v") != std::string::npos)
 		{
 			float a, b, c;
-			sscanf_s(line, "v %f %f %f", &a, &b, &c);
+			sscanf_s(line.c_str(), "v %f %f %f", &a, &b, &c);
 			verticesVector.push_back(XMFLOAT3(a, c, b));
 		}
 
-		if (line[0] == 'v' && line[1] == 'n')
+		if (line.find("vn") != std::string::npos)
 		{
 			float a, b, c;
-			sscanf_s(line, "vn %f %f %f", &a, &b, &c);
+			sscanf_s(line.c_str(), "vn %f %f %f", &a, &b, &c);
 			vertexNormals.push_back(XMFLOAT3(a, b, c));
 		}
 
-		if (line[0] == 'v' && line[1] == 't')
+		if (line.find("vt") != std::string::npos)
 		{
 			float a, b, c;
-			sscanf_s(line, "vt %f %f %f", &a, &b, &c);
+			sscanf_s(line.c_str(), "vt %f %f %f", &a, &b, &c);
 			b = 1.0f - b;
 			uvCoords.push_back(XMFLOAT3(a, b, c));
 		}
 
-		if (line[0] == 'f' && line[1] == ' ')
+		if (line.find("f") != std::string::npos)
 		{
 			float v1, v2, v3;
 			float vn1, vn2, vn3;
 			float vt1, vt2, vt3;
-			sscanf_s(line, "f %f/%f/%f %f/%f/%f %f/%f/%f", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
+			sscanf_s(line.c_str(), "f %f/%f/%f %f/%f/%f %f/%f/%f", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
 
 			if (v1 < vIndexOffset)
 			{
@@ -160,7 +163,7 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 		}
 	}
 
-	parts.at(currentPart ).endIndex = count;
+	parts.at(currentPart).endIndex = count;
 
 	inf.close();
 	WORD *indices = (WORD*)malloc(vertexIndices.size() * 3 * sizeof(WORD));
@@ -211,28 +214,26 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, D3D11_BUFFER_DESC* bd, std::stri
 		count++;
 	}
 
-	ZeroMemory(bd, sizeof(D3D11_BUFFER_DESC));
-	bd->Usage = D3D11_USAGE_DEFAULT;
-	bd->ByteWidth = sizeof(SimpleVertex) * count;
-	bd->BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd->CPUAccessFlags = 0;
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(D3D11_BUFFER_DESC));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(SimpleVertex) * count;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = vertices;
 
-	_pd3dDevice->CreateBuffer(bd, &InitData, &(mesh->vertexBuffer));
+	_pd3dDevice->CreateBuffer(&bd, &InitData, &(mesh->vertexBuffer));
 
-	ZeroMemory(bd, sizeof(D3D11_BUFFER_DESC));
-	bd->Usage = D3D11_USAGE_DEFAULT;
-	bd->ByteWidth = sizeof(WORD) * count;
-	bd->BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd->CPUAccessFlags = 0;
+	bd.ByteWidth = sizeof(WORD) * count;
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
 
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = indices;
-	_pd3dDevice->CreateBuffer(bd, &InitData, &(mesh->indexBuffer));
+	_pd3dDevice->CreateBuffer(&bd, &InitData, &(mesh->indexBuffer));
 
 	mesh->numIndices = count;
 	mesh->parts = parts;

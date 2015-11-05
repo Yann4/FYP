@@ -157,125 +157,20 @@ HRESULT Application::InitShadersAndInputLayout()
 	return hr;
 }
 
-//Group of functions that define a multicoloured cube
-#pragma region Define_Cube
-HRESULT Application::instantiateCube()
+HRESULT Application::initialiseCube()
 {
-	squareMesh->material.diffuse = XMFLOAT4(0.8f, 0.5f, 0.5f, 1.0f);
-	squareMesh->material.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	squareMesh->material.ambient = XMFLOAT4(0.2, 0.2, 0.2, 0.2);
+	squareMesh->material.diffuse = XMFLOAT4(0.8f, 0.7f, 0.5f, 1.0f);
+	squareMesh->material.specular = XMFLOAT4(0.4f, 0.35f, 0.25f, 1.0f);
+	squareMesh->material.ambient = XMFLOAT4(0.4, 0.35, 0.25, 0.2);
 
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(squareMesh->specularRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(squareMesh->normalMapRV));
 
-	D3D11_BUFFER_DESC bd;
 	Parser p;
-	p.readFile(_pd3dDevice, &bd, "cube.txt", squareMesh, nullptr);
+	p.readFile(_pd3dDevice, "cube.txt", squareMesh, nullptr);
 	return S_OK;
 }
-
-HRESULT Application::InitCubeVertexBuffer()
-{
-	HRESULT hr;
-
-    // Create vertex buffer
-    SimpleVertex vertices[] =
-    {
-		{ XMFLOAT3( 0.0f, 0.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3( 0.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 0.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2( 1.0f, 0.0f) },
-
-		{ XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT3( -1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-
-		{ XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT3( -1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-
-		{ XMFLOAT3( 0.0f, 1.0f, 1.0f), XMFLOAT3( -1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3( 0.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3( 0.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-		
-		{ XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-
-		{ XMFLOAT3( 1.0f, 0.0f, 1.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3( 1.0f, 0.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-
-		{ XMFLOAT3( 1.0f, 1.0f, 0.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f, 1.0f, 0.0f), XMFLOAT3( 0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-		{ XMFLOAT3( 1.0f, 1.0f, 1.0f), XMFLOAT3( 1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
-		{ XMFLOAT3( 1.0f, 1.0f, 1.0f), XMFLOAT3( 0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-    };
-
-    D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 24;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = vertices;
-
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->vertexBuffer);
-
-    if (FAILED(hr))
-        return hr;
-
-	return S_OK;
-}
-
-HRESULT Application::InitCubeIndexBuffer()
-{
-	HRESULT hr;
-
-    // Create index buffer
-    WORD indices[] =
-    {
-		2,20,14,
-		2,8,20,
-		0,9,6,
-		0,3,9,
-		7,22,19,
-		7,10,22,
-		12,18,21,
-		12,21,16,
-		2,13,16,
-		2,16,4,
-		5,17,23,
-		5,23,11,
-    };
-
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(WORD) * 36;     
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	bd.CPUAccessFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA InitData;
-	ZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = indices;
-    hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &squareMesh->indexBuffer);
-
-	squareMesh->numIndices = 36;
-
-    if (FAILED(hr))
-        return hr;
-
-	return S_OK;
-}
-#pragma endregion
 
 HRESULT Application::InitWindow(HINSTANCE hInstance, int nCmdShow)
 {
@@ -489,13 +384,13 @@ HRESULT Application::InitDevice()
 
 void Application::initObjects()
 {
-	instantiateCube();
+	initialiseCube();
 	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0));
 	go1 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 2, 2));
 	go2 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 4, 4));
 	go3 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 6, 6));
 
-	light = Light(XMFLOAT4(0.2, 0.2, 0.2, 1.0), XMFLOAT4(0.7f, 0.7f, 0.7f, 0.7f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
+	light = Light(XMFLOAT4(0.2, 0.2, 0.2, 1.0), XMFLOAT4(0.9f, 0.9f, 0.9f, 0.9f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
 
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
