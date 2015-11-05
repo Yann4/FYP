@@ -360,6 +360,7 @@ HRESULT Application::InitDevice()
 	ZeroMemory(&sol, sizeof(D3D11_RASTERIZER_DESC));
 	sol.FillMode = D3D11_FILL_SOLID;
 	sol.CullMode = D3D11_CULL_NONE;
+	sol.MultisampleEnable = true;
 	_pd3dDevice->CreateRasterizerState(&sol, &_solid);
 
 	_pImmediateContext->RSSetState(_solid);
