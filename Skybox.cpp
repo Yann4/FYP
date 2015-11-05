@@ -19,7 +19,7 @@ Skybox::Skybox()
 	sphereWorld = DirectX::XMMatrixIdentity();
 }
 
-void Skybox::init(ID3D11DeviceContext* _pImmediateContext, ID3D11Device* _pd3dDevice, LPCTSTR fileName)
+void Skybox::init(ID3D11DeviceContext* context, ID3D11Device* _pd3dDevice, LPCTSTR fileName)
 {
 	// Create the constant buffer
 	D3D11_BUFFER_DESC bd;
@@ -30,7 +30,7 @@ void Skybox::init(ID3D11DeviceContext* _pImmediateContext, ID3D11Device* _pd3dDe
 	bd.CPUAccessFlags = 0;
 	_pd3dDevice->CreateBuffer(&bd, nullptr, &_pConstantBuffer);
 
-	this->_pImmediateContext = _pImmediateContext;
+	_pImmediateContext = context;
 	sphereWorld = DirectX::XMMatrixIdentity();
 
 	CreateSphere(_pd3dDevice, 10, 10);

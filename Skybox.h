@@ -38,8 +38,9 @@ private:
 
 public:
 	Skybox();
-	void init(ID3D11DeviceContext* _pImmediateContext, ID3D11Device* _pd3dDevice, LPCTSTR fileName);
 	~Skybox();
+
+	void init(ID3D11DeviceContext* context, ID3D11Device* _pd3dDevice, LPCTSTR fileName);
 	void Update(Camera* cam);
 	void Draw(ID3D11VertexShader* _pVertexShader, ID3D11PixelShader* _pPixelShader, Camera* cam);
 };

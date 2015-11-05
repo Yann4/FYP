@@ -17,17 +17,17 @@ up(XMFLOAT4(0, 1, 0, 0))
 }
 
 //Sets up the projection matrix
-void Camera::setLens(float fovY, float aspect, float znear, float zfar)
+void Camera::setLens(float fovY, float aspectRatio, float znear, float zfar)
 {
 	nearZ = znear;
 	farZ = zfar;
-	this->aspect = aspect;
+	this->aspect = aspectRatio;
 	yFov = fovY;
 
 	nearWindHeight = 2.0f * nearZ * tanf(0.5f * yFov);
 	farWindHeight = 2.0f * farZ * tanf(0.5f * yFov);
 
-	XMMATRIX proj = XMMatrixPerspectiveFovLH(yFov, aspect, nearZ, farZ);
+	XMMATRIX proj = XMMatrixPerspectiveFovLH(yFov, aspectRatio, nearZ, farZ);
 	XMStoreFloat4x4(&projection, proj);
 }
 
