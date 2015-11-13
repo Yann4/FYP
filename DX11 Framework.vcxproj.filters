@@ -41,7 +41,10 @@
       <Filter>TextureLoader</Filter>
     </ClInclude>
     <ClInclude Include="Parser.h" />
-    <ClInclude Include="Skybox.h" />
+    <ClInclude Include="Skybox.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeSlice.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -59,7 +62,9 @@
       <Filter>TextureLoader</Filter>
     </ClCompile>
     <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

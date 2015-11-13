@@ -400,6 +400,7 @@
     <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="TimeSlice.h" />
     <ResourceCompile Include="DX11 Framework.rc" />
   </ItemGroup>
   <ItemGroup>
