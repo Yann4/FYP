@@ -48,6 +48,10 @@ Application::Application()
 	_depthStencilView = nullptr;
 	_solid = nullptr;
 	samplerLinear = nullptr;
+
+	cameraMoveSpeed = 0.1f;
+	cameraPanSpeed = 0.25f;
+	lastMousePos = XMFLOAT2(0, 0);
 }
 
 Application::~Application()
@@ -356,6 +360,7 @@ HRESULT Application::InitDevice()
 	ZeroMemory(&sol, sizeof(D3D11_RASTERIZER_DESC));
 	sol.FillMode = D3D11_FILL_SOLID;
 	sol.CullMode = D3D11_CULL_NONE;
+	sol.MultisampleEnable = true;
 	_pd3dDevice->CreateRasterizerState(&sol, &_solid);
 
 	_pImmediateContext->RSSetState(_solid);
@@ -415,6 +420,22 @@ void Application::Cleanup()
 	if (skyboxVS) skyboxVS->Release();
 
 	delete squareMesh;
+}
+
+void Application::onMouseMove(WPARAM btnState, int x, int y)
+{
+	if ((btnState & MK_LBUTTON) != 0)
+	{
+		float dx = XMConvertToRadians(cameraPanSpeed * (x - lastMousePos.x));
+		float dy = XMConvertToRadians(cameraPanSpeed * (y - lastMousePos.y));
+
+		camera.Pitch(dy);
+		camera.Yaw(dx);
+	}
+
+	lastMousePos.x = x;
+	lastMousePos.y = y;
+	camera.Update();
 }
 
 void Application::pushEvent(Event toPush)

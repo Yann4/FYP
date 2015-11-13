@@ -10,7 +10,7 @@ GameObject::GameObject()
 	mesh = nullptr;
 
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
-	std::stack<XMFLOAT4X4> translations = std::stack<XMFLOAT4X4>();
+	translations = std::stack<XMFLOAT4X4>();
 
 	position = DirectX::XMFLOAT3(0, 0, 0);
 	rotation = XMFLOAT3(0, 0, 0);
@@ -20,8 +20,8 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBu
 	:context(devContext), constBuffer(constantBuffer), mesh(mesh), position(pos)
 {
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
-	std::stack<XMFLOAT4X4> translations = std::stack<XMFLOAT4X4>();
-	XMFLOAT3 rotation = XMFLOAT3(0, 0, 0);
+	translations = std::stack<XMFLOAT4X4>();
+	rotation = XMFLOAT3(0, 0, 0);
 
 	setTranslation(pos.x, pos.y, pos.z);
 	setScale(2, 2, 2);

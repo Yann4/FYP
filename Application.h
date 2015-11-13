@@ -62,6 +62,10 @@ private:
 	Input input;
 	static std::queue<Event> inputEventQueue;
 
+	float cameraMoveSpeed;
+	float cameraPanSpeed;
+	DirectX::XMFLOAT2 lastMousePos;
+
 private:
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	HRESULT InitDevice();
@@ -71,8 +75,6 @@ private:
 	HRESULT InitShadersAndInputLayout();
 
 	HRESULT initialiseCube();
-	HRESULT InitCubeVertexBuffer();
-	HRESULT InitCubeIndexBuffer();
 
 	void initObjects();
 
@@ -87,7 +89,7 @@ public:
 	~Application();
 
 	HRESULT Initialise(HINSTANCE hInstance, int nCmdShow);
-
+	void onMouseMove(WPARAM btnState, int x, int y);
 	void Update();
 	void Draw();
 };

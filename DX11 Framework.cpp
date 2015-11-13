@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <windowsx.h>
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
@@ -21,9 +22,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }
+		}
         else
         {
+			if (msg.message == WM_MOUSEMOVE)
+			{
+				theApp.onMouseMove(msg.wParam, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
+			}
 			theApp.Update();
             theApp.Draw();
         }
