@@ -14,6 +14,7 @@ GameObject::GameObject()
 
 	position = DirectX::XMFLOAT3(0, 0, 0);
 	rotation = XMFLOAT3(0, 0, 0);
+	scale = XMFLOAT3(0, 0, 0);
 }
 
 GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos)
@@ -22,9 +23,9 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBu
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
 	translations = std::stack<XMFLOAT4X4>();
 	rotation = XMFLOAT3(0, 0, 0);
+	scale = XMFLOAT3(0, 0, 0);
 
 	setTranslation(pos.x, pos.y, pos.z);
-	setScale(2, 2, 2);
 	UpdateMatrix();
 }
 
@@ -44,6 +45,11 @@ void GameObject::setScale(float x, float y, float z)
 	XMFLOAT4X4 temp;
 	XMStoreFloat4x4(&temp, XMMatrixScaling(x, y, z));
 	translations.push(temp);
+
+	
+	XMVECTOR sc = XMLoadFloat3(&scale);
+	sc = XMVector3Transform(sc, XMMatrixScaling(x, y, z));
+	XMStoreFloat3(&scale, sc);
 }
 
 void GameObject::setRotation(float x, float y, float z)
@@ -100,8 +106,13 @@ void GameObject::Update(float deltaTime)
 	UpdateMatrix();
 }
 
-void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, Light& light)
+void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, Light& light)
 {
+	if (!frustum.checkSphere(position, max(max(scale.x, scale.y), scale.z)))
+	{
+		return;
+	}
+
 	context->VSSetShader(vShader, nullptr, 0);
 	context->VSSetConstantBuffers(0, 1, &constBuffer);
 	context->PSSetShader(pShader, nullptr, 0);

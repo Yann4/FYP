@@ -35,6 +35,7 @@ public:
 	DirectX::XMMATRIX getProjection() const;
 
 	inline DirectX::XMFLOAT4 getPosition() { return position; };
+	inline float viewDistance() { return farZ - nearZ; };
 
 private:
 	void UpdateViewMatrix();

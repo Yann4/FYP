@@ -14,6 +14,7 @@
 #include "Input.h"
 #include "Parser.h"
 #include "Skybox.h"
+#include "Frustum.h"
 
 #include <queue>
 
@@ -53,6 +54,7 @@ private:
 	ID3D11Buffer*           _pConstantBuffer;
 
 	Camera camera;
+	Frustum viewFrustum;
 
 	MeshData* squareMesh;
 

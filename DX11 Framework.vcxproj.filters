@@ -45,6 +45,7 @@
       <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="TimeSlice.h" />
+    <ClInclude Include="Frustum.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -65,6 +66,7 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Frustum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

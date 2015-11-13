@@ -74,10 +74,11 @@ struct MeshSection
 	Material* material;
 	int startIndex, endIndex;
 	DirectX::XMFLOAT3 centre;
+	DirectX::XMFLOAT3 size;
 
-	MeshSection(){ materialName = ""; sectionName = ""; material = nullptr; startIndex = 0; endIndex = 0; centre = DirectX::XMFLOAT3(0, 0, 0); }
-	MeshSection(std::string materialName, std::string sectionName, Material* material, int startIndex, int endIndex, DirectX::XMFLOAT3 centre) :
-		materialName(materialName), sectionName(sectionName), material(material), startIndex(startIndex), endIndex(endIndex), centre(centre){}
+	MeshSection() { materialName = ""; sectionName = ""; material = nullptr; startIndex = 0; endIndex = 0; centre = DirectX::XMFLOAT3(0, 0, 0); size = DirectX::XMFLOAT3(0, 0, 0); }
+	MeshSection(std::string materialName, std::string sectionName, Material* material, int startIndex, int endIndex, DirectX::XMFLOAT3 centre, DirectX::XMFLOAT3 size) :
+		materialName(materialName), sectionName(sectionName), material(material), startIndex(startIndex), endIndex(endIndex), centre(centre), size(size){}
 	~MeshSection(){ material = nullptr; }
 };
 

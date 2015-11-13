@@ -82,6 +82,8 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
 	input = Input("input_map.txt");
 
+	viewFrustum = Frustum();
+
 	return S_OK;
 }
 
@@ -531,10 +533,11 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	go.Draw(_pPixelShader, _pVertexShader, camera, light);
-	go1.Draw(_pPixelShader, _pVertexShader, camera, light);
-	go2.Draw(_pPixelShader, _pVertexShader, camera, light);
-	go3.Draw(_pPixelShader, _pVertexShader, camera, light);
+	viewFrustum.constructFrustum(camera.viewDistance(), camera.getProjection(), camera.getView());
+	go.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
+	go1.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
+	go2.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
+	go3.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
 
 	skybox.Draw(skyboxVS, skyboxPS, &camera);
     //

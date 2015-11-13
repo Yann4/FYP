@@ -310,6 +310,7 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshData* 
 		}
 
 		mesh->parts.at(i).centre = XMFLOAT3(minX + ((maxX - minX) / 2.0f), minY + ((maxY - minY) / 2.0f), minZ + ((maxZ - minZ) / 2.0f));
+		mesh->parts.at(i).size = XMFLOAT3(maxX - minX, maxY - minY, maxZ - minZ);
 	}
 
 	return 0;
