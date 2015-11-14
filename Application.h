@@ -17,6 +17,8 @@
 #include "Frustum.h"
 
 #include <queue>
+#include <fstream>
+#include <regex>
 
 class Application
 {
@@ -60,6 +62,7 @@ private:
 
 	Light light;
 	GameObject go, go1, go2, go3;
+	std::vector<GameObject> objects;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;
@@ -76,6 +79,7 @@ private:
 	HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 	HRESULT InitShadersAndInputLayout();
 
+	void readInitFile(std::string fileName);
 	HRESULT initialiseCube();
 
 	void initObjects();

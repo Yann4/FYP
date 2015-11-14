@@ -376,6 +376,7 @@
   <ItemGroup>
     <Text Include="cube.txt" />
     <Text Include="input_map.txt" />
+    <Text Include="worldData.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />

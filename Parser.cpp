@@ -1,7 +1,8 @@
 #include "Parser.h"
 using namespace DirectX;
+using std::vector;
 
-int Parser::readFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshData* mesh, std::vector<Material>* materials)
+int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshData* mesh, std::vector<Material>* materials)
 {
 	std::ifstream inf(fileName);
 
@@ -21,6 +22,7 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshData* 
 
 	std::vector<MeshSection> parts;
 
+	XMFLOAT3 bottomLeft = XMFLOAT3(NULL,NULL,NULL), topRight = XMFLOAT3(NULL,NULL,NULL);
 	std::string mtlFileName;
 
 	float vIndexOffset = 9999999.0f;
@@ -311,8 +313,43 @@ int Parser::readFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshData* 
 
 		mesh->parts.at(i).centre = XMFLOAT3(minX + ((maxX - minX) / 2.0f), minY + ((maxY - minY) / 2.0f), minZ + ((maxZ - minZ) / 2.0f));
 		mesh->parts.at(i).size = XMFLOAT3(maxX - minX, maxY - minY, maxZ - minZ);
+
+		if (bottomLeft.x == NULL)
+		{
+			bottomLeft = XMFLOAT3(minX, minY, minZ);
+			topRight = XMFLOAT3(maxX, maxY, maxZ);
+		}
+		else
+		{
+			if (bottomLeft.x > minX)
+			{
+				bottomLeft.x = minX;
+			}
+			if (bottomLeft.y > minY)
+			{
+				bottomLeft.y = minY;
+			}
+			if (bottomLeft.z > minZ)
+			{
+				bottomLeft.z = minZ;
+			}
+
+			if (topRight.x < maxX)
+			{
+				topRight.x = maxX;
+			}
+			if (topRight.y < maxY)
+			{
+				topRight.y = maxY;
+			}
+			if (topRight.z < maxZ)
+			{
+				topRight.z = maxZ;
+			}
+		}
 	}
 
+	mesh->size = XMFLOAT3(topRight.x - bottomLeft.x, topRight.y - bottomLeft.y, topRight.z - bottomLeft.z);
 	return 0;
 }
 

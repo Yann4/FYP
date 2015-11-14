@@ -91,6 +91,7 @@
       <Filter>Input</Filter>
     </Text>
     <Text Include="cube.txt" />
+    <Text Include="worldData.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Crate_COLOR.dds">

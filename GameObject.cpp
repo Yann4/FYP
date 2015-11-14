@@ -23,7 +23,7 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBu
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
 	translations = std::stack<XMFLOAT4X4>();
 	rotation = XMFLOAT3(0, 0, 0);
-	scale = XMFLOAT3(0, 0, 0);
+	scale = mesh->size;
 
 	setTranslation(pos.x, pos.y, pos.z);
 	UpdateMatrix();

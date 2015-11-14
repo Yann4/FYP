@@ -33,7 +33,6 @@ public:
 	void Update(float deltaTime);
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, Light& light);
 
-protected:
 	void setScale(float x, float y, float z);
 	void setRotation(float x, float y, float z);
 	void setTranslation(float x, float y, float z);

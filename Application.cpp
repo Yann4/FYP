@@ -52,6 +52,7 @@ Application::Application()
 	cameraMoveSpeed = 0.1f;
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
+	objects = std::vector<GameObject>();
 }
 
 Application::~Application()
@@ -174,7 +175,7 @@ HRESULT Application::initialiseCube()
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(squareMesh->normalMapRV));
 
 	Parser p;
-	p.readFile(_pd3dDevice, "cube.txt", squareMesh, nullptr);
+	p.readObjFile(_pd3dDevice, "cube.txt", squareMesh, nullptr);
 	return S_OK;
 }
 
@@ -389,16 +390,65 @@ HRESULT Application::InitDevice()
     return S_OK;
 }
 
+void Application::readInitFile(std::string fileName)
+{
+	/*
+	Reads world data from file.
+	The syntax for the file is:
+	Lines starting with a # is treated as a comment
+	Other than that, each line should be an isolated piece of information that gives all of the data needed to instantiate the object in the format:
+	MESHNAME LOCATION SCALE ROTATION
+	e.g. CRATE (0,0,0) (1,1,1) (0,0,0)
+
+	The list of valid meshnames are:
+	CRATE
+	*/
+
+	std::fstream worldFile;
+	worldFile.open(fileName, std::fstream::in);
+
+	if (!worldFile.is_open())
+	{
+		throw std::exception::exception("Error opening file");
+	}
+
+	std::string line;
+	std::regex const matcher("([[:upper:]]+) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\)");
+
+	while (std::getline(worldFile, line))
+	{
+		std::smatch captures;
+		if (line.find('#') != std::string::npos)
+		{
+			continue;
+		}
+
+		if (std::regex_match(line, captures, matcher))
+		{
+			std::string name = captures[1];
+			XMFLOAT3 position(std::stof(captures[2]), std::stof(captures[3]), std::stof(captures[4]));
+			XMFLOAT3 scale(std::stof(captures[5]), std::stof(captures[6]), std::stof(captures[7]));
+			XMFLOAT3 rotation(std::stof(captures[8]), std::stof(captures[9]), std::stof(captures[10]));
+
+			if (name == "CRATE")
+			{
+				GameObject temp = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, position);
+				temp.setScale(scale.x, scale.y, scale.z);
+				temp.setRotation(rotation.x, rotation.y, rotation.z);
+				temp.UpdateMatrix();
+				objects.push_back(temp);
+			}
+		}
+	}
+}
+
 void Application::initObjects()
 {
 	initialiseCube();
-	go = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 0, 0));
-	go1 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 2, 2));
-	go2 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 4, 4));
-	go3 = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, XMFLOAT3(0, 6, 6));
 
 	light = Light(XMFLOAT4(0.2, 0.2, 0.2, 1.0), XMFLOAT4(0.9f, 0.9f, 0.9f, 0.9f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
 
+	readInitFile("worldData.txt");
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 }
@@ -522,6 +572,10 @@ void Application::Update()
 	handleMessages();
 	camera.Update();
 	skybox.Update(&camera);
+	for (GameObject object : objects)
+	{
+		object.Update(t);
+	}
 }
 
 void Application::Draw()
@@ -534,10 +588,10 @@ void Application::Draw()
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	viewFrustum.constructFrustum(camera.viewDistance(), camera.getProjection(), camera.getView());
-	go.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
-	go1.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
-	go2.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
-	go3.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
+	for (GameObject object : objects)
+	{
+		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
+	}
 
 	skybox.Draw(skyboxVS, skyboxPS, &camera);
     //
