@@ -1,3 +1,7 @@
+#Format: NAME POSITION SCALE ROTATION
+#Only integer values
+#Allowed names:
+#CRATE
 CRATE (0,0,0) (1,1,1) (0,0,0)
 CRATE (5,5,5) (1,1,1) (1,0,0)
 CRATE (2,2,2) (1,1,1) (2,0,0)
