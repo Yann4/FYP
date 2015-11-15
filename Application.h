@@ -15,6 +15,7 @@
 #include "Parser.h"
 #include "Skybox.h"
 #include "Frustum.h"
+#include "Light.h"
 
 #include <queue>
 #include <fstream>
@@ -53,14 +54,15 @@ private:
 
 	ID3D11SamplerState* samplerLinear;
 
-	ID3D11Buffer*           _pConstantBuffer;
+	ID3D11Buffer*           frameConstantBuffer;
+	ID3D11Buffer*           objectConstantBuffer;
 
 	Camera camera;
 	Frustum viewFrustum;
 
 	MeshData* squareMesh;
 
-	Light light;
+	DirectionalLight light;
 	GameObject go, go1, go2, go3;
 	std::vector<GameObject> objects;
 

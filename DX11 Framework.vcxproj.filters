@@ -24,6 +24,9 @@
     <Filter Include="Textures">
       <UniqueIdentifier>{5009c21a-55e2-4dd7-a79e-d568737d1fbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lights">
+      <UniqueIdentifier>{906c6f5f-aee8-4e0a-8fa2-bf312bdb6f05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -45,7 +48,12 @@
       <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="TimeSlice.h" />
-    <ClInclude Include="Frustum.h" />
+    <ClInclude Include="Frustum.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -66,7 +74,9 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="Frustum.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

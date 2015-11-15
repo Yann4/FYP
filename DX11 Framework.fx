@@ -7,27 +7,69 @@
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
-cbuffer ConstantBuffer : register( b0 )
+struct DirectionalLight
+{
+	float4 diffuse;
+	float4 ambient;
+	float4 specular;
+
+	float3 direction;
+	float pad;
+};
+
+struct PointLight
+{
+	float4 diffuse;
+	float4 ambient;
+	float4 specular;
+
+	float3 position;
+	float range;
+
+	float3 attenuation;
+	float pad;
+};
+
+struct SpotLight
+{
+	float4 diffuse;
+	float4 ambient;
+	float4 specular;
+
+	float3 position;
+	float range;
+
+	float3 direction;
+	float spot;
+
+	float3 attenuation;
+	float pad;
+};
+
+struct Material
+{
+	float4 diffuse;
+	float4 ambient;
+	float4 specular;
+};
+
+cbuffer frameCB : register(b0)
+{
+	DirectionalLight dirLight;
+	PointLight pointLight;
+	SpotLight spotLight;
+	float3 eyePos;
+	float pad;
+};
+
+cbuffer objectCB : register(b1)
 {
 	matrix World;
 	matrix View;
 	matrix Projection;
+	Material material;
+};
 
-	float4 DiffuseMtl;
-	float4 DiffuseLight;
-
-	float4 AmbientMtl;
-	float4 AmbientLight;
-
-	float4 SpecularMtl;
-	float4 SpecularLight;
-	float SpecularPower;
-	float3 EyePosW;
-
-	float3 LightVecW;
-}
-
-//--------------------------------------------------------------------------------------
 struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
@@ -42,6 +84,30 @@ Texture2D texNormMap : register(t2);
 
 SamplerState samLinear: register(s0);
 
+void calculateDirectionalLight(Material mat, DirectionalLight light, float3 normal, float3 toEye, 
+	out float4 ambient, out float4 specular, out float4 diffuse)
+{
+	ambient = float4(0, 0, 0, 0);
+	specular = float4(0, 0, 0, 0);
+	diffuse = float4(0, 0, 0, 0);
+
+	float3 lightV = -light.direction;
+
+	ambient = mat.ambient * light.ambient;
+
+	//If surface is in line of sight
+	float diffuseFact = dot(lightV, normal);
+
+	[flatten]
+	if (diffuseFact > 0.0f)
+	{
+		float3 vect = reflect(-lightV, normal);
+		float specularFact = pow(max(dot(vect, toEye), 0.0f), mat.specular.w);
+
+		diffuse = diffuseFact * mat.diffuse * light.diffuse;
+		specular = specularFact * mat.specular * light.specular;
+	}
+}
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
@@ -52,7 +118,7 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXC
     output.Pos = mul( Pos, World );
 
 	//Get normalised vector to camera position in world coordinates
-	output.PosW = normalize(EyePosW - output.Pos.xyz);
+	output.PosW = normalize(eyePos - output.Pos.xyz);
 
     output.Pos = mul( output.Pos, View );
     output.Pos = mul( output.Pos, Projection );
@@ -76,7 +142,21 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	input.Norm = texNormMap.Sample(samLinear, input.TexC);
 
 	float4 texCol = texDiffuse.Sample(samLinear, input.TexC);
+	float4 specCol = texSpec.Sample(samLinear, input.TexC).r;
 
+	float4 ambient = (0, 0, 0, 0);
+	float4 specular = (0, 0, 0, 0);
+	float4 diffuse = (0, 0, 0, 0);
+
+
+	float4 amb, spec, diff;
+	calculateDirectionalLight(material, dirLight, input.Norm, normalize(eyePos - input.PosW), amb, diff, spec);
+
+	ambient += amb;
+	specular += spec;
+	diffuse += diff;
+
+	/*
 	//Calculate reflection vector
 	float3 reflectVect = reflect(-LightVecW, input.Norm);
 
@@ -93,9 +173,11 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	//Calculate Ambient light
 	float3 ambient = AmbientMtl * AmbientLight;
 
+	*/
 
 	float4 colour;
-	colour.rgb = texCol * (diffuse + ambient) + specular;
-	colour.a = DiffuseMtl.a;
+	colour = ambient + specular + diffuse;
+	//colour.rgb = texCol * (diffuse + ambient) + specular;
+	colour.a = material.diffuse.a;
 	return colour;
 }

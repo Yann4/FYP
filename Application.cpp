@@ -42,7 +42,8 @@ Application::Application()
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
 	squareMesh = new MeshData();
-	_pConstantBuffer = nullptr;
+	frameConstantBuffer = nullptr;
+	objectConstantBuffer = nullptr;
 	samplerLinear = nullptr;
 	_depthStencilBuffer = nullptr;
 	_depthStencilView = nullptr;
@@ -348,21 +349,28 @@ HRESULT Application::InitDevice()
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(ConstantBuffer);
+	bd.ByteWidth = sizeof(frameCB);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-    hr = _pd3dDevice->CreateBuffer(&bd, nullptr, &_pConstantBuffer);
+    hr = _pd3dDevice->CreateBuffer(&bd, nullptr, &frameConstantBuffer);
+
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(objectCB);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	hr = _pd3dDevice->CreateBuffer(&bd, nullptr, &objectConstantBuffer);
 
 	D3D11_RASTERIZER_DESC wf;
 	ZeroMemory(&wf, sizeof(D3D11_RASTERIZER_DESC));
 	wf.FillMode = D3D11_FILL_WIREFRAME;
-	wf.CullMode = D3D11_CULL_NONE;
+	wf.CullMode = D3D11_CULL_BACK;
 	_pd3dDevice->CreateRasterizerState(&wf, &_wireFrame);
 
 	D3D11_RASTERIZER_DESC sol;
 	ZeroMemory(&sol, sizeof(D3D11_RASTERIZER_DESC));
 	sol.FillMode = D3D11_FILL_SOLID;
-	sol.CullMode = D3D11_CULL_NONE;
+	sol.CullMode = D3D11_CULL_BACK;
 	sol.MultisampleEnable = true;
 	_pd3dDevice->CreateRasterizerState(&sol, &_solid);
 
@@ -432,7 +440,7 @@ void Application::readInitFile(std::string fileName)
 
 			if (name == "CRATE")
 			{
-				GameObject temp = GameObject(_pImmediateContext, _pConstantBuffer, squareMesh, position);
+				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, squareMesh, position);
 				temp.setScale(scale.x, scale.y, scale.z);
 				temp.setRotation(rotation.x, rotation.y, rotation.z);
 				temp.UpdateMatrix();
@@ -446,7 +454,7 @@ void Application::initObjects()
 {
 	initialiseCube();
 
-	light = Light(XMFLOAT4(0.2, 0.2, 0.2, 1.0), XMFLOAT4(0.9f, 0.9f, 0.9f, 0.9f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, XMFLOAT3(0.25f, 0.5f, -1.0f));
+	light = DirectionalLight(XMFLOAT4(0.2, 0.2, 0.2, 10.0), XMFLOAT4(0.9f, 0.9f, 0.9f, 0.9f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT3(0.25f, 0.5f, -1.0f));
 
 	readInitFile("worldData.txt");
 	skybox = Skybox();
@@ -456,7 +464,8 @@ void Application::initObjects()
 void Application::Cleanup()
 {
     if (_pImmediateContext) _pImmediateContext->ClearState();
-    if (_pConstantBuffer) _pConstantBuffer->Release();
+    if (objectConstantBuffer) objectConstantBuffer->Release();
+	if (frameConstantBuffer) frameConstantBuffer->Release();
     if (_pVertexLayout) _pVertexLayout->Release();
     if (_pVertexShader) _pVertexShader->Release();
     if (_pPixelShader) _pPixelShader->Release();
@@ -485,8 +494,8 @@ void Application::onMouseMove(WPARAM btnState, int x, int y)
 		camera.Yaw(dx);
 	}
 
-	lastMousePos.x = x;
-	lastMousePos.y = y;
+	lastMousePos.x = (float)x;
+	lastMousePos.y = (float)y;
 	camera.Update();
 }
 
@@ -586,6 +595,14 @@ void Application::Draw()
     float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	frameCB cb;
+	cb.dirLight = light;
+	cb.pointLight = PointLight(XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT3(0, 0, 0), 0, XMFLOAT3(0, 0, 0));
+	cb.spotLight = SpotLight(XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT3(0, 0, 0), 0, XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), 0);
+	cb.eyePos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+
+	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &cb, 0, 0);
 
 	viewFrustum.constructFrustum(camera.viewDistance(), camera.getProjection(), camera.getView());
 	for (GameObject object : objects)

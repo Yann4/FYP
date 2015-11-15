@@ -2,12 +2,46 @@
 #include <directxmath.h>
 #include <string>
 #include <vector>
+#include "Light.h"
 
 struct SimpleVertex
 {
 	DirectX::XMFLOAT3 Pos;
 	DirectX::XMFLOAT3 Normal;
 	DirectX::XMFLOAT2 TexC;
+};
+
+struct Material
+{
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 specular;
+
+	std::string name;
+	Material()
+	{
+		diffuse = DirectX::XMFLOAT4(0, 0, 0, 0);
+		ambient = DirectX::XMFLOAT4(0, 0, 0, 0);
+		specular = DirectX::XMFLOAT4(0, 0, 0, 0);
+	}
+
+	Material(DirectX::XMFLOAT4 spec, DirectX::XMFLOAT4 amb, DirectX::XMFLOAT4 diff) : specular(spec), ambient(amb), diffuse(diff) {}
+};
+
+struct CBMaterial
+{
+	DirectX::XMFLOAT4 diffuse;
+	DirectX::XMFLOAT4 ambient;
+	DirectX::XMFLOAT4 specular;
+
+	CBMaterial()
+	{
+		diffuse = DirectX::XMFLOAT4(0, 0, 0, 0);
+		ambient = DirectX::XMFLOAT4(0, 0, 0, 0);
+		specular = DirectX::XMFLOAT4(0, 0, 0, 0);
+	}
+
+	CBMaterial(DirectX::XMFLOAT4 spec, DirectX::XMFLOAT4 amb, DirectX::XMFLOAT4 diff) : specular(spec), ambient(amb), diffuse(diff) {}
 };
 
 struct ConstantBuffer
@@ -30,41 +64,23 @@ struct ConstantBuffer
 	DirectX::XMFLOAT3 lightVecW;
 };
 
-struct Material
+struct frameCB
 {
-	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 ambient;
-	DirectX::XMFLOAT4 specular;
+	DirectionalLight dirLight;
+	PointLight pointLight;
+	SpotLight spotLight;
 
-	std::string name;
-	Material()
-	{
-		diffuse = DirectX::XMFLOAT4(0, 0, 0, 0);
-		ambient = DirectX::XMFLOAT4(0, 0, 0, 0);
-		specular = DirectX::XMFLOAT4(0, 0, 0, 0);
-	}
-
-	Material(DirectX::XMFLOAT4 spec, DirectX::XMFLOAT4 amb, DirectX::XMFLOAT4 diff) : specular(spec), ambient(amb), diffuse(diff) {}
+	DirectX::XMFLOAT3 eyePos;
+	float pad;
 };
 
-struct Light
+struct objectCB
 {
-	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 ambient;
-	DirectX::XMFLOAT4 specular;
-	float			  specularPower;
-	DirectX::XMFLOAT3 lightVecW;
+	DirectX::XMMATRIX world;
+	DirectX::XMMATRIX view;
+	DirectX::XMMATRIX projection;
 
-	Light()
-	{
-		diffuse = DirectX::XMFLOAT4(0, 0, 0, 0);
-		ambient = DirectX::XMFLOAT4(0, 0, 0, 0);
-		specular = DirectX::XMFLOAT4(0, 0, 0, 0);
-		lightVecW = DirectX::XMFLOAT3(0, 0, 0);
-		specularPower = 0;
-	}
-
-	Light(DirectX::XMFLOAT4 spec, DirectX::XMFLOAT4 amb, DirectX::XMFLOAT4 diff, float specPow, DirectX::XMFLOAT3 lightVW) : specular(spec), ambient(amb), diffuse(diff), specularPower(specPow), lightVecW(lightVW) {}
+	CBMaterial material;
 };
 
 struct MeshSection

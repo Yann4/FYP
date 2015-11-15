@@ -5,7 +5,8 @@ using namespace DirectX;
 GameObject::GameObject()
 {
 	context = nullptr;
-	constBuffer = nullptr;
+	frameConstBuffer = nullptr;
+	objectConstBuffer = nullptr;
 
 	mesh = nullptr;
 
@@ -17,8 +18,8 @@ GameObject::GameObject()
 	scale = XMFLOAT3(0, 0, 0);
 }
 
-GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos)
-	:context(devContext), constBuffer(constantBuffer), mesh(mesh), position(pos)
+GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* frameConstantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos)
+	:context(devContext), frameConstBuffer(frameConstantBuffer), objectConstBuffer(objectBuffer), mesh(mesh), position(pos)
 {
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
 	translations = std::stack<XMFLOAT4X4>();
@@ -32,7 +33,8 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBu
 GameObject::~GameObject()
 {
 	context = nullptr;
-	constBuffer = nullptr;
+	objectConstBuffer = nullptr;
+	frameConstBuffer = nullptr;
 	mesh = nullptr;
 }
 
@@ -106,7 +108,7 @@ void GameObject::Update(float deltaTime)
 	UpdateMatrix();
 }
 
-void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, Light& light)
+void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, DirectionalLight& light)
 {
 	if (!frustum.checkSphere(position, max(max(scale.x, scale.y), scale.z)))
 	{
@@ -114,9 +116,12 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, F
 	}
 
 	context->VSSetShader(vShader, nullptr, 0);
-	context->VSSetConstantBuffers(0, 1, &constBuffer);
+	context->VSSetConstantBuffers(0, 1, &frameConstBuffer);
+	context->VSSetConstantBuffers(1, 1, &objectConstBuffer);
+
 	context->PSSetShader(pShader, nullptr, 0);
-	context->PSSetConstantBuffers(0, 1, &constBuffer);
+	context->PSSetConstantBuffers(0, 1, &frameConstBuffer);
+	context->PSSetConstantBuffers(1, 1, &objectConstBuffer);
 
 	context->PSSetShaderResources(0, 1, &mesh->textureRV);
 	context->PSSetShaderResources(1, 1, &mesh->specularRV);
@@ -132,25 +137,13 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, F
 	XMMATRIX viewMat = cam.getView();
 	XMMATRIX projectionMat = cam.getProjection();
 
-	ConstantBuffer cb;
-	cb.mWorld = XMMatrixTranspose(worldMat);
-	cb.mView = XMMatrixTranspose(viewMat);
-	cb.mProjection = XMMatrixTranspose(projectionMat);
+	objectCB cb;
+	cb.projection = XMMatrixTranspose(projectionMat);
+	cb.view = XMMatrixTranspose(viewMat);
+	cb.world = XMMatrixTranspose(worldMat);
+	cb.material = CBMaterial(mesh->material.specular, mesh->material.ambient, mesh->material.diffuse);
 
-	cb.diffuseLight = light.diffuse;
-	cb.diffuseMtl = mesh->material.diffuse;
-
-	cb.ambientLight = light.ambient;
-	cb.ambientMtl = mesh->material.ambient;
-
-	cb.specularLight = light.specular;
-	cb.specularMtl = mesh->material.specular;
-	cb.specularPower = light.specularPower;
-	cb.cameraPosW = XMFLOAT3(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
-
-	cb.lightVecW = light.lightVecW;
-
-	context->UpdateSubresource(constBuffer, 0, nullptr, &cb, 0, 0);
+	context->UpdateSubresource(objectConstBuffer, 0, nullptr, &cb, 0, 0);
 
 	context->DrawIndexed(mesh->numIndices, 0, 0);
 }

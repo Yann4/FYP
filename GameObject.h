@@ -9,12 +9,14 @@
 #include "data structs.h"
 #include "Camera.h"
 #include "Frustum.h"
+#include "Light.h"
 
 class GameObject
 {
 protected:
 	ID3D11DeviceContext* context;
-	ID3D11Buffer* constBuffer;
+	ID3D11Buffer* frameConstBuffer;
+	ID3D11Buffer* objectConstBuffer;
 
 	MeshData* mesh;
 
@@ -27,11 +29,11 @@ protected:
 
 public:
 	GameObject();
-	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos);
+	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos);
 	~GameObject();
 
 	void Update(float deltaTime);
-	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, Light& light);
+	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, DirectionalLight& light);
 
 	void setScale(float x, float y, float z);
 	void setRotation(float x, float y, float z);

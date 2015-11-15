@@ -400,6 +400,7 @@
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
     <ClInclude Include="Skybox.h" />
