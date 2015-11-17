@@ -108,7 +108,7 @@ void GameObject::Update(float deltaTime)
 	UpdateMatrix();
 }
 
-void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, DirectionalLight& light)
+void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam)
 {
 	if (!frustum.checkSphere(position, max(max(scale.x, scale.y), scale.z)))
 	{

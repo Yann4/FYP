@@ -54,6 +54,7 @@ Application::Application()
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = std::vector<GameObject>();
+	flashlightOn = false;
 }
 
 Application::~Application()
@@ -80,12 +81,11 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
         return E_FAIL;
     }
 
-	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.01f, 100.0f);
+	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
 
 	input = Input("input_map.txt");
 
 	viewFrustum = Frustum();
-
 	return S_OK;
 }
 
@@ -453,9 +453,6 @@ void Application::readInitFile(std::string fileName)
 void Application::initObjects()
 {
 	initialiseCube();
-
-	light = DirectionalLight(XMFLOAT4(0.2, 0.2, 0.2, 10.0), XMFLOAT4(0.9f, 0.9f, 0.9f, 0.9f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT3(0.25f, 0.5f, -1.0f));
-
 	readInitFile("worldData.txt");
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
@@ -547,6 +544,8 @@ void Application::handleMessages()
 				_pImmediateContext->RSSetState(_solid);
 				wfRender = false;
 			}
+		case TOGGLE_FLASHLIGHT:
+			flashlightOn = !flashlightOn;
 		case NO_SUCH_EVENT:
 		default:
 			break;
@@ -587,6 +586,18 @@ void Application::Update()
 	}
 }
 
+std::wstring s2ws(const std::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	return r;
+}
+
 void Application::Draw()
 {
     //
@@ -597,17 +608,59 @@ void Application::Draw()
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	frameCB cb;
-	cb.dirLight = light;
-	cb.pointLight = PointLight(XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT3(0, 0, 0), 0, XMFLOAT3(0, 0, 0));
-	cb.spotLight = SpotLight(XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT4(0, 0, 0, 0), XMFLOAT3(0, 0, 0), 0, XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), 0);
-	cb.eyePos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+	cb.dirLight = DirectionalLight();
+	cb.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	cb.dirLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	cb.dirLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	cb.dirLight.lightVecW = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+
+	XMFLOAT3 cameraPos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+	std::string debug = "(" + std::to_string(cameraPos.x) + "," + std::to_string(cameraPos.y) + "," + std::to_string(cameraPos.z) + ")"
+		+ ": (" + std::to_string(camera.getForwards().x) + "," + std::to_string(camera.getForwards().y) + "," + std::to_string(camera.getForwards().z) + ")\n";
+	
+	OutputDebugString(s2ws(debug).c_str());
+
+	cb.pointLight = PointLight();
+	cb.pointLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	cb.pointLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	cb.pointLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	cb.pointLight.position = cameraPos;
+	cb.pointLight.range = 25;
+	cb.pointLight.attenuation = XMFLOAT3(1, 1, 0);	
+
+	cb.spotLight = SpotLight();
+	cb.spotLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	cb.spotLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 10.0);
+	cb.spotLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	cb.spotLight.attenuation = XMFLOAT3(1, 1, 1);
+	if (flashlightOn)
+	{
+		cb.spotLight.range = 15;
+	}
+	else
+	{
+		cb.spotLight.range = 0;
+	}
+
+	XMVECTOR cameraP = XMLoadFloat3(&cameraPos);
+	XMVECTOR s = XMVectorReplicate(cb.spotLight.range);
+	XMVECTOR l = XMLoadFloat3(&camera.getForwards());
+	XMVECTOR lookat = XMVectorMultiplyAdd(s, l, cameraP);
+	
+	XMStoreFloat3(&cb.spotLight.direction, XMVector3Normalize(lookat - XMVectorSet(cameraPos.x, cameraPos.y, cameraPos.z, 1.0f)));
+	cb.spotLight.direction = camera.getForwards();
+	cb.spotLight.position = cameraPos;
+	
+	cb.spotLight.spot = 96;
+	
+	cb.eyePos = cameraPos;
 
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &cb, 0, 0);
 
 	viewFrustum.constructFrustum(camera.viewDistance(), camera.getProjection(), camera.getView());
 	for (GameObject object : objects)
 	{
-		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera, light);
+		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
 	skybox.Draw(skyboxVS, skyboxPS, &camera);

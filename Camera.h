@@ -36,6 +36,8 @@ public:
 
 	inline DirectX::XMFLOAT4 getPosition() { return position; };
 	inline float viewDistance() { return farZ - nearZ; };
+	
+	inline DirectX::XMFLOAT3 getForwards() { return DirectX::XMFLOAT3(-lookAt.x, -lookAt.y, lookAt.z); };
 
 private:
 	void UpdateViewMatrix();

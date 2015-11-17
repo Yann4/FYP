@@ -33,7 +33,7 @@ public:
 	~GameObject();
 
 	void Update(float deltaTime);
-	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam, DirectionalLight& light);
+	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam);
 
 	void setScale(float x, float y, float z);
 	void setRotation(float x, float y, float z);

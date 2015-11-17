@@ -88,6 +88,10 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return TOGGLE_WIREFRAME;
 	}
+	else if (eventName == "TOGGLE_FLASHLIGHT")
+	{
+		return TOGGLE_FLASHLIGHT;
+	}
 	else
 	{
 		return NO_SUCH_EVENT;

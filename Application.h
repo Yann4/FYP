@@ -62,13 +62,11 @@ private:
 
 	MeshData* squareMesh;
 
-	DirectionalLight light;
-	GameObject go, go1, go2, go3;
 	std::vector<GameObject> objects;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;
-
+	bool flashlightOn;
 	float cameraMoveSpeed;
 	float cameraPanSpeed;
 	DirectX::XMFLOAT2 lastMousePos;

@@ -74,6 +74,7 @@ struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
     float3 PosW : POSITION;
+	float3 PosInW : POSITION_WORLD;
 	float3 Norm : NORMAL;
 	float2 TexC : TEXCOORD;
 };
@@ -109,6 +110,86 @@ void calculateDirectionalLight(Material mat, DirectionalLight light, float3 norm
 	}
 }
 
+void calculatePointLight(Material mat, PointLight light, float3 position, float3 normal, float3 toEye,
+	out float4 ambient, out float4 diffuse, out float4 specular)
+{
+	ambient = float4(0, 0, 0, 0);
+	specular = float4(0, 0, 0, 0);
+	diffuse = float4(0, 0, 0, 0);
+
+	float3 lightV = light.position - position;
+
+	float dist = length(lightV);
+
+	if (dist > light.range)
+	{
+		return;
+	}
+
+	lightV = normalize(lightV);
+
+	ambient = mat.ambient * light.ambient;
+
+	float diffuseFact = dot(lightV, normal);
+
+	[flatten]
+	if (diffuseFact > 0.0f)
+	{
+		float3 vect = reflect(-lightV, normal);
+		float specularFact = pow(max(dot(vect, toEye), 0.0f), mat.specular.w);
+
+		diffuse = diffuseFact * mat.diffuse * light.diffuse;
+		specular = specularFact * mat.specular * light.specular;
+	}
+
+	float attenuation = 1.0f / dot(light.attenuation, float3(1.0f, dist, dist*dist));
+
+	diffuse *= attenuation;
+	specular *= attenuation;
+}
+
+void calculateSpotLight(Material mat, SpotLight light, float3 position, float3 normal, float3 toEye,
+	out float4 ambient, out float4 diffuse, out float4 specular)
+{
+	ambient = float4(0, 0, 0, 0);
+	specular = float4(0, 0, 0, 0);
+	diffuse = float4(0, 0, 0, 0);
+
+	float3 lightV = light.position - position;
+
+	float distance = length(lightV);
+
+	if (distance > light.range)
+	{
+		return;
+	}
+
+	lightV /= distance;
+
+	ambient = mat.ambient * light.ambient;
+
+	float diffuseFact = dot(lightV, normal);
+
+	[flatten]
+	if (diffuseFact > 0.0f)
+	{
+		float3 vect = reflect(-lightV, normal);
+
+		float specularFact = pow(max(dot(vect, toEye), 0.0f), mat.specular.w);
+
+		diffuse = diffuseFact * mat.diffuse * light.diffuse;
+		specular = specularFact * mat.specular * light.specular;
+	}
+
+	float spot = pow(max(dot(-lightV, float3(-light.direction.x, -light.direction.y, light.direction.z)), 0.0f), light.spot);
+
+	float attenuation = spot / dot(light.attenuation, float3(1.0f, distance, distance*distance));
+
+	ambient *= spot;
+	diffuse *= attenuation;
+	specular *= attenuation;
+}
+
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
@@ -116,6 +197,7 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXC
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     output.Pos = mul( Pos, World );
+	output.PosInW = output.Pos;
 
 	//Get normalised vector to camera position in world coordinates
 	output.PosW = normalize(eyePos - output.Pos.xyz);
@@ -139,45 +221,42 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXC
 //--------------------------------------------------------------------------------------
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
-	input.Norm = texNormMap.Sample(samLinear, input.TexC);
-
+	//input.Norm = normalize(mul(input.Norm, (texNormMap.Sample(samLinear, input.TexC).rgb*2.0f - 1.0f)));
+	input.Norm = normalize(input.Norm);
 	float4 texCol = texDiffuse.Sample(samLinear, input.TexC);
 	float4 specCol = texSpec.Sample(samLinear, input.TexC).r;
 
-	float4 ambient = (0, 0, 0, 0);
-	float4 specular = (0, 0, 0, 0);
-	float4 diffuse = (0, 0, 0, 0);
 
+	Material newMat;
+	newMat.ambient = material.ambient;
+	newMat.diffuse = texCol;
+	newMat.specular = specCol;
+
+	float4 ambient = (0.0f, 0.0f, 0.0f, 0.0f);
+	float4 specular = (0.0f, 0.0f, 0.0f, 0.0f);
+	float4 diffuse = (0.0f, 0.0f, 0.0f, 0.0f);
 
 	float4 amb, spec, diff;
-	calculateDirectionalLight(material, dirLight, input.Norm, normalize(eyePos - input.PosW), amb, diff, spec);
+	calculateDirectionalLight(newMat, dirLight, input.Norm, input.PosW, amb, diff, spec);
 
 	ambient += amb;
 	specular += spec;
 	diffuse += diff;
 
-	/*
-	//Calculate reflection vector
-	float3 reflectVect = reflect(-LightVecW, input.Norm);
+	calculatePointLight(newMat, pointLight, input.PosInW, input.Norm, normalize(input.PosW), amb, diff, spec);
 
-	//How much specular light makes it to the camera
-	float specularAmount = pow(max(dot(reflectVect, input.PosW), 0.0f), texSpec.Sample(samLinear, input.TexC).r);
+	ambient += amb;
+	specular += spec;
+	diffuse += diff;
 
-	//Calculate Specular light
-	float3 specular = specularAmount * (SpecularMtl * SpecularLight).rgb;
+	calculateSpotLight(newMat, spotLight, input.PosInW, input.Norm, normalize(input.PosW), amb, diff, spec);
 
-	//Calculate Diffuse light
-	float diffuseAmount = max(dot(LightVecW, input.Norm), 0.0f);
-	float3 diffuse = diffuseAmount * (DiffuseMtl * DiffuseLight).rgb;
-
-	//Calculate Ambient light
-	float3 ambient = AmbientMtl * AmbientLight;
-
-	*/
+	ambient += amb;
+	specular += spec;
+	diffuse += diff;
 
 	float4 colour;
 	colour = ambient + specular + diffuse;
-	//colour.rgb = texCol * (diffuse + ambient) + specular;
 	colour.a = material.diffuse.a;
 	return colour;
 }
