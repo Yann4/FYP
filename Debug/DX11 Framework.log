@@ -1,8 +1,9 @@
-﻿Build started 18/11/2015 10:18:07.
+﻿Build started 18/11/2015 10:40:29.
      1>Project "C:\Users\r007712b\Source\Repos\3D-Computer-Graphics\DX11 Framework.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W4 /WX- /Od /Oi /Oy- /D WIN32 /D _DEBUG /D DEBUG /D PROFILE /D _WINDOWS /D D3DXFX_LARGEADDRESS_HANDLE /D _UNICODE /D UNICODE /Gm- /EHsc /RTC1 /MDd /GS /arch:SSE2 /fp:fast /Zc:wchar_t /Zc:forScope /openmp- /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt  Input.cpp
-         Input.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W4 /WX- /Od /Oi /Oy- /D WIN32 /D _DEBUG /D DEBUG /D PROFILE /D _WINDOWS /D D3DXFX_LARGEADDRESS_HANDLE /D _UNICODE /D UNICODE /Gm- /EHsc /RTC1 /MDd /GS /arch:SSE2 /fp:fast /Zc:wchar_t /Zc:forScope /openmp- /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt  Application.cpp
+         Application.cpp
+     1>c:\users\r007712b\source\repos\3d-computer-graphics\application.cpp(631): warning C4238: nonstandard extension used : class rvalue used as lvalue
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\r007712b\Source\Repos\3D-Computer-Graphics\Debug\DX11 Framework.exe" /INCREMENTAL /NOLOGO d3d11.lib d3dcompiler.lib dxguid.lib winmm.lib comctl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"C:\Users\r007712b\Source\Repos\3D-Computer-Graphics\Debug\DX11 Framework.pdb" /SUBSYSTEM:WINDOWS /LARGEADDRESSAWARE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\r007712b\Source\Repos\3D-Computer-Graphics\Debug\DX11 Framework.lib" /MACHINE:X86 /SAFESEH  "Debug\DX11 Framework.res"
          Debug\Application.obj
@@ -14,9 +15,10 @@
          Debug\Input.obj
          Debug\Parser.obj
          Debug\Skybox.obj
+     1>Application.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
          DX11 Framework.vcxproj -> C:\Users\r007712b\Source\Repos\3D-Computer-Graphics\Debug\DX11 Framework.exe
      1>Done Building Project "C:\Users\r007712b\Source\Repos\3D-Computer-Graphics\DX11 Framework.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:02.08
+Time Elapsed 00:00:04.76

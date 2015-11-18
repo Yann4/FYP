@@ -15,7 +15,8 @@ public:
 	Frustum();
 	Frustum(const Frustum&);
 
-	void constructFrustum(float screenDepth, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& view);
+	void constructFrustum(float screenDepth, float fov, float ar, float znear, float zfar, const DirectX::XMMATRIX& viewMat);
+	DirectX::XMMATRIX calculateProjection(float fovY, float aspectRatio, float znear, float zfar);
 
 	bool checkSphere(DirectX::XMFLOAT3 centre, float radius);
 };

@@ -13,14 +13,23 @@ Frustum::Frustum(const Frustum& other)
 
 }
 
-void Frustum::constructFrustum(float screenDepth, const XMMATRIX& projectionMat, const XMMATRIX& viewMat)
+XMMATRIX Frustum::calculateProjection(float fovY, float aspectRatio, float znear, float zfar)
+{
+	float nearWindHeight = 2.0f * znear * tanf(0.5f * fovY);
+	float farWindHeight = 2.0f * zfar * tanf(0.5f * fovY);
+
+	XMMATRIX proj = XMMatrixPerspectiveFovLH(fovY, aspectRatio, znear, zfar);
+	return proj;
+}
+
+void Frustum::constructFrustum(float screenDepth, float fov, float ar, float znear, float zfar, const XMMATRIX& viewMat)
 {
 	float zMin, r;
 	XMFLOAT4X4 proj, matAsFloat;
 
 	XMMATRIX matrix, projMat;
 
-	XMStoreFloat4x4(&proj, projectionMat);
+	XMStoreFloat4x4(&proj, calculateProjection(fov, ar, znear, zfar));
 	
 
 	zMin = -proj._43 / proj._33;

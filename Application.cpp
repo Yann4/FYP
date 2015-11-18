@@ -586,18 +586,6 @@ void Application::Update()
 	}
 }
 
-std::wstring s2ws(const std::string& s)
-{
-	int len;
-	int slength = (int)s.length() + 1;
-	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-	wchar_t* buf = new wchar_t[len];
-	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
-	std::wstring r(buf);
-	delete[] buf;
-	return r;
-}
-
 void Application::Draw()
 {
     //
@@ -615,18 +603,14 @@ void Application::Draw()
 	cb.dirLight.lightVecW = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
 
 	XMFLOAT3 cameraPos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-	std::string debug = "(" + std::to_string(cameraPos.x) + "," + std::to_string(cameraPos.y) + "," + std::to_string(cameraPos.z) + ")"
-		+ ": (" + std::to_string(camera.getForwards().x) + "," + std::to_string(camera.getForwards().y) + "," + std::to_string(camera.getForwards().z) + ")\n";
-	
-	OutputDebugString(s2ws(debug).c_str());
 
 	cb.pointLight = PointLight();
-	cb.pointLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	cb.pointLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	cb.pointLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	cb.pointLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	cb.pointLight.specular = XMFLOAT4(0.0, 0.0, 0.0, 1.0);
+	cb.pointLight.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 1.0);
 	cb.pointLight.position = cameraPos;
-	cb.pointLight.range = 25;
-	cb.pointLight.attenuation = XMFLOAT3(1, 1, 0);	
+	cb.pointLight.range = 5;
+	cb.pointLight.attenuation = XMFLOAT3(1, 0, 0);	
 
 	cb.spotLight = SpotLight();
 	cb.spotLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -657,7 +641,8 @@ void Application::Draw()
 
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &cb, 0, 0);
 
-	viewFrustum.constructFrustum(camera.viewDistance(), camera.getProjection(), camera.getView());
+	viewFrustum.constructFrustum(camera.viewDistance()*2, camera.fov()*2, camera.aspectRatio()*2, 0, camera.zFar()*2, camera.getView());
+
 	for (GameObject object : objects)
 	{
 		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
