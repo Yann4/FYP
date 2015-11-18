@@ -29,8 +29,9 @@ struct KeyEvent
 {
 	char key;
 	Event eventToFire;
+	bool isToggle;
 
-	KeyEvent(char key, Event toFire) : key(key), eventToFire(toFire){};
+	KeyEvent(char key, Event toFire, bool toggle = false) : key(key), eventToFire(toFire), isToggle(toggle){};
 };
 
 class Input

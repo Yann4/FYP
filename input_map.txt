@@ -1,14 +1,15 @@
 ﻿#Format should be:
-#{char} {Event name}
+#{char} {Event name} {Toggle}
 #where char is a pressable character, and Event name matches a value in the enum "Event", defined in the file "Input.h"
+#and toggle is either TRUE or FALSE, depending on if the key should be a toggled one
 
-W WALK_FORWARDS
-S WALK_BACKWARDS
-A STRAFE_LEFT
-D STRAFE_RIGHT
-Q YAW_LEFT
-E YAW_RIGHT
-Z PITCH_UP
-X PITCH_DOWN
-M TOGGLE_WIREFRAME
-F TOGGLE_FLASHLIGHT
+W WALK_FORWARDS FALSE
+S WALK_BACKWARDS FALSE
+A STRAFE_LEFT FALSE
+D STRAFE_RIGHT FALSE
+Q YAW_LEFT FALSE
+E YAW_RIGHT FALSE
+Z PITCH_UP FALSE
+X PITCH_DOWN FALSE
+M TOGGLE_WIREFRAME TRUE
+F TOGGLE_FLASHLIGHT TRUE

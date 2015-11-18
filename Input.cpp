@@ -14,15 +14,15 @@ Input::Input(string keyMapFileName)
 }
 
 //Reads in keymap from file. The keymap has to be of a specific format
-//i.e {CHAR} {EVENT}
-//e.g W WALK_FORWARDS
+//i.e {CHAR} {EVENT} {TOGGLE}
+//e.g W WALK_FORWARDS FALSE
 //'#' is the comment line character.
 void Input::initialiseKeys(string dataFile)
 {
 	std::ifstream file(dataFile);
 	string line;
 
-	string token1, token2;
+	string token1, token2, token3;
 
 	std::istringstream iss;
 
@@ -30,7 +30,7 @@ void Input::initialiseKeys(string dataFile)
 	{
 		iss = std::istringstream(line);
 
-		if (!(iss >> token1 >> token2))
+		if (!(iss >> token1 >> token2 >> token3))
 		{
 			continue;
 		}
@@ -41,7 +41,14 @@ void Input::initialiseKeys(string dataFile)
 		Event tokenEvent = eventValueFromString(token2);
 		if (tokenEvent != NO_SUCH_EVENT)
 		{
-			usedKeys.push_back(KeyEvent(token1.at(0), tokenEvent));
+			bool toggle = false;
+			if (token3 == "TRUE")
+			{
+				toggle = true;
+			}
+
+			usedKeys.push_back(KeyEvent(token1.at(0), tokenEvent, toggle));
+			
 		}
 		
 	}
@@ -105,9 +112,19 @@ void Input::handleInput(void(*handleEvent)(Event e))
 {
 	for (KeyEvent e : usedKeys)
 	{
-		if (GetAsyncKeyState(e.key) & 0x8000)
+		if (e.isToggle)
 		{
-			handleEvent(e.eventToFire);
+			if (GetAsyncKeyState(e.key) & 0x0001)
+			{
+				handleEvent(e.eventToFire);
+			}
+		}
+		else
+		{
+			if (GetAsyncKeyState(e.key) & 0x8000)
+			{
+				handleEvent(e.eventToFire);
+			}
 		}
 	}
 }
