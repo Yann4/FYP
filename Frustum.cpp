@@ -15,9 +15,6 @@ Frustum::Frustum(const Frustum& other)
 
 XMMATRIX Frustum::calculateProjection(float fovY, float aspectRatio, float znear, float zfar)
 {
-	float nearWindHeight = 2.0f * znear * tanf(0.5f * fovY);
-	float farWindHeight = 2.0f * zfar * tanf(0.5f * fovY);
-
 	XMMATRIX proj = XMMatrixPerspectiveFovLH(fovY, aspectRatio, znear, zfar);
 	return proj;
 }

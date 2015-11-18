@@ -396,6 +396,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="data structs.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="Frustum.h" />

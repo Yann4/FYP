@@ -57,6 +57,8 @@ private:
 	ID3D11Buffer*           frameConstantBuffer;
 	ID3D11Buffer*           objectConstantBuffer;
 
+	frameCB perFrameCB;
+
 	Camera camera;
 	Frustum viewFrustum;
 

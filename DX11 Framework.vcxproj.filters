@@ -54,6 +54,7 @@
     <ClInclude Include="Light.h">
       <Filter>Lights</Filter>
     </ClInclude>
+    <ClInclude Include="Collision.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />

@@ -1,12 +1,3 @@
-//--------------------------------------------------------------------------------------
-// File: DX11 Framework.fx
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
 struct DirectionalLight
 {
 	float4 diffuse;
@@ -73,8 +64,8 @@ cbuffer objectCB : register(b1)
 struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
-    float3 PosW : POSITION;
-	float3 PosInW : POSITION_WORLD;
+    float3 ToEye : TO_EYE_VECT;
+	float3 PosW : POSITION_WORLD;
 	float3 Norm : NORMAL;
 	float2 TexC : TEXCOORD;
 };
@@ -126,7 +117,7 @@ void calculatePointLight(Material mat, PointLight light, float3 position, float3
 		return;
 	}
 
-	lightV = normalize(lightV);
+	lightV /= dist;
 
 	ambient = mat.ambient * light.ambient;
 
@@ -197,10 +188,10 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXC
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     output.Pos = mul( Pos, World );
-	output.PosInW = output.Pos;
+	output.PosW = output.Pos;
 
 	//Get normalised vector to camera position in world coordinates
-	output.PosW = normalize(eyePos - output.Pos.xyz);
+	output.ToEye = normalize(eyePos - output.Pos.xyz);
 
     output.Pos = mul( output.Pos, View );
     output.Pos = mul( output.Pos, Projection );
@@ -226,7 +217,6 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float4 texCol = texDiffuse.Sample(samLinear, input.TexC);
 	float4 specCol = texSpec.Sample(samLinear, input.TexC).r;
 
-
 	Material newMat;
 	newMat.ambient = material.ambient;
 	newMat.diffuse = texCol;
@@ -237,19 +227,19 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float4 diffuse = (0.0f, 0.0f, 0.0f, 0.0f);
 
 	float4 amb, spec, diff;
-	calculateDirectionalLight(newMat, dirLight, input.Norm, input.PosW, amb, diff, spec);
+	calculateDirectionalLight(newMat, dirLight, input.Norm, input.ToEye, amb, diff, spec);
 
 	ambient += amb;
 	specular += spec;
 	diffuse += diff;
 
-	calculatePointLight(newMat, pointLight, input.PosInW, input.Norm, normalize(input.PosW), amb, diff, spec);
+	calculatePointLight(newMat, pointLight, input.PosW, input.Norm, normalize(input.ToEye), amb, diff, spec);
 
 	ambient += amb;
 	specular += spec;
 	diffuse += diff;
 
-	calculateSpotLight(newMat, spotLight, input.PosInW, input.Norm, normalize(input.PosW), amb, diff, spec);
+	calculateSpotLight(newMat, spotLight, input.PosW, input.Norm, normalize(input.ToEye), amb, diff, spec);
 
 	ambient += amb;
 	specular += spec;

@@ -456,6 +456,27 @@ void Application::initObjects()
 	readInitFile("worldData.txt");
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
+
+	//Lights
+	perFrameCB.dirLight = DirectionalLight();
+	perFrameCB.dirLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);// XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	perFrameCB.dirLight.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);//XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	perFrameCB.dirLight.diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);// XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	perFrameCB.dirLight.lightVecW = XMFLOAT3(1, -0.0f, 0.0f);
+
+	perFrameCB.pointLight = PointLight();
+	perFrameCB.pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	perFrameCB.pointLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 10.0);
+	perFrameCB.pointLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	perFrameCB.pointLight.range = 5;
+	perFrameCB.pointLight.attenuation = XMFLOAT3(0.0f, 0.2f, 0.0f);
+
+	perFrameCB.spotLight = SpotLight();
+	perFrameCB.spotLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	perFrameCB.spotLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 10.0);
+	perFrameCB.spotLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	perFrameCB.spotLight.attenuation = XMFLOAT3(0, 1, 0);
+	perFrameCB.spotLight.spot = 96;
 }
 
 void Application::Cleanup()
@@ -578,12 +599,15 @@ void Application::Update()
 
 	input.handleInput(&Application::pushEvent);
 	handleMessages();
+
 	camera.Update();
 	skybox.Update(&camera);
 	for (GameObject object : objects)
 	{
 		object.Update(t);
 	}
+
+	viewFrustum.constructFrustum(camera.viewDistance() * 2, camera.fov() * 2, camera.aspectRatio() * 2, 0, camera.zFar() * 2, camera.getView());
 }
 
 void Application::Draw()
@@ -595,53 +619,21 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	frameCB cb;
-	cb.dirLight = DirectionalLight();
-	cb.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	cb.dirLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	cb.dirLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	cb.dirLight.lightVecW = XMFLOAT3(0.57735f, -0.57735f, 0.57735f);
+	perFrameCB.eyePos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
 
-	XMFLOAT3 cameraPos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-
-	cb.pointLight = PointLight();
-	cb.pointLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	cb.pointLight.specular = XMFLOAT4(0.0, 0.0, 0.0, 1.0);
-	cb.pointLight.diffuse = XMFLOAT4(1.0, 1.0, 1.0, 1.0);
-	cb.pointLight.position = cameraPos;
-	cb.pointLight.range = 5;
-	cb.pointLight.attenuation = XMFLOAT3(1, 0, 0);	
-
-	cb.spotLight = SpotLight();
-	cb.spotLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	cb.spotLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 10.0);
-	cb.spotLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	cb.spotLight.attenuation = XMFLOAT3(1, 1, 1);
+	perFrameCB.pointLight.position = perFrameCB.eyePos;
 	if (flashlightOn)
 	{
-		cb.spotLight.range = 15;
+		perFrameCB.spotLight.range = 15;
+		perFrameCB.spotLight.direction = camera.getForwards();
+		perFrameCB.spotLight.position = perFrameCB.eyePos;
 	}
 	else
 	{
-		cb.spotLight.range = 0;
+		perFrameCB.spotLight.range = 0;
 	}
 
-	XMVECTOR cameraP = XMLoadFloat3(&cameraPos);
-	XMVECTOR s = XMVectorReplicate(cb.spotLight.range);
-	XMVECTOR l = XMLoadFloat3(&camera.getForwards());
-	XMVECTOR lookat = XMVectorMultiplyAdd(s, l, cameraP);
-	
-	XMStoreFloat3(&cb.spotLight.direction, XMVector3Normalize(lookat - XMVectorSet(cameraPos.x, cameraPos.y, cameraPos.z, 1.0f)));
-	cb.spotLight.direction = camera.getForwards();
-	cb.spotLight.position = cameraPos;
-	
-	cb.spotLight.spot = 96;
-	
-	cb.eyePos = cameraPos;
-
-	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &cb, 0, 0);
-
-	viewFrustum.constructFrustum(camera.viewDistance()*2, camera.fov()*2, camera.aspectRatio()*2, 0, camera.zFar()*2, camera.getView());
+	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &perFrameCB, 0, 0);
 
 	for (GameObject object : objects)
 	{
