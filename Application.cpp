@@ -575,6 +575,19 @@ void Application::handleMessages()
 	}
 }
 
+std::wstring s2ws(const std::string& s)
+ {
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	return r;
+	}
+
+
 void Application::Update()
 {
     // Update our time
@@ -602,10 +615,33 @@ void Application::Update()
 
 	camera.Update();
 	skybox.Update(&camera);
-	for (GameObject object : objects)
+	objects.at(2).Update(t);
+
+
+	Collision::AABB ob0(objects.at(2).Pos(), objects.at(2).Size());
+	for (int i = 0; i < 1; i++)
+	{
+		Collision::MTV mtv;
+		Collision::AABB other(objects.at(i).Pos(), objects.at(i).Size());
+		if (Collision::boundingBoxCollision(ob0, other, mtv))
+		{
+			std::string debug = "MTV: (" + std::to_string(mtv.axis.x * mtv.magnitude) + ", " + std::to_string(mtv.axis.y * mtv.magnitude) + ", " + std::to_string(mtv.axis.z * mtv.magnitude) + ")\n";
+			OutputDebugString(s2ws(debug).c_str());
+			debug = "Pos: (" + std::to_string(objects.at(0).Pos().x) + ", " + std::to_string(objects.at(0).Pos().y) + ", " + std::to_string(objects.at(0).Pos().z) + ")\n";
+			OutputDebugString(s2ws(debug).c_str());
+
+			objects.at(2).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+		}
+		else
+		{
+			OutputDebugString(s2ws("No Collision\n").c_str());
+		}
+	}
+
+	/*for (GameObject object : objects)
 	{
 		object.Update(t);
-	}
+	}*/
 
 	viewFrustum.constructFrustum(camera.viewDistance() * 2, camera.fov() * 2, camera.aspectRatio() * 2, 0, camera.zFar() * 2, camera.getView());
 }

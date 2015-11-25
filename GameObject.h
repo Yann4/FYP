@@ -39,4 +39,9 @@ public:
 	void setRotation(float x, float y, float z);
 	void setTranslation(float x, float y, float z);
 	void UpdateMatrix();
+
+	void moveFromCollision(float x, float y, float z);
+
+	inline DirectX::XMFLOAT3 Pos(){ return position; };
+	inline DirectX::XMFLOAT3 Size(){ return scale; };
 };

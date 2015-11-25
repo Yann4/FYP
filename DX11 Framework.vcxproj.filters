@@ -78,6 +78,7 @@
     <ClCompile Include="Frustum.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Collision.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

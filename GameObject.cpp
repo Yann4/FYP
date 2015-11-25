@@ -19,7 +19,7 @@ GameObject::GameObject()
 }
 
 GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* frameConstantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos)
-	:context(devContext), frameConstBuffer(frameConstantBuffer), objectConstBuffer(objectBuffer), mesh(mesh), position(pos)
+	:context(devContext), frameConstBuffer(frameConstantBuffer), objectConstBuffer(objectBuffer), mesh(mesh), position(XMFLOAT3(0,0,0))
 {
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
 	translations = std::stack<XMFLOAT4X4>();
@@ -77,6 +77,10 @@ void GameObject::setTranslation(float x, float y, float z)
 	XMFLOAT4X4 temp;
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(x, y, z));
 	translations.push(temp);
+
+	position.x += x;
+	position.y += y;
+	position.z += z;
 }
 
 void GameObject::UpdateMatrix()
@@ -102,9 +106,16 @@ void GameObject::UpdateMatrix()
 }
 #pragma endregion
 
+void GameObject::moveFromCollision(float x, float y, float z)
+{
+	setTranslation(x, y, z);
+	UpdateMatrix();
+}
+
 //UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix
 void GameObject::Update(float deltaTime)
 {
+	setTranslation(-0.001f, 0, 0);
 	UpdateMatrix();
 }
 

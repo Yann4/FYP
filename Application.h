@@ -16,6 +16,7 @@
 #include "Skybox.h"
 #include "Frustum.h"
 #include "Light.h"
+#include "Collision.h"
 
 #include <queue>
 #include <fstream>
