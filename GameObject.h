@@ -44,4 +44,5 @@ public:
 
 	inline DirectX::XMFLOAT3 Pos(){ return position; };
 	inline DirectX::XMFLOAT3 Size(){ return scale; };
+	inline DirectX::XMFLOAT3 Rotation() { return rotation; };
 };

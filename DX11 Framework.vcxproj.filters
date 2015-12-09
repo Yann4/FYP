@@ -55,6 +55,9 @@
       <Filter>Lights</Filter>
     </ClInclude>
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Spline.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -79,6 +82,9 @@
       <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Spline.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

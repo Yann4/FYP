@@ -618,11 +618,11 @@ void Application::Update()
 	objects.at(2).Update(t);
 
 
-	Collision::AABB ob0(objects.at(2).Pos(), objects.at(2).Size());
+	Collision::AABB ob0(objects.at(2).Pos(), objects.at(2).Size(), objects.at(2).Rotation());
 	for (int i = 0; i < 1; i++)
 	{
 		Collision::MTV mtv;
-		Collision::AABB other(objects.at(i).Pos(), objects.at(i).Size());
+		Collision::AABB other(objects.at(i).Pos(), objects.at(i).Size(), objects.at(i).Rotation());
 		if (Collision::boundingBoxCollision(ob0, other, mtv))
 		{
 			std::string debug = "MTV: (" + std::to_string(mtv.axis.x * mtv.magnitude) + ", " + std::to_string(mtv.axis.y * mtv.magnitude) + ", " + std::to_string(mtv.axis.z * mtv.magnitude) + ")\n";

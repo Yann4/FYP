@@ -37,7 +37,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'" Label="Configuration">
@@ -390,6 +390,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="Spline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11 Framework.fx" />
@@ -407,6 +408,7 @@
     <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="Spline.h" />
     <ClInclude Include="TimeSlice.h" />
     <ResourceCompile Include="DX11 Framework.rc" />
   </ItemGroup>
