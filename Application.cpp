@@ -159,6 +159,33 @@ HRESULT Application::InitShadersAndInputLayout()
 	if (FAILED(hr))
         return hr;
 
+	ID3DBlob* lineVSBuffer = nullptr;
+	ID3DBlob* linePSBuffer = nullptr;
+
+	//Skybox
+	hr = CompileShaderFromFile(L"LineShader.fx", "lineVertexShader", "vs_4_0", &lineVSBuffer);
+	hr = CompileShaderFromFile(L"LineShader.fx", "linePixelShader", "ps_4_0", &linePSBuffer);
+
+	hr = _pd3dDevice->CreateVertexShader(lineVSBuffer->GetBufferPointer(), lineVSBuffer->GetBufferSize(), NULL, &lineVS);
+	hr = _pd3dDevice->CreatePixelShader(linePSBuffer->GetBufferPointer(), linePSBuffer->GetBufferSize(), NULL, &linePS);
+
+	// Define the input layout
+	D3D11_INPUT_ELEMENT_DESC lineLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	numElements = ARRAYSIZE(lineLayout);
+
+	// Create the input layout
+	hr = _pd3dDevice->CreateInputLayout(lineLayout, numElements, lineVSBuffer->GetBufferPointer(),
+		lineVSBuffer->GetBufferSize(), &basicVertexLayout);
+	lineVSBuffer->Release();
+
+	if (FAILED(hr))
+		return hr;
+
     // Set the input layout
     _pImmediateContext->IASetInputLayout(_pVertexLayout);
 
@@ -477,6 +504,15 @@ void Application::initObjects()
 	perFrameCB.spotLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
 	perFrameCB.spotLight.attenuation = XMFLOAT3(0, 1, 0);
 	perFrameCB.spotLight.spot = 96;
+
+
+	std::vector<XMFLOAT3> cp;
+	cp.push_back(XMFLOAT3(0, 0, 0));
+	cp.push_back(XMFLOAT3(10, 0, 0));
+	cp.push_back(XMFLOAT3(10, 10, 0));
+	cp.push_back(XMFLOAT3(10, 10, 10));
+	cp.push_back(XMFLOAT3(20, 20, 30));
+	spline = Spline(cp, _pImmediateContext, _pd3dDevice);
 }
 
 void Application::Cleanup()
@@ -673,8 +709,14 @@ void Application::Draw()
 
 	for (GameObject object : objects)
 	{
-		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+		//object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
+
+	_pImmediateContext->IASetInputLayout(basicVertexLayout);
+	_pImmediateContext->RSSetState(_wireFrame);
+	spline.Draw(linePS, lineVS, camera);
+	_pImmediateContext->RSSetState(_solid);
+	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
 	skybox.Draw(skyboxVS, skyboxPS, &camera);
     //

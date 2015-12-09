@@ -98,6 +98,9 @@
     <None Include="SkyBox.fx">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="LineShader.fx">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX11 Framework.rc">

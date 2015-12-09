@@ -17,6 +17,7 @@
 #include "Frustum.h"
 #include "Light.h"
 #include "Collision.h"
+#include "Spline.h"
 
 #include <queue>
 #include <fstream>
@@ -45,9 +46,14 @@ private:
 	ID3D11VertexShader*     skyboxVS;
 	ID3D11PixelShader*      skyboxPS;
 
+	ID3D11VertexShader*     lineVS;
+	ID3D11PixelShader*      linePS;
+
 	Skybox skybox;
+	Spline spline;
 
 	ID3D11InputLayout*      _pVertexLayout;
+	ID3D11InputLayout*		basicVertexLayout;
 	
 	ID3D11RasterizerState*	_wireFrame;
 	ID3D11RasterizerState*	_solid;
