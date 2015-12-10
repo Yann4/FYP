@@ -53,7 +53,7 @@ Application::Application()
 	cameraMoveSpeed = 0.1f;
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
-	objects = std::vector<GameObject>();
+	objects = Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
 	flashlightOn = false;
 }
 
@@ -477,7 +477,7 @@ void Application::readInitFile(std::string fileName)
 				temp.setScale(scale.x, scale.y, scale.z);
 				temp.setRotation(rotation.x, rotation.y, rotation.z);
 				temp.UpdateMatrix();
-				objects.push_back(temp);
+				objects.insert(temp, temp.Pos(), temp.Size());
 			}
 		}
 		else if (std::regex_match(line, captures, splineMatch))
@@ -662,32 +662,36 @@ void Application::Update()
 
 	camera.Update();
 	skybox.Update(&camera);
-	objects.at(2).Update(t);
-
-
-	Collision::AABB ob0(objects.at(2).Pos(), objects.at(2).Size(), objects.at(2).Rotation());
-	for (int i = 0; i < 1; i++)
+	std::vector<GameObject*> allObjects = objects.getAllElements();
+	int count = 0;
+	for (GameObject* object : allObjects)
 	{
-		Collision::MTV mtv;
-		Collision::AABB other(objects.at(i).Pos(), objects.at(i).Size(), objects.at(i).Rotation());
-		if (Collision::boundingBoxCollision(ob0, other, mtv))
+		if (count == 0)
 		{
-			std::string debug = "MTV: (" + std::to_string(mtv.axis.x * mtv.magnitude) + ", " + std::to_string(mtv.axis.y * mtv.magnitude) + ", " + std::to_string(mtv.axis.z * mtv.magnitude) + ")\n";
-			OutputDebugString(s2ws(debug).c_str());
-			debug = "Pos: (" + std::to_string(objects.at(0).Pos().x) + ", " + std::to_string(objects.at(0).Pos().y) + ", " + std::to_string(objects.at(0).Pos().z) + ")\n";
-			OutputDebugString(s2ws(debug).c_str());
-
-			objects.at(2).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+			count++;
+			continue;
 		}
-		else
+		object->Update(t);
+		XMFLOAT3 size = object->Size();
+
+		std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
+		for (GameObject* closeObject : neighbourhood)
 		{
-			OutputDebugString(s2ws("No Collision\n").c_str());
-		}
-	}
+			if (closeObject == object)
+			{
+				continue;
+			}
+			Collision::MTV mtv;
 
-	for (GameObject object : objects)
-	{
-		object.Update(t);
+			Collision::AABB objAABB = Collision::AABB(object->Pos(), object->Size());
+
+			Collision::AABB closeAABB = Collision::AABB(closeObject->Pos(), closeObject->Size());
+			
+			if(Collision::boundingBoxCollision(objAABB, closeAABB, mtv))
+			{
+				object->moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+			}
+		}
 	}
 
 	viewFrustum.constructFrustum(camera.viewDistance() * 2, camera.fov() * 2, camera.aspectRatio() * 2, 0, camera.zFar() * 2, camera.getView());
@@ -718,9 +722,10 @@ void Application::Draw()
 
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &perFrameCB, 0, 0);
 
-	for (GameObject object : objects)
+	std::vector<GameObject*> allObjects = objects.getAllElements();
+	for (GameObject* object : allObjects)
 	{
-		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+		object->Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);

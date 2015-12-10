@@ -58,6 +58,7 @@
     <ClInclude Include="Spline.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Octree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />

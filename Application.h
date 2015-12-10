@@ -18,6 +18,7 @@
 #include "Light.h"
 #include "Collision.h"
 #include "Spline.h"
+#include "Octree.h"
 
 #include <queue>
 #include <fstream>
@@ -70,7 +71,8 @@ private:
 
 	MeshData* squareMesh;
 
-	std::vector<GameObject> objects;
+	Octree<GameObject> objects;
+	std::vector<GameObject*> allObjects;
 	std::vector<Spline> splines;
 
 	Input input;
