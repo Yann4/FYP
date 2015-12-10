@@ -7,7 +7,7 @@ cbuffer lineCBuffer : register(b0)
 
 struct VS_IN
 {
-	float3 pos : POSITION;
+	float4 position : POSITION;
 	float4 colour : COLOUR;
 };
 
@@ -17,19 +17,19 @@ struct VS_OUT
 	float4 colour : COLOUR;
 };
 
-VS_OUT lineVertexShader(float3 pos : POSITION, float4 colour : COLOUR)
+VS_OUT lineVertexShader(float4 position : POSITION, float4 colour : COLOUR)
 {
-	VS_OUT output;
-	output.pos = mul(pos, World);
+	VS_OUT output = (VS_OUT)0;
+
+	output.pos = mul(position, World);
 	output.pos = mul(output.pos, View);
 	output.pos = mul(output.pos, Projection);
-	output.pos.w = 0;
 	output.colour = colour;
 
 	return output;
 }
 
-float4 linePixelShader(VS_OUT input) : SV_TARGET0
+float4 linePixelShader(VS_OUT input) : SV_TARGET
 {
 	return input.colour;
 }

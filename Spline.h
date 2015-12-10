@@ -18,7 +18,7 @@ private:
 
 	struct Vertex
 	{
-		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT4 position;
 		DirectX::XMFLOAT4 colour;
 	};
 
@@ -27,9 +27,13 @@ private:
 	std::vector<DirectX::XMFLOAT3> controlPoints;
 	std::vector<DirectX::XMFLOAT3> linePoints;
 
+	//Each spline holds own buffers because they are all unique buffers
+	//Or rather; no point in having two identical splines in the same location
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* constBuffer;
+
+	int NUM_POINTS = 101;
 public:
 	Spline();
 	Spline(std::vector<DirectX::XMFLOAT3> controlPoints, ID3D11DeviceContext* context, ID3D11Device* device);

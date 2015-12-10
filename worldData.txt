@@ -2,6 +2,18 @@
 #Only integer values
 #Allowed names:
 #CRATE
+
+#Format for creating a spline is:
+#SPLINE
+#(x,y,z) on a newline for however many control points
+#END
+
 CRATE (0,0,0) (1,1,1) (0,0,0)
 CRATE (5,5,5) (1,1,1) (0,0,0)
 CRATE (3,0,0) (1,1,1) (0,0,0)
+
+SPLINE
+(0,0,0)
+(10,5,2)
+(20,50,5)
+END

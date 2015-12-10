@@ -50,7 +50,6 @@ private:
 	ID3D11PixelShader*      linePS;
 
 	Skybox skybox;
-	Spline spline;
 
 	ID3D11InputLayout*      _pVertexLayout;
 	ID3D11InputLayout*		basicVertexLayout;
@@ -72,6 +71,7 @@ private:
 	MeshData* squareMesh;
 
 	std::vector<GameObject> objects;
+	std::vector<Spline> splines;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;

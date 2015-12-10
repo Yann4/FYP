@@ -5,12 +5,12 @@ Spline::Spline()
 {
 	context = nullptr;
 	controlPoints = std::vector<XMFLOAT3>();
-	linePoints = std::vector<XMFLOAT3>(100);
+	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 }
 
 Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device): controlPoints(controlPoints), context(context)
 {
-	linePoints = std::vector<XMFLOAT3>(101);
+	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 	generateLine();
 	createBuffers(device);
 }
@@ -38,11 +38,13 @@ void Spline::generateLine()
 
 void Spline::createBuffers(ID3D11Device* device)
 {
-	Vertex vertices[100];
-	for (int i = 0; i < 100; i++)
+	Vertex vertices[101];
+	WORD indices[101];
+
+	for (int i = 0; i < NUM_POINTS; i++)
 	{
 		Vertex v;
-		v.position = linePoints.at(0);
+		v.position = XMFLOAT4(linePoints.at(i).x, linePoints.at(i).y, linePoints.at(i).z, 1.0f);
 		v.colour = XMFLOAT4(0, 0, 0, 1.0);
 		vertices[i] = v;
 	}
@@ -50,7 +52,7 @@ void Spline::createBuffers(ID3D11Device* device)
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(D3D11_BUFFER_DESC));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(Vertex) * linePoints.size();
+	bd.ByteWidth = sizeof(Vertex) * NUM_POINTS;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 
@@ -60,11 +62,13 @@ void Spline::createBuffers(ID3D11Device* device)
 
 	device->CreateBuffer(&bd, &InitData, &vertexBuffer);
 
-	bd.ByteWidth = sizeof(WORD) * linePoints.size();
+	ZeroMemory(&bd, sizeof(D3D11_BUFFER_DESC));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.CPUAccessFlags = 0;
+	bd.ByteWidth = sizeof(WORD) * NUM_POINTS;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
-	WORD indices[100];
-	for (WORD i = 0; i < 100; i++)
+	for (WORD i = 0; i < NUM_POINTS; i++)
 	{
 		indices[i] = i;
 	}
@@ -96,18 +100,19 @@ XMFLOAT3 Spline::lerp(XMFLOAT3 a, XMFLOAT3 b, float u)
 
 void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)
 {
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+
+	context->VSSetShader(vShader, nullptr, 0);
+	context->PSSetShader(pShader, nullptr, 0);
 
 	LineCBuffer lCB;
 	lCB.world = XMMatrixIdentity();
-	lCB.view = cam.getView();
-	lCB.projection = cam.getProjection();
+	lCB.view = XMMatrixTranspose(cam.getView());
+	lCB.projection = XMMatrixTranspose(cam.getProjection());
 
-	context->VSSetShader(vShader, nullptr, 0);
+	context->UpdateSubresource(constBuffer, 0, nullptr, &lCB, 0, 0);
+
 	context->VSSetConstantBuffers(0, 1, &constBuffer);
-
-	context->PSSetShader(pShader, nullptr, 0);
-	context->PSSetConstantBuffers(0, 1, &constBuffer);
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -115,9 +120,7 @@ void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camer
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
-	context->UpdateSubresource(constBuffer, 0, nullptr, &lCB, 0, 0);
-
-	context->DrawIndexed(100, 0, 0);
+	context->DrawIndexed(NUM_POINTS, 0, 0);
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

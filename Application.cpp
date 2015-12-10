@@ -172,8 +172,8 @@ HRESULT Application::InitShadersAndInputLayout()
 	// Define the input layout
 	D3D11_INPUT_ELEMENT_DESC lineLayout[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	numElements = ARRAYSIZE(lineLayout);
@@ -433,10 +433,13 @@ void Application::readInitFile(std::string fileName)
 	Lines starting with a # is treated as a comment
 	Other than that, each line should be an isolated piece of information that gives all of the data needed to instantiate the object in the format:
 	MESHNAME LOCATION SCALE ROTATION
+	or
+	SPLINE CONTROLPOINT CONTROLPOINT ...
 	e.g. CRATE (0,0,0) (1,1,1) (0,0,0)
 
 	The list of valid meshnames are:
 	CRATE
+	SPLINE
 	*/
 
 	std::fstream worldFile;
@@ -449,6 +452,9 @@ void Application::readInitFile(std::string fileName)
 
 	std::string line;
 	std::regex const matcher("([[:upper:]]+) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\)");
+	std::regex const splineMatch("(SPLINE)");
+	std::regex const endSplineMatch("(END)");
+	std::regex const posMatch("\\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\)");
 
 	while (std::getline(worldFile, line))
 	{
@@ -473,6 +479,20 @@ void Application::readInitFile(std::string fileName)
 				temp.UpdateMatrix();
 				objects.push_back(temp);
 			}
+		}
+		else if (std::regex_match(line, captures, splineMatch))
+		{
+			std::vector<XMFLOAT3> controlPoints;
+			while(!std::regex_match(line, captures, endSplineMatch))
+			{
+				std::getline(worldFile, line);
+				if (std::regex_match(line, captures, posMatch))
+				{
+					XMFLOAT3 position(std::stof(captures[1]), std::stof(captures[2]), std::stof(captures[3]));
+					controlPoints.push_back(position);
+				}
+			}
+			splines.push_back(Spline(controlPoints, _pImmediateContext, _pd3dDevice));			
 		}
 	}
 }
@@ -504,15 +524,6 @@ void Application::initObjects()
 	perFrameCB.spotLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
 	perFrameCB.spotLight.attenuation = XMFLOAT3(0, 1, 0);
 	perFrameCB.spotLight.spot = 96;
-
-
-	std::vector<XMFLOAT3> cp;
-	cp.push_back(XMFLOAT3(0, 0, 0));
-	cp.push_back(XMFLOAT3(10, 0, 0));
-	cp.push_back(XMFLOAT3(10, 10, 0));
-	cp.push_back(XMFLOAT3(10, 10, 10));
-	cp.push_back(XMFLOAT3(20, 20, 30));
-	spline = Spline(cp, _pImmediateContext, _pd3dDevice);
 }
 
 void Application::Cleanup()
@@ -674,10 +685,10 @@ void Application::Update()
 		}
 	}
 
-	/*for (GameObject object : objects)
+	for (GameObject object : objects)
 	{
 		object.Update(t);
-	}*/
+	}
 
 	viewFrustum.constructFrustum(camera.viewDistance() * 2, camera.fov() * 2, camera.aspectRatio() * 2, 0, camera.zFar() * 2, camera.getView());
 }
@@ -709,13 +720,14 @@ void Application::Draw()
 
 	for (GameObject object : objects)
 	{
-		//object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
-	_pImmediateContext->RSSetState(_wireFrame);
-	spline.Draw(linePS, lineVS, camera);
-	_pImmediateContext->RSSetState(_solid);
+	for (Spline s : splines)
+	{
+		s.Draw(linePS, lineVS, camera);
+	}
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
 	skybox.Draw(skyboxVS, skyboxPS, &camera);
