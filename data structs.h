@@ -81,6 +81,7 @@ struct objectCB
 	DirectX::XMMATRIX projection;
 
 	CBMaterial material;
+	int useTextures = false;
 };
 
 struct MeshSection
@@ -112,7 +113,7 @@ struct MeshData
 	ID3D11ShaderResourceView* normalMapRV;
 	Material material;
 
-	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr), parts(std::vector<MeshSection>()), size(DirectX::XMFLOAT3(0,0,0))
+	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr), normalMapRV(nullptr), parts(std::vector<MeshSection>()), size(DirectX::XMFLOAT3(0,0,0))
 	{}
 
 	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, std::vector<MeshSection> parts, Material mat, ID3D11ShaderResourceView* texRV, ID3D11ShaderResourceView* specRV) : 

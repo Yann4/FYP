@@ -52,17 +52,24 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 			mtlFileName.append(".txt");
 		}
 
-		if (line.find("usemtl") != std::string::npos)
+		if (line.find("usemtl ") != std::string::npos)
 		{
 			std::string mtlName;
 			int i = 7;
-			while (line[i] != '\n' && i < 30)
+			while (i < line.size() && line[i] != '\n')
 			{
 				mtlName += line[i];
 				i++;
 			}
 
+			parts.push_back(MeshSection());
+
+			if (currentPart != 0)
+			{
+				parts[currentPart - 1].endIndex = count - 1;
+			}
 			parts[currentPart].materialName = mtlName;
+			parts[currentPart].startIndex = count;
 			currentPart++;
 		}
 
@@ -89,34 +96,34 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 			parts.push_back(ms);
 		}
 
-		if (line.find("v") != std::string::npos)
+		if (line.find("v ") != std::string::npos)
 		{
 			float a, b, c;
 			sscanf_s(line.c_str(), "v %f %f %f", &a, &b, &c);
 			verticesVector.push_back(XMFLOAT3(a, c, b));
 		}
 
-		if (line.find("vn") != std::string::npos)
+		if (line.find("vn ") != std::string::npos)
 		{
 			float a, b, c;
 			sscanf_s(line.c_str(), "vn %f %f %f", &a, &b, &c);
 			vertexNormals.push_back(XMFLOAT3(a, b, c));
 		}
 
-		if (line.find("vt") != std::string::npos)
+		if (line.find("vt ") != std::string::npos)
 		{
-			float a, b, c;
-			sscanf_s(line.c_str(), "vt %f %f %f", &a, &b, &c);
+			float a, b, c = 0;
+			sscanf_s(line.c_str(), "vt %f %f", &a, &b);
 			b = 1.0f - b;
 			uvCoords.push_back(XMFLOAT3(a, b, c));
 		}
 
-		if (line.find("f") != std::string::npos)
+		if (line.find("f ") != std::string::npos)
 		{
-			float v1, v2, v3;
-			float vn1, vn2, vn3;
-			float vt1, vt2, vt3;
-			sscanf_s(line.c_str(), "f %f/%f/%f %f/%f/%f %f/%f/%f", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
+			int v1, v2, v3;
+			int vn1, vn2, vn3;
+			int vt1, vt2, vt3;
+			sscanf_s(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
 
 			if (v1 < vIndexOffset)
 			{
@@ -165,11 +172,15 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 		}
 	}
 
+	if (currentPart > 0)
+	{
+		currentPart--;
+	}
 	parts.at(currentPart).endIndex = count;
 
 	inf.close();
-	WORD *indices = (WORD*)malloc(vertexIndices.size() * 3 * sizeof(WORD));
-	SimpleVertex *vertices = (SimpleVertex*)malloc(vertexIndices.size() * 3 * sizeof(SimpleVertex));
+	vector<WORD> indices = vector<WORD>(vertexIndices.size() * 3);
+	vector<SimpleVertex> vertices = vector<SimpleVertex>(vertexIndices.size() * 3);
 
 	count = 0;
 
@@ -225,16 +236,15 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 
 	D3D11_SUBRESOURCE_DATA InitData;
 	ZeroMemory(&InitData, sizeof(InitData));
-	InitData.pSysMem = vertices;
+	InitData.pSysMem = &(vertices)[0];
 
 	_pd3dDevice->CreateBuffer(&bd, &InitData, &(mesh->vertexBuffer));
 
 	bd.ByteWidth = sizeof(WORD) * count;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
-
 	ZeroMemory(&InitData, sizeof(InitData));
-	InitData.pSysMem = indices;
+	InitData.pSysMem = &(indices)[0];
 	_pd3dDevice->CreateBuffer(&bd, &InitData, &(mesh->indexBuffer));
 
 	mesh->numIndices = count;
@@ -246,22 +256,17 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 
 		for (unsigned int i = 0; i < mesh->parts.size(); i++)
 		{
-			unsigned int j = 0;
 			std::string mtlName = mesh->parts[i].materialName;
-			std::string comp = materials->at(j).name;
-
-			mtlName = mtlName.substr(0, mtlName.find_first_of('\0'));
-			comp = comp.substr(0, comp.find_first_of('\0'));
-
-			while (mtlName != comp && j < materials->size())
+			
+			for (unsigned int j = 0; j < materials->size(); j++)
 			{
-				j++;
-				comp = materials->at(j).name;
-				comp = comp.substr(0, comp.find_first_of('\0'));
-			}
-			if (mtlName != materials->at(j).name)
-			{
-				mesh->parts[i].material = &(materials->at(j));
+				std::string comp = materials->at(j).name;
+
+				if (comp.find(mtlName) != std::string::npos)
+				{
+					mesh->parts.at(i).material = &(materials->at(j));
+					break;
+				}
 			}
 		}
 	}
@@ -391,7 +396,7 @@ int Parser::readMtlFile(std::string fileName, std::vector<Material>* materials)
 			materials->at(mtlcount).name = mtlName;
 		}
 
-		if (line[1] == 'K' && line[2] == 'a')
+		if (line[0] == 'K' && line[1] == 'a')
 		{
 			float r, g, b;
 
@@ -400,7 +405,7 @@ int Parser::readMtlFile(std::string fileName, std::vector<Material>* materials)
 			materials->at(mtlcount).ambient = XMFLOAT4(r, g, b, 1.0);
 		}
 
-		if (line[1] == 'K' && line[2] == 'd')
+		if (line[0] == 'K' && line[1] == 'd')
 		{
 			float r, g, b;
 
@@ -409,7 +414,7 @@ int Parser::readMtlFile(std::string fileName, std::vector<Material>* materials)
 			materials->at(mtlcount).diffuse = XMFLOAT4(r, g, b, 1.0);
 		}
 
-		if (line[1] == 'K' && line[2] == 's')
+		if (line[0] == 'K' && line[1] == 's')
 		{
 			float r, g, b;
 

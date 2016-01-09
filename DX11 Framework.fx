@@ -59,6 +59,7 @@ cbuffer objectCB : register(b1)
 	matrix View;
 	matrix Projection;
 	Material material;
+	int useTextures;
 };
 
 struct VS_OUTPUT
@@ -218,9 +219,16 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float4 specCol = texSpec.Sample(samLinear, input.TexC).r;
 
 	Material newMat;
-	newMat.ambient = material.ambient;
-	newMat.diffuse = texCol;
-	newMat.specular = specCol;
+	if (useTextures == 1)
+	{
+		newMat.ambient = material.ambient;
+		newMat.diffuse = texCol;
+		newMat.specular = specCol;
+	}
+	else
+	{
+		newMat = material;
+	}
 
 	float4 ambient = (0.0f, 0.0f, 0.0f, 0.0f);
 	float4 specular = (0.0f, 0.0f, 0.0f, 0.0f);

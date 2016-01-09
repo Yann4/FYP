@@ -1,7 +1,7 @@
 #Format: NAME POSITION SCALE ROTATION
 #Only integer values
 #Allowed names:
-#CRATE
+#CRATE HOUSE
 
 #Format for creating a spline is:
 #SPLINE
@@ -9,11 +9,14 @@
 #END
 
 CRATE (0,0,0) (1,1,1) (0,0,0)
-CRATE (5,5,5) (1,1,1) (0,0,0)
-CRATE (3,0,0) (1,1,1) (0,0,0)
+HOUSE (0,0,0) (1,1,1) (0,0,0)
 
 SPLINE
 (0,0,0)
-(10,5,2)
-(20,50,5)
+(0,10,0)
+END
+
+SPLINE
+(10,0,0)
+(10,10,0)
 END

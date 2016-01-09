@@ -376,6 +376,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="cube.txt" />
+    <Text Include="house.txt" />
+    <Text Include="housemtl.txt" />
     <Text Include="input_map.txt" />
     <Text Include="worldData.txt" />
   </ItemGroup>
@@ -391,6 +393,7 @@
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Spline.cpp" />
+    <ClCompile Include="Surface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11 Framework.fx" />
@@ -410,6 +413,7 @@
     <CLInclude Include="resource.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Spline.h" />
+    <ClInclude Include="Surface.h" />
     <ClInclude Include="TimeSlice.h" />
     <ResourceCompile Include="DX11 Framework.rc" />
   </ItemGroup>

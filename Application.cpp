@@ -42,6 +42,7 @@ Application::Application()
 	_pPixelShader = nullptr;
 	_pVertexLayout = nullptr;
 	squareMesh = new MeshData();
+	houseMesh = new MeshData();
 	frameConstantBuffer = nullptr;
 	objectConstantBuffer = nullptr;
 	samplerLinear = nullptr;
@@ -204,6 +205,13 @@ HRESULT Application::initialiseCube()
 
 	Parser p;
 	p.readObjFile(_pd3dDevice, "cube.txt", squareMesh, nullptr);
+	return S_OK;
+}
+
+HRESULT Application::initialiseHouse()
+{
+	Parser p;
+	p.readObjFile(_pd3dDevice, "house.txt", houseMesh, &houseMaterials);
 	return S_OK;
 }
 
@@ -479,6 +487,14 @@ void Application::readInitFile(std::string fileName)
 				temp.UpdateMatrix();
 				objects.insert(temp, temp.Pos(), temp.Size());
 			}
+			else if (name == "HOUSE")
+			{
+				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, houseMesh, position);
+				temp.setScale(scale.x, scale.y, scale.z);
+				temp.setRotation(rotation.x, rotation.y, rotation.z);
+				temp.UpdateMatrix();
+				objects.insert(temp, temp.Pos(), temp.Size());
+			}
 		}
 		else if (std::regex_match(line, captures, splineMatch))
 		{
@@ -500,9 +516,12 @@ void Application::readInitFile(std::string fileName)
 void Application::initObjects()
 {
 	initialiseCube();
+	initialiseHouse();
 	readInitFile("worldData.txt");
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
+
+	tarp = Surface(splines, _pImmediateContext, _pd3dDevice);
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
@@ -546,6 +565,7 @@ void Application::Cleanup()
 	if (skyboxVS) skyboxVS->Release();
 
 	delete squareMesh;
+	delete houseMesh;
 }
 
 void Application::onMouseMove(WPARAM btnState, int x, int y)
@@ -632,7 +652,7 @@ std::wstring s2ws(const std::string& s)
 	std::wstring r(buf);
 	delete[] buf;
 	return r;
-	}
+}
 
 
 void Application::Update()
@@ -663,15 +683,10 @@ void Application::Update()
 	camera.Update();
 	skybox.Update(&camera);
 	std::vector<GameObject*> allObjects = objects.getAllElements();
-	int count = 0;
+	
 	for (GameObject* object : allObjects)
 	{
-		if (count == 0)
-		{
-			count++;
-			continue;
-		}
-		object->Update(t);
+		//object->Update(t);
 		XMFLOAT3 size = object->Size();
 
 		std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
@@ -729,10 +744,14 @@ void Application::Draw()
 	}
 
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
+	
 	for (Spline s : splines)
 	{
 		s.Draw(linePS, lineVS, camera);
 	}
+
+	tarp.Draw(linePS, lineVS, camera);
+
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
 	skybox.Draw(skyboxVS, skyboxPS, &camera);

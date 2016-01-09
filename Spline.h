@@ -5,23 +5,24 @@
 #include <directxmath.h>
 #include <vector>
 #include "Camera.h"
+#include "data structs.h"
+
+struct LineCBuffer
+{
+	DirectX::XMMATRIX world;
+	DirectX::XMMATRIX view;
+	DirectX::XMMATRIX projection;
+};
+
+struct Vertex
+{
+	DirectX::XMFLOAT4 position;
+	DirectX::XMFLOAT4 colour;
+};
 
 class Spline
 {
 private:
-	struct LineCBuffer
-	{
-		DirectX::XMMATRIX world;
-		DirectX::XMMATRIX view;
-		DirectX::XMMATRIX projection;
-	};
-
-	struct Vertex
-	{
-		DirectX::XMFLOAT4 position;
-		DirectX::XMFLOAT4 colour;
-	};
-
 	ID3D11DeviceContext* context;
 
 	std::vector<DirectX::XMFLOAT3> controlPoints;
@@ -46,4 +47,6 @@ private:
 
 public:
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
+
+	inline std::vector<DirectX::XMFLOAT3> getLinePoints() { return linePoints; }
 };

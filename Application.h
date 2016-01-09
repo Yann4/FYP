@@ -18,6 +18,7 @@
 #include "Light.h"
 #include "Collision.h"
 #include "Spline.h"
+#include "Surface.h"
 #include "Octree.h"
 
 #include <queue>
@@ -70,10 +71,13 @@ private:
 	Frustum viewFrustum;
 
 	MeshData* squareMesh;
+	std::vector<Material> houseMaterials;
+	MeshData* houseMesh;
 
 	Octree<GameObject> objects;
 	std::vector<GameObject*> allObjects;
 	std::vector<Spline> splines;
+	Surface tarp;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;
@@ -92,6 +96,7 @@ private:
 
 	void readInitFile(std::string fileName);
 	HRESULT initialiseCube();
+	HRESULT initialiseHouse();
 
 	void initObjects();
 

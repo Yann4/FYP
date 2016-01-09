@@ -134,6 +134,7 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, F
 	context->PSSetConstantBuffers(0, 1, &frameConstBuffer);
 	context->PSSetConstantBuffers(1, 1, &objectConstBuffer);
 
+
 	context->PSSetShaderResources(0, 1, &mesh->textureRV);
 	context->PSSetShaderResources(1, 1, &mesh->specularRV);
 	context->PSSetShaderResources(2, 1, &mesh->normalMapRV);
@@ -152,9 +153,28 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, F
 	cb.projection = XMMatrixTranspose(projectionMat);
 	cb.view = XMMatrixTranspose(viewMat);
 	cb.world = XMMatrixTranspose(worldMat);
-	cb.material = CBMaterial(mesh->material.specular, mesh->material.ambient, mesh->material.diffuse);
 
-	context->UpdateSubresource(objectConstBuffer, 0, nullptr, &cb, 0, 0);
+	if (mesh->textureRV == nullptr)
+	{
+		cb.useTextures = 0;
+	}
+	else
+	{
+		cb.useTextures = 1;
+	}
 
-	context->DrawIndexed(mesh->numIndices, 0, 0);
+	for (int i = 0; i < mesh->parts.size(); i++)
+	{
+		if (mesh->parts.at(i).material == nullptr)
+		{
+			cb.material = CBMaterial(mesh->material.specular, mesh->material.ambient, mesh->material.diffuse);
+		}
+		else
+		{
+			cb.material = CBMaterial(mesh->parts.at(i).material->specular, mesh->parts.at(i).material->ambient, mesh->parts.at(i).material->diffuse);
+		}
+		context->UpdateSubresource(objectConstBuffer, 0, nullptr, &cb, 0, 0);
+
+		context->DrawIndexed(mesh->parts.at(i).endIndex - mesh->parts.at(i).startIndex, mesh->parts.at(i).startIndex, 0);
+	}
 }

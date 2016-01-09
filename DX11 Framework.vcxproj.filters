@@ -27,6 +27,9 @@
     <Filter Include="Lights">
       <UniqueIdentifier>{906c6f5f-aee8-4e0a-8fa2-bf312bdb6f05}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Data files">
+      <UniqueIdentifier>{14dbe98b-982b-4e66-9132-eaae96e0a25f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -59,6 +62,9 @@
       <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="Octree.h" />
+    <ClInclude Include="Surface.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -84,6 +90,9 @@
     </ClCompile>
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Spline.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Surface.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,8 +121,18 @@
     <Text Include="input_map.txt">
       <Filter>Input</Filter>
     </Text>
-    <Text Include="cube.txt" />
-    <Text Include="worldData.txt" />
+    <Text Include="cube.txt">
+      <Filter>Data files</Filter>
+    </Text>
+    <Text Include="worldData.txt">
+      <Filter>Data files</Filter>
+    </Text>
+    <Text Include="house.txt">
+      <Filter>Data files</Filter>
+    </Text>
+    <Text Include="housemtl.txt">
+      <Filter>Data files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Crate_COLOR.dds">
