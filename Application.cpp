@@ -43,6 +43,8 @@ Application::Application()
 	_pVertexLayout = nullptr;
 	squareMesh = new MeshData();
 	houseMesh = new MeshData();
+	pipeMesh = new MeshData();
+	grassMesh = new MeshData();
 	frameConstantBuffer = nullptr;
 	objectConstantBuffer = nullptr;
 	samplerLinear = nullptr;
@@ -208,10 +210,27 @@ HRESULT Application::initialiseCube()
 	return S_OK;
 }
 
+HRESULT Application::initialiseGrass()
+{
+	CreateDDSTextureFromFile(_pd3dDevice, L"grass.dds", nullptr, &(grassMesh->textureRV));
+	CreateDDSTextureFromFile(_pd3dDevice, L"specularWhite.dds", nullptr, &(grassMesh->specularRV));
+	CreateDDSTextureFromFile(_pd3dDevice, L"normalUp.dds", nullptr, &(grassMesh->normalMapRV));
+	Parser p;
+	p.readObjFile(_pd3dDevice, "plane.txt", grassMesh, nullptr);
+	return S_OK;
+}
+
 HRESULT Application::initialiseHouse()
 {
 	Parser p;
 	p.readObjFile(_pd3dDevice, "house.txt", houseMesh, &houseMaterials);
+	return S_OK;
+}
+
+HRESULT Application::initialisePipe()
+{
+	Parser p;
+	p.readObjFile(_pd3dDevice, "pipe.obj", pipeMesh, &pipeMaterials);
 	return S_OK;
 }
 
@@ -448,6 +467,7 @@ void Application::readInitFile(std::string fileName)
 	The list of valid meshnames are:
 	CRATE
 	SPLINE
+	PIPE
 	*/
 
 	std::fstream worldFile;
@@ -459,10 +479,10 @@ void Application::readInitFile(std::string fileName)
 	}
 
 	std::string line;
-	std::regex const matcher("([[:upper:]]+) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\) \\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\)");
+	std::regex const matcher("([[:upper:]]+) \\((-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*)\\) \\((-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*)\\) \\((-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*)\\)");
 	std::regex const splineMatch("(SPLINE)");
 	std::regex const endSplineMatch("(END)");
-	std::regex const posMatch("\\(([[:digit:]]+),([[:digit:]]+),([[:digit:]]+)\\)");
+	std::regex const posMatch("\\((-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*)\\)");
 
 	while (std::getline(worldFile, line))
 	{
@@ -495,6 +515,22 @@ void Application::readInitFile(std::string fileName)
 				temp.UpdateMatrix();
 				objects.insert(temp, temp.Pos(), temp.Size());
 			}
+			else if (name == "PIPE")
+			{
+				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, pipeMesh, position);
+				temp.setScale(scale.x, scale.y, scale.z);
+				temp.setRotation(rotation.x, rotation.y, rotation.z);
+				temp.UpdateMatrix();
+				objects.insert(temp, temp.Pos(), temp.Size());
+			}
+			else if (name == "GRASS")
+			{
+				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, grassMesh, position);
+				temp.setScale(scale.x, scale.y, scale.z);
+				temp.setRotation(rotation.x, rotation.y, rotation.z);
+				temp.UpdateMatrix();
+				objects.insert(temp, temp.Pos(), temp.Size());
+			}
 		}
 		else if (std::regex_match(line, captures, splineMatch))
 		{
@@ -517,6 +553,9 @@ void Application::initObjects()
 {
 	initialiseCube();
 	initialiseHouse();
+	initialisePipe();
+	initialiseGrass();
+
 	readInitFile("worldData.txt");
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
@@ -525,17 +564,17 @@ void Application::initObjects()
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
-	perFrameCB.dirLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);// XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	perFrameCB.dirLight.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);//XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	perFrameCB.dirLight.diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);// XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	perFrameCB.dirLight.lightVecW = XMFLOAT3(1, -0.0f, 0.0f);
+	perFrameCB.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	perFrameCB.dirLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	perFrameCB.dirLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
+	perFrameCB.dirLight.lightVecW = XMFLOAT3(0.115f, -0.57735f, -0.94f);
 
 	perFrameCB.pointLight = PointLight();
 	perFrameCB.pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	perFrameCB.pointLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 10.0);
-	perFrameCB.pointLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	perFrameCB.pointLight.range = 5;
-	perFrameCB.pointLight.attenuation = XMFLOAT3(0.0f, 0.2f, 0.0f);
+	perFrameCB.pointLight.specular = XMFLOAT4(0.7, 0.7, 0.7, 10.0);
+	perFrameCB.pointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	perFrameCB.pointLight.range = 15;
+	perFrameCB.pointLight.attenuation = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
 	perFrameCB.spotLight = SpotLight();
 	perFrameCB.spotLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -566,6 +605,8 @@ void Application::Cleanup()
 
 	delete squareMesh;
 	delete houseMesh;
+	delete pipeMesh;
+	delete grassMesh;
 }
 
 void Application::onMouseMove(WPARAM btnState, int x, int y)
@@ -686,13 +727,20 @@ void Application::Update()
 	
 	for (GameObject* object : allObjects)
 	{
-		//object->Update(t);
+		object->Update(t);
+		
+		if (!object->getCollider())
+		{
+			continue;
+		}
+
 		XMFLOAT3 size = object->Size();
 
 		std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
+		
 		for (GameObject* closeObject : neighbourhood)
 		{
-			if (closeObject == object)
+			if (closeObject == object || !closeObject->getCollider())
 			{
 				continue;
 			}
@@ -734,6 +782,7 @@ void Application::Draw()
 	{
 		perFrameCB.spotLight.range = 0;
 	}
+
 
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &perFrameCB, 0, 0);
 

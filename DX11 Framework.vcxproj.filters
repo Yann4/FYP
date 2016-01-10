@@ -111,6 +111,9 @@
     <None Include="LineShader.fx">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="pipe.txt">
+      <Filter>Data files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DX11 Framework.rc">
@@ -133,6 +136,12 @@
     <Text Include="housemtl.txt">
       <Filter>Data files</Filter>
     </Text>
+    <Text Include="plane.txt">
+      <Filter>Data files</Filter>
+    </Text>
+    <Text Include="grassmtl.txt">
+      <Filter>Data files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Crate_COLOR.dds">
@@ -147,5 +156,19 @@
     <Image Include="snowcube.dds">
       <Filter>Textures</Filter>
     </Image>
+    <Image Include="grass.dds">
+      <Filter>Textures</Filter>
+    </Image>
+    <Image Include="specularWhite.dds">
+      <Filter>Textures</Filter>
+    </Image>
+    <Image Include="NormalUp.dds">
+      <Filter>Textures</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="pipe.obj">
+      <Filter>Data files</Filter>
+    </Object>
   </ItemGroup>
 </Project>

@@ -27,6 +27,8 @@ protected:
 	DirectX::XMFLOAT4X4 objMatrix;
 	DirectX::XMFLOAT3 position;
 
+	bool collider = false;
+
 public:
 	GameObject();
 	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos);
@@ -45,4 +47,7 @@ public:
 	inline DirectX::XMFLOAT3 Pos(){ return position; };
 	inline DirectX::XMFLOAT3 Size(){ return scale; };
 	inline DirectX::XMFLOAT3 Rotation() { return rotation; };
+
+	bool getCollider() { return collider; }
+	void setCollider(bool isCollider) { collider = isCollider; }
 };

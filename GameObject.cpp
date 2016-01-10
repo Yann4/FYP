@@ -45,10 +45,16 @@ GameObject::~GameObject()
 void GameObject::setScale(float x, float y, float z)
 {
 	XMFLOAT4X4 temp;
-	XMStoreFloat4x4(&temp, XMMatrixScaling(x, y, z));
+
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(position.x, position.y, position.z));
 	translations.push(temp);
 
+	XMStoreFloat4x4(&temp, XMMatrixScaling(x, y, z));
+	translations.push(temp);
 	
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(-position.x, -position.y, -position.z));
+	translations.push(temp);
+
 	XMVECTOR sc = XMLoadFloat3(&scale);
 	sc = XMVector3Transform(sc, XMMatrixScaling(x, y, z));
 	XMStoreFloat3(&scale, sc);
@@ -115,7 +121,6 @@ void GameObject::moveFromCollision(float x, float y, float z)
 //UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix
 void GameObject::Update(float deltaTime)
 {
-	setTranslation(-0.001f, 0, 0);
 	UpdateMatrix();
 }
 

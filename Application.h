@@ -71,8 +71,15 @@ private:
 	Frustum viewFrustum;
 
 	MeshData* squareMesh;
+	
 	std::vector<Material> houseMaterials;
 	MeshData* houseMesh;
+
+	MeshData* pipeMesh;
+	std::vector<Material> pipeMaterials;
+
+	MeshData* grassMesh;
+	std::vector<Material> grassMaterial;
 
 	Octree<GameObject> objects;
 	std::vector<GameObject*> allObjects;
@@ -97,6 +104,8 @@ private:
 	void readInitFile(std::string fileName);
 	HRESULT initialiseCube();
 	HRESULT initialiseHouse();
+	HRESULT initialisePipe();
+	HRESULT initialiseGrass();
 
 	void initObjects();
 

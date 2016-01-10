@@ -66,7 +66,7 @@ struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
     float3 ToEye : TO_EYE_VECT;
-	float3 PosW : POSITION_WORLD;
+	float3 PosW : POSITION;
 	float3 Norm : NORMAL;
 	float2 TexC : TEXCOORD;
 };
@@ -188,17 +188,17 @@ void calculateSpotLight(Material mat, SpotLight light, float3 position, float3 n
 VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXCOORD )
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
-    output.Pos = mul( Pos, World );
+    output.Pos = mul( Pos, (float4x4)World );
 	output.PosW = output.Pos;
 
 	//Get normalised vector to camera position in world coordinates
-	output.ToEye = normalize(eyePos - output.Pos.xyz);
+	output.ToEye = normalize(eyePos - output.Pos);
 
     output.Pos = mul( output.Pos, View );
     output.Pos = mul( output.Pos, Projection );
     
 	//Getting normalised surface normal
-	float3 normalW = mul(float4(NormalL, 0.0f), World).xyz;
+	float3 normalW = mul(NormalL, World).xyz;
 	normalW = normalize(normalW);
 	output.Norm = normalW;
 	
@@ -213,15 +213,15 @@ VS_OUTPUT VS( float4 Pos : POSITION, float3 NormalL : NORMAL, float2 TexC : TEXC
 //--------------------------------------------------------------------------------------
 float4 PS( VS_OUTPUT input ) : SV_Target
 {
-	//input.Norm = normalize(mul(input.Norm, (texNormMap.Sample(samLinear, input.TexC).rgb*2.0f - 1.0f)));
-	input.Norm = normalize(input.Norm);
+	input.Norm = normalize(input.Norm * (texNormMap.Sample(samLinear, input.TexC).rgb * 2.0f - 1.0f));
+	//input.Norm = normalize(input.Norm);
 	float4 texCol = texDiffuse.Sample(samLinear, input.TexC);
-	float4 specCol = texSpec.Sample(samLinear, input.TexC).r;
+	float4 specCol = texSpec.Sample(samLinear, input.TexC);
 
 	Material newMat;
+	newMat.ambient = material.ambient;
 	if (useTextures == 1)
-	{
-		newMat.ambient = material.ambient;
+	{	
 		newMat.diffuse = texCol;
 		newMat.specular = specCol;
 	}
@@ -235,7 +235,7 @@ float4 PS( VS_OUTPUT input ) : SV_Target
 	float4 diffuse = (0.0f, 0.0f, 0.0f, 0.0f);
 
 	float4 amb, spec, diff;
-	calculateDirectionalLight(newMat, dirLight, input.Norm, input.ToEye, amb, diff, spec);
+	calculateDirectionalLight(newMat, dirLight, input.Norm, normalize(input.ToEye), amb, diff, spec);
 
 	ambient += amb;
 	specular += spec;

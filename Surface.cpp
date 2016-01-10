@@ -36,7 +36,7 @@ Surface::Surface(vector<Spline>& splines, ID3D11DeviceContext* context, ID3D11De
 		{
 			vertices.push_back(Vertex());
 			vertices.at(count).position = XMFLOAT4(point.x, point.y, point.z, 1.0f);
-			vertices.at(count).colour = XMFLOAT4(0.898f, 0.827f, 0.827f, 1.0f);
+			vertices.at(count).colour = XMFLOAT4(0.0f, 0.0f, 0.545f, 1.0f);
 			count++;
 		}
 	}
