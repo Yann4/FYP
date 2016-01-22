@@ -84,7 +84,6 @@ private:
 	Octree<GameObject> objects;
 	std::vector<GameObject*> allObjects;
 	std::vector<Spline> splines;
-	Surface tarp;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;

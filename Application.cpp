@@ -566,8 +566,6 @@ void Application::initObjects()
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 
-	tarp = Surface(splines, _pImmediateContext, _pd3dDevice);
-
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
 	perFrameCB.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -692,19 +690,6 @@ void Application::handleMessages()
 	}
 }
 
-std::wstring s2ws(const std::string& s)
- {
-	int len;
-	int slength = (int)s.length() + 1;
-	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-	wchar_t* buf = new wchar_t[len];
-	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
-	std::wstring r(buf);
-	delete[] buf;
-	return r;
-}
-
-
 void Application::Update()
 {
     // Update our time
@@ -807,8 +792,6 @@ void Application::Draw()
 	{
 		s.Draw(linePS, lineVS, camera);
 	}
-
-	tarp.Draw(linePS, lineVS, camera);
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
