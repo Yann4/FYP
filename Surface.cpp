@@ -16,7 +16,7 @@ Surface::Surface()
 /*
 Needs to be defined from top to bottom
 Example order of vectors
-Horizontal
+
 ------ 0
 ------ 1
 ------ 2

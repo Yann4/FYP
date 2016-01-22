@@ -40,6 +40,11 @@ Application::Application()
 	_pRenderTargetView = nullptr;
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
+	skyboxPS = nullptr;
+	skyboxVS = nullptr;
+	lineVS = nullptr;
+	linePS = nullptr;
+	basicVertexLayout = nullptr;
 	_pVertexLayout = nullptr;
 	squareMesh = new MeshData();
 	houseMesh = new MeshData();
@@ -51,6 +56,7 @@ Application::Application()
 	_depthStencilBuffer = nullptr;
 	_depthStencilView = nullptr;
 	_solid = nullptr;
+	_wireFrame = nullptr;
 	samplerLinear = nullptr;
 
 	cameraMoveSpeed = 0.1f;
@@ -79,7 +85,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     if (FAILED(InitDevice()))
     {
-        Cleanup();
+        //Cleanup();
 
         return E_FAIL;
     }
@@ -573,7 +579,7 @@ void Application::initObjects()
 	perFrameCB.pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	perFrameCB.pointLight.specular = XMFLOAT4(0.7, 0.7, 0.7, 10.0);
 	perFrameCB.pointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	perFrameCB.pointLight.range = 15;
+	perFrameCB.pointLight.range = 5;
 	perFrameCB.pointLight.attenuation = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
 	perFrameCB.spotLight = SpotLight();
@@ -602,6 +608,9 @@ void Application::Cleanup()
 	if (_solid) _solid->Release();
 	if (skyboxPS) skyboxPS->Release();
 	if (skyboxVS) skyboxVS->Release();
+	if (lineVS) lineVS->Release();
+	if (linePS) linePS->Release();
+	if (basicVertexLayout) basicVertexLayout->Release();
 
 	delete squareMesh;
 	delete houseMesh;
