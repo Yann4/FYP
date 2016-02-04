@@ -20,7 +20,7 @@ protected:
 
 	MeshData* mesh;
 
-	std::stack<DirectX::XMFLOAT4X4> translations;
+	std::stack<DirectX::XMFLOAT4X4> transformations;
 	DirectX::XMFLOAT3 rotation;
 	DirectX::XMFLOAT3 scale;
 
@@ -28,6 +28,11 @@ protected:
 	DirectX::XMFLOAT3 position;
 
 	bool collider = false;
+	bool shouldBeFrustumCulled = true;
+	bool objectMoves = true;
+
+	bool isGround = false;
+	bool onGround = false;
 
 public:
 	GameObject();
@@ -45,9 +50,27 @@ public:
 	void moveFromCollision(float x, float y, float z);
 
 	inline DirectX::XMFLOAT3 Pos(){ return position; };
-	inline DirectX::XMFLOAT3 Size(){ return scale; };
+	inline DirectX::XMFLOAT3 Size()
+	{
+		DirectX::XMFLOAT3 size;
+		DirectX::XMVECTOR sizeV = DirectX::XMVector3Transform(DirectX::XMLoadFloat3(&mesh->size), DirectX::XMMatrixScaling(scale.x, scale.y, scale.z));
+		DirectX::XMStoreFloat3(&size, sizeV);
+		return size;
+	}
 	inline DirectX::XMFLOAT3 Rotation() { return rotation; };
 
 	bool getCollider() { return collider; }
 	void setCollider(bool isCollider) { collider = isCollider; }
+
+	bool getCullState() { return shouldBeFrustumCulled; }
+	void setCullState(bool cull) { shouldBeFrustumCulled = cull; }
+
+	bool getMovementState() { return objectMoves; }
+	void setMovementState(bool objectMoves) { GameObject::objectMoves = objectMoves; }
+
+	bool getIsGround() { return isGround; }
+	void setIsGround(bool isGround) { GameObject::isGround = isGround; }
+
+	bool getOnGround() { return onGround; }
+	void setOnGround(bool onGround) { GameObject::onGround = onGround; }
 };

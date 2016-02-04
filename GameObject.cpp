@@ -11,7 +11,7 @@ GameObject::GameObject()
 	mesh = nullptr;
 
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
-	translations = std::stack<XMFLOAT4X4>();
+	transformations = std::stack<XMFLOAT4X4>();
 
 	position = DirectX::XMFLOAT3(0, 0, 0);
 	rotation = XMFLOAT3(0, 0, 0);
@@ -22,9 +22,9 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* frameConst
 	:context(devContext), frameConstBuffer(frameConstantBuffer), objectConstBuffer(objectBuffer), mesh(mesh), position(XMFLOAT3(0,0,0))
 {
 	XMStoreFloat4x4(&objMatrix, XMMatrixIdentity());
-	translations = std::stack<XMFLOAT4X4>();
+	transformations = std::stack<XMFLOAT4X4>();
 	rotation = XMFLOAT3(0, 0, 0);
-	scale = mesh->size;
+	scale = XMFLOAT3(1,1,1);
 
 	setTranslation(pos.x, pos.y, pos.z);
 	UpdateMatrix();
@@ -47,14 +47,14 @@ void GameObject::setScale(float x, float y, float z)
 	XMFLOAT4X4 temp;
 
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(position.x, position.y, position.z));
-	translations.push(temp);
+	transformations.push(temp);
 
 	XMStoreFloat4x4(&temp, XMMatrixScaling(x, y, z));
-	translations.push(temp);
+	transformations.push(temp);
 	
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(-position.x, -position.y, -position.z));
-	translations.push(temp);
-
+	transformations.push(temp);
+	
 	XMVECTOR sc = XMLoadFloat3(&scale);
 	sc = XMVector3Transform(sc, XMMatrixScaling(x, y, z));
 	XMStoreFloat3(&scale, sc);
@@ -64,46 +64,44 @@ void GameObject::setRotation(float x, float y, float z)
 {
 	XMFLOAT4X4 temp;
 
-	XMFLOAT3 pos = position;
-	XMStoreFloat4x4(&temp, XMMatrixTranslation(pos.x, pos.y, pos.z));
-	translations.push(temp);
-
-	XMStoreFloat4x4(&temp, XMMatrixRotationX(x) * XMMatrixRotationY(y) * XMMatrixRotationZ(z));
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(position.x, position.y, position.z));
+	transformations.push(temp);
+	
 	rotation.x += x;
 	rotation.y += y;
 	rotation.z += z;
-	translations.push(temp);
 
-	XMStoreFloat4x4(&temp, XMMatrixTranslation(-pos.x, -pos.y, -pos.z));
-	translations.push(temp);
+	XMStoreFloat4x4(&temp, XMMatrixRotationX(x) * XMMatrixRotationY(y) * XMMatrixRotationZ(z));
+	transformations.push(temp);
+
+	XMStoreFloat4x4(&temp, XMMatrixTranslation(-position.x, -position.y, -position.z));
+	transformations.push(temp);
 }
 
 void GameObject::setTranslation(float x, float y, float z)
 {
 	XMFLOAT4X4 temp;
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(x, y, z));
-	translations.push(temp);
+	transformations.push(temp);
 
-	position.x += x;
-	position.y += y;
-	position.z += z;
+	XMStoreFloat3(&position, XMVector3Transform(XMLoadFloat3(&position), XMMatrixTranslation(x, y, z)));
 }
 
 void GameObject::UpdateMatrix()
 {
-	if (!translations.empty())
+	if (!transformations.empty())
 	{
 		XMMATRIX tr;
-		XMFLOAT4X4 temp = translations.top();
-		translations.pop();
+		XMFLOAT4X4 temp = transformations.top();
+		transformations.pop();
 		tr = XMLoadFloat4x4(&temp);
 
-		while (!translations.empty())
+		while (!transformations.empty())
 		{
-			temp = translations.top();
+			temp = transformations.top();
 			XMMATRIX tempMat = XMLoadFloat4x4(&temp);
 			tr *= tempMat;
-			translations.pop();
+			transformations.pop();
 		}
 		XMMATRIX p = XMLoadFloat4x4(&objMatrix);
 		p *= tr;
@@ -114,19 +112,33 @@ void GameObject::UpdateMatrix()
 
 void GameObject::moveFromCollision(float x, float y, float z)
 {
-	setTranslation(x, y, z);
-	UpdateMatrix();
+	if (objectMoves)
+	{
+		setTranslation(x, y, z);
+		UpdateMatrix();
+	}
 }
 
 //UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix
 void GameObject::Update(float deltaTime)
 {
+	if (!objectMoves)
+	{
+		return;
+	}
+
+	if (!onGround)
+	{
+		//Gravity
+		setTranslation(0, -9.81f * (deltaTime / 1000.0f), 0);
+	}
+
 	UpdateMatrix();
 }
 
 void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam)
 {
-	if (!frustum.checkSphere(position, max(max(scale.x, scale.y), scale.z)))
+	if (shouldBeFrustumCulled && !frustum.checkSphere(position, max(max(scale.x, scale.y), scale.z)))
 	{
 		return;
 	}

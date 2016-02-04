@@ -218,11 +218,10 @@ HRESULT Application::initialiseCube()
 
 HRESULT Application::initialiseGrass()
 {
+	*grassMesh = *squareMesh;
 	CreateDDSTextureFromFile(_pd3dDevice, L"grass.dds", nullptr, &(grassMesh->textureRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"specularWhite.dds", nullptr, &(grassMesh->specularRV));
-	CreateDDSTextureFromFile(_pd3dDevice, L"normalUp.dds", nullptr, &(grassMesh->normalMapRV));
-	Parser p;
-	p.readObjFile(_pd3dDevice, "plane.txt", grassMesh, nullptr);
+	CreateDDSTextureFromFile(_pd3dDevice, L"normalUp.dds", nullptr, &(grassMesh->normalMapRV));	
 	return S_OK;
 }
 
@@ -511,6 +510,7 @@ void Application::readInitFile(std::string fileName)
 				temp.setScale(scale.x, scale.y, scale.z);
 				temp.setRotation(rotation.x, rotation.y, rotation.z);
 				temp.UpdateMatrix();
+				temp.setCollider(true);
 				objects.insert(temp, temp.Pos(), temp.Size());
 			}
 			else if (name == "HOUSE")
@@ -535,6 +535,10 @@ void Application::readInitFile(std::string fileName)
 				temp.setScale(scale.x, scale.y, scale.z);
 				temp.setRotation(rotation.x, rotation.y, rotation.z);
 				temp.UpdateMatrix();
+				temp.setCullState(false);
+				temp.setCollider(true);
+				temp.setMovementState(false);
+				temp.setIsGround(true);
 				objects.insert(temp, temp.Pos(), temp.Size());
 			}
 		}
@@ -746,6 +750,14 @@ void Application::Update()
 			
 			if(Collision::boundingBoxCollision(objAABB, closeAABB, mtv))
 			{
+				if (object->getIsGround())
+				{
+					closeObject->setOnGround(true);
+				}
+				if (closeObject->getIsGround())
+				{
+					object->setOnGround(true);
+				}
 				object->moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
 			}
 		}

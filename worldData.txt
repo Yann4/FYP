@@ -5,8 +5,8 @@
 
 #Format for creating a spline is:
 #SPLINE
-#(x,y,z) on a newline for however many control points
+#(x,y,z) on a new line for however many control points
 #END
 
-CRATE (-1.765,-0.48,0) (0.35,0.35,0.35) (0,0,0)
-GRASS (0,-1.779,-36) (10,1,10) (1.51,0,0)
+GRASS (0,0,0) (10,0.1,10) (0,0,0)
+CRATE (3,3,3) (1,1,1) (0,0,0)
