@@ -30,6 +30,9 @@
     <Filter Include="Data files">
       <UniqueIdentifier>{14dbe98b-982b-4e66-9132-eaae96e0a25f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graph">
+      <UniqueIdentifier>{c18325fe-8366-4afe-b4c1-7a5b741b8f03}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -65,6 +68,12 @@
     <ClInclude Include="Surface.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -94,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="Surface.cpp">
       <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

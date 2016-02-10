@@ -394,7 +394,9 @@
     <ClCompile Include="DX11 Framework.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Spline.cpp" />
@@ -411,8 +413,10 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Graph.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
