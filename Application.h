@@ -20,6 +20,7 @@
 #include "Spline.h"
 #include "Surface.h"
 #include "Octree.h"
+#include "Graph.h"
 
 #include <queue>
 #include <fstream>
@@ -84,6 +85,8 @@ private:
 	Octree<GameObject> objects;
 	std::vector<GameObject*> allObjects;
 	std::vector<Spline> splines;
+
+	Graph navGraph;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;

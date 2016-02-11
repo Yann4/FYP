@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <d3d11_1.h>
 #include <directxmath.h>
-
+#include <DirectXCollision.h>
 #include <stack>
 
 #include "data structs.h"
@@ -49,6 +49,8 @@ public:
 
 	void moveFromCollision(float x, float y, float z);
 
+	DirectX::BoundingBox getBoundingBox();
+
 	inline DirectX::XMFLOAT3 Pos(){ return position; };
 	inline DirectX::XMFLOAT3 Size()
 	{
@@ -66,11 +68,11 @@ public:
 	void setCullState(bool cull) { shouldBeFrustumCulled = cull; }
 
 	bool getMovementState() { return objectMoves; }
-	void setMovementState(bool objectMoves) { GameObject::objectMoves = objectMoves; }
+	void setMovementState(bool objectMoves) { this->objectMoves = objectMoves; }
 
 	bool getIsGround() { return isGround; }
-	void setIsGround(bool isGround) { GameObject::isGround = isGround; }
+	void setIsGround(bool isGround) { this->isGround = isGround; }
 
 	bool getOnGround() { return onGround; }
-	void setOnGround(bool onGround) { GameObject::onGround = onGround; }
+	void setOnGround(bool onGround) { this->onGround = onGround; }
 };

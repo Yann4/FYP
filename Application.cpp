@@ -570,6 +570,19 @@ void Application::initObjects()
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 
+	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, squareMesh);
+	navGraph.giveNode(XMFLOAT3(0, 10, 0));
+	navGraph.giveNode(XMFLOAT3(10, 10, 10));
+
+	std::vector<BoundingBox> bbs;
+	std::vector<GameObject*> allObjects = objects.getAllElements();
+	for (GameObject* o : allObjects)
+	{
+		bbs.push_back(o->getBoundingBox());
+	}
+	
+	navGraph.calculateGraph(bbs);
+
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
 	perFrameCB.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -798,6 +811,7 @@ void Application::Draw()
 		object->Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
+	navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, camera);
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
 	
 	for (Spline s : splines)

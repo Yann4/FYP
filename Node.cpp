@@ -5,17 +5,18 @@ using std::vector;
 Node::Node()
 {
 	position = XMFLOAT3(0, 0, 0);
-	neighbours = vector<Arc>();
+	neighbours = vector<Connection>();
 }
 
-Node::Node(XMFLOAT3 position) : position(position)
+Node::Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh) : position(position), context(context), device(device)
 {
-	neighbours = vector<Arc>();
+	neighbours = vector<Connection>();
+	object = GameObject(context, constBuffer, objBuffer, mesh, position);
 }
 
 bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 {
-	for (Arc a : neighbours)
+	for (Connection a : neighbours)
 	{
 		if (a.end == &other)
 		{
@@ -36,13 +37,13 @@ bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 	XMFLOAT3 length;
 	XMStoreFloat3(&length, XMVector3Length(direction));
 	
-	neighbours.push_back(Arc(this, &other, length.x));
-	other.acceptArc(Arc(&other, this, length.x));
+	neighbours.push_back(Connection(this, &other, length.x, context, device));
+	other.acceptArc(Connection(&other, this, length.x, context, device));
 
 	return true;
 }
 
-void Node::acceptArc(Arc arc)
+void Node::acceptArc(Connection arc)
 {
 	neighbours.push_back(arc);
 }
@@ -79,4 +80,14 @@ float Node::distanceFrom(XMFLOAT3 pos)
 	XMStoreFloat3(&length, XMVector3Length(direction));
 	
 	return length.x;
+}
+
+void Node::Draw(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam)
+{
+	for (Connection c : neighbours)
+	{
+		c.Draw(ConnectionPShader, ConnectionVShader, cam);
+	}
+
+	object.Draw(NodePShader, NodeVShader, frustum, cam);
 }

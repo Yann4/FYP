@@ -118,6 +118,10 @@ void GameObject::moveFromCollision(float x, float y, float z)
 		UpdateMatrix();
 	}
 }
+BoundingBox GameObject::getBoundingBox()
+{
+	return BoundingBox(position, scale);
+}
 
 //UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix
 void GameObject::Update(float deltaTime)
