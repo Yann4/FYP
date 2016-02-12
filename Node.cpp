@@ -12,6 +12,8 @@ Node::Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Devic
 {
 	neighbours = vector<Connection>();
 	object = GameObject(context, constBuffer, objBuffer, mesh, position);
+	object.setScale(0.1f, 0.1f, 0.1f);
+	object.UpdateMatrix();
 }
 
 bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)

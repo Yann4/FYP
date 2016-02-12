@@ -63,6 +63,7 @@ Application::Application()
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
+	recalcGraph = TimeSlice<void>();
 	flashlightOn = false;
 }
 
@@ -93,7 +94,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
 
 	input = Input("input_map.txt");
-
 	viewFrustum = Frustum();
 	return S_OK;
 }
@@ -457,6 +457,30 @@ HRESULT Application::InitDevice()
     return S_OK;
 }
 
+void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotation)
+{
+
+	GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, squareMesh, position);
+	temp.setScale(scale.x, scale.y, scale.z);
+	temp.setRotation(rotation.x, rotation.y, rotation.z);
+	temp.UpdateMatrix();
+	temp.setCollider(true);
+	objects.insert(temp, temp.Pos(), temp.Size());
+
+	/*
+	from top down:
+	* _ *
+	 |_|
+	*   *
+
+	*/
+
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1, position.y, position.z - scale.z - 0.1));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1, position.y, position.z + scale.z + 0.1));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1, position.y, position.z - scale.z - 0.1));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1, position.y, position.z + scale.z + 0.1));
+}
+
 void Application::readInitFile(std::string fileName)
 {
 	/*
@@ -506,12 +530,7 @@ void Application::readInitFile(std::string fileName)
 
 			if (name == "CRATE")
 			{
-				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, squareMesh, position);
-				temp.setScale(scale.x, scale.y, scale.z);
-				temp.setRotation(rotation.x, rotation.y, rotation.z);
-				temp.UpdateMatrix();
-				temp.setCollider(true);
-				objects.insert(temp, temp.Pos(), temp.Size());
+				placeCrate(position, scale, rotation);
 			}
 			else if (name == "HOUSE")
 			{
@@ -566,22 +585,11 @@ void Application::initObjects()
 	initialisePipe();
 	initialiseGrass();
 
+	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, squareMesh);
+
 	readInitFile("worldData.txt");
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
-
-	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, squareMesh);
-	navGraph.giveNode(XMFLOAT3(0, 10, 0));
-	navGraph.giveNode(XMFLOAT3(10, 10, 10));
-
-	std::vector<BoundingBox> bbs;
-	std::vector<GameObject*> allObjects = objects.getAllElements();
-	for (GameObject* o : allObjects)
-	{
-		bbs.push_back(o->getBoundingBox());
-	}
-	
-	navGraph.calculateGraph(bbs);
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
@@ -656,6 +664,10 @@ void Application::pushEvent(Event toPush)
 
 void Application::handleMessages()
 {
+	std::random_device rd;
+	std::mt19937 generator(rd());
+	std::uniform_int_distribution<int> distr(-10, 10);
+
 	while (!inputEventQueue.empty())
 	{
 		Event next = inputEventQueue.front();
@@ -685,6 +697,12 @@ void Application::handleMessages()
 			break;
 		case PITCH_DOWN:
 			camera.Pitch(0.001f);
+			break;
+		case PLACE_CRATE:
+			//if (!recalcGraph.running())
+			{
+				placeCrate(XMFLOAT3(distr(generator), 0.5, distr(generator)), XMFLOAT3(1, 1, 1), XMFLOAT3(0, 0, 0));
+			}
 			break;
 		case TOGGLE_WIREFRAME:
 			if (!wfRender)
@@ -735,7 +753,21 @@ void Application::Update()
 	camera.Update();
 	skybox.Update(&camera);
 	std::vector<GameObject*> allObjects = objects.getAllElements();
-	
+
+
+	if (navGraph.needsRecalculating())
+	{
+		/*Update the navigation graph*/
+		std::vector<BoundingBox> bbs;
+		for (GameObject* o : allObjects)
+		{
+			bbs.push_back(o->getBoundingBox());
+		}
+
+		//recalcGraph = TimeSlice<void>(std::bind(&Graph::calculateGraph, &navGraph, bbs), bbs);
+		navGraph.calculateGraph(bbs);
+	}
+
 	for (GameObject* object : allObjects)
 	{
 		object->Update(t);
@@ -811,7 +843,11 @@ void Application::Draw()
 		object->Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
-	navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, camera);
+	//if (!recalcGraph.running())
+	{
+		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, camera);
+	}
+
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
 	
 	for (Spline s : splines)

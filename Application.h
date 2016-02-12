@@ -21,10 +21,12 @@
 #include "Surface.h"
 #include "Octree.h"
 #include "Graph.h"
+#include "TimeSlice.h"
 
 #include <queue>
 #include <fstream>
 #include <regex>
+#include <random>
 
 class Application
 {
@@ -87,6 +89,7 @@ private:
 	std::vector<Spline> splines;
 
 	Graph navGraph;
+	TimeSlice<void> recalcGraph;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;
@@ -108,6 +111,7 @@ private:
 	HRESULT initialiseHouse();
 	HRESULT initialisePipe();
 	HRESULT initialiseGrass();
+	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
 
 	void initObjects();
 
@@ -119,6 +123,7 @@ private:
 
 public:
 	Application();
+	Application(const Application& other) {  }
 	~Application();
 
 	HRESULT Initialise(HINSTANCE hInstance, int nCmdShow);

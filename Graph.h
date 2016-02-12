@@ -4,6 +4,7 @@
 #include <directxmath.h>
 #include <DirectXCollision.h>
 #include <vector>
+#include <algorithm>
 
 #include "Node.h"
 
@@ -32,4 +33,6 @@ public:
 	//Node* getNearestNode(DirectX::XMFLOAT3 position);
 
 	void DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam);
+
+	inline bool needsRecalculating() { return !graphUpToDate; }
 };

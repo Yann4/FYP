@@ -35,19 +35,45 @@ void Graph::calculateGraph(vector<BoundingBox> objects)
 		return;
 	}
 
-	constexpr int searchRadius = 50;
+	constexpr int searchRadius = 20;
+	constexpr int maxNeighbours = 30;
 
+	vector<int> checked;
 	for (int i = 0; i < graphNodes.size(); i++)
 	{
-		for (int j = i + 1; j < graphNodes.size(); j++)
+
+		for (unsigned int j = 0; j < graphNodes.size(); j++)
 		{
+			checked.push_back(j);
 			if (graphNodes.at(i).distanceFrom(graphNodes.at(j).Position()) > searchRadius)
 			{
 				continue;
 			}
 
 			graphNodes.at(i).giveArc(graphNodes.at(j), objects);
+
+			if (graphNodes.at(i).getNeighbours().size() >= maxNeighbours)
+			{
+				break;
+			}
 		}
+
+		if (graphNodes.at(i).getNeighbours().size() <= 2)
+		{
+			for (unsigned int j = 0; j < graphNodes.size(); j++)
+			{
+				if (std::find(checked.begin(), checked.end(), j) != checked.end())
+				{
+					graphNodes.at(i).giveArc(graphNodes.at(j), objects);
+				}
+
+				if (graphNodes.at(i).getNeighbours().size() >= maxNeighbours)
+				{
+					break;
+				}
+			}
+		}
+		checked.clear();
 	}
 
 	graphUpToDate = true;

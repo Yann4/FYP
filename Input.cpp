@@ -99,6 +99,10 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return TOGGLE_FLASHLIGHT;
 	}
+	else if (eventName == "PLACE_CRATE")
+	{
+		return PLACE_CRATE;
+	}
 	else
 	{
 		return NO_SUCH_EVENT;

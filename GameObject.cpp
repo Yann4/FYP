@@ -55,9 +55,9 @@ void GameObject::setScale(float x, float y, float z)
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(-position.x, -position.y, -position.z));
 	transformations.push(temp);
 	
-	XMVECTOR sc = XMLoadFloat3(&scale);
-	sc = XMVector3Transform(sc, XMMatrixScaling(x, y, z));
-	XMStoreFloat3(&scale, sc);
+	scale.x *= x;
+	scale.y *= y;
+	scale.z *= z;
 }
 
 void GameObject::setRotation(float x, float y, float z)
@@ -120,7 +120,7 @@ void GameObject::moveFromCollision(float x, float y, float z)
 }
 BoundingBox GameObject::getBoundingBox()
 {
-	return BoundingBox(position, scale);
+	return BoundingBox(position, XMFLOAT3(scale.x / 2, scale.y / 2, scale.z / 2));
 }
 
 //UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix
