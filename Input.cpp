@@ -103,6 +103,10 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return PLACE_CRATE;
 	}
+	else if (eventName == "TOGGLE_GRAPH_RENDER")
+	{
+		return TOGGLE_GRAPH_RENDER;
+	}
 	else
 	{
 		return NO_SUCH_EVENT;

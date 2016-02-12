@@ -63,8 +63,8 @@ Application::Application()
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
-	recalcGraph = TimeSlice<void>();
 	flashlightOn = false;
+	renderGraph = false;
 }
 
 Application::~Application()
@@ -459,6 +459,11 @@ HRESULT Application::InitDevice()
 
 void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotation)
 {
+	if (!graphMutex.try_lock())
+	{
+		return;
+	}
+	graphMutex.unlock();
 
 	GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, squareMesh, position);
 	temp.setScale(scale.x, scale.y, scale.z);
@@ -472,13 +477,13 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	* _ *
 	 |_|
 	*   *
-
 	*/
 
 	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1, position.y, position.z - scale.z - 0.1));
 	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1, position.y, position.z + scale.z + 0.1));
 	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1, position.y, position.z - scale.z - 0.1));
 	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1, position.y, position.z + scale.z + 0.1));
+
 }
 
 void Application::readInitFile(std::string fileName)
@@ -699,10 +704,7 @@ void Application::handleMessages()
 			camera.Pitch(0.001f);
 			break;
 		case PLACE_CRATE:
-			//if (!recalcGraph.running())
-			{
-				placeCrate(XMFLOAT3(distr(generator), 0.5, distr(generator)), XMFLOAT3(1, 1, 1), XMFLOAT3(0, 0, 0));
-			}
+			placeCrate(XMFLOAT3(distr(generator), 0.5, distr(generator)), XMFLOAT3(1, 1, 1), XMFLOAT3(0, 0, 0));
 			break;
 		case TOGGLE_WIREFRAME:
 			if (!wfRender)
@@ -717,12 +719,23 @@ void Application::handleMessages()
 			}
 		case TOGGLE_FLASHLIGHT:
 			flashlightOn = !flashlightOn;
+			break;
+		case TOGGLE_GRAPH_RENDER:
+			renderGraph = !renderGraph;
+			break;
 		case NO_SUCH_EVENT:
 		default:
 			break;
 		}
 		inputEventQueue.pop();
 	}
+}
+
+void Application::updateGraph(std::vector<BoundingBox>& objects)
+{
+	graphMutex.lock();
+	navGraph.calculateGraph(objects);
+	graphMutex.unlock();
 }
 
 void Application::Update()
@@ -754,18 +767,20 @@ void Application::Update()
 	skybox.Update(&camera);
 	std::vector<GameObject*> allObjects = objects.getAllElements();
 
-
-	if (navGraph.needsRecalculating())
+	if (graphMutex.try_lock())
 	{
-		/*Update the navigation graph*/
-		std::vector<BoundingBox> bbs;
-		for (GameObject* o : allObjects)
+		graphMutex.unlock();
+		if (navGraph.needsRecalculating())
 		{
-			bbs.push_back(o->getBoundingBox());
-		}
+			/*Update the navigation graph*/
+			std::vector<BoundingBox> bbs;
+			for (GameObject* o : allObjects)
+			{
+				bbs.push_back(o->getBoundingBox());
+			}
 
-		//recalcGraph = TimeSlice<void>(std::bind(&Graph::calculateGraph, &navGraph, bbs), bbs);
-		navGraph.calculateGraph(bbs);
+			std::thread(&Application::updateGraph, this, bbs).detach();
+		}
 	}
 
 	for (GameObject* object : allObjects)
@@ -843,8 +858,9 @@ void Application::Draw()
 		object->Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
-	//if (!recalcGraph.running())
+	if (renderGraph && graphMutex.try_lock())
 	{
+		graphMutex.unlock();
 		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 

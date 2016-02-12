@@ -21,12 +21,13 @@
 #include "Surface.h"
 #include "Octree.h"
 #include "Graph.h"
-#include "TimeSlice.h"
 
 #include <queue>
 #include <fstream>
 #include <regex>
 #include <random>
+#include <thread>
+#include <mutex>
 
 class Application
 {
@@ -89,7 +90,8 @@ private:
 	std::vector<Spline> splines;
 
 	Graph navGraph;
-	TimeSlice<void> recalcGraph;
+	std::mutex graphMutex;
+	bool renderGraph;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;
@@ -114,6 +116,8 @@ private:
 	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
 
 	void initObjects();
+
+	void updateGraph(std::vector<DirectX::BoundingBox>& objects);
 
 	static void pushEvent(Event toPush);
 	void handleMessages();
