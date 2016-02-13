@@ -95,7 +95,8 @@ struct MeshSection
 
 	MeshSection() { materialName = ""; sectionName = ""; material = nullptr; startIndex = 0; endIndex = 0; centre = DirectX::XMFLOAT3(0, 0, 0); size = DirectX::XMFLOAT3(0, 0, 0); }
 	MeshSection(std::string materialName, std::string sectionName, Material* material, int startIndex, int endIndex, DirectX::XMFLOAT3 centre, DirectX::XMFLOAT3 size) :
-		materialName(materialName), sectionName(sectionName), material(material), startIndex(startIndex), endIndex(endIndex), centre(centre), size(size){}
+		materialName(materialName), sectionName(sectionName), material(material), startIndex(startIndex), endIndex(endIndex), centre(centre), size(size)
+	{}
 	~MeshSection(){ material = nullptr; }
 };
 
@@ -116,9 +117,15 @@ struct MeshData
 	MeshData() : vertexBuffer(nullptr), indexBuffer(nullptr), numIndices(0), material(Material()), textureRV(nullptr), specularRV(nullptr), normalMapRV(nullptr), parts(std::vector<MeshSection>()), size(DirectX::XMFLOAT3(0,0,0))
 	{}
 
-	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, std::vector<MeshSection> parts, Material mat, ID3D11ShaderResourceView* texRV, ID3D11ShaderResourceView* specRV) : 
-		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), parts(parts), textureRV(texRV), specularRV(specRV)
-	{}
+	MeshData(ID3D11Buffer* vBuffer, ID3D11Buffer* iBuffer, int numIndices, std::vector<MeshSection> parts, Material mat, ID3D11ShaderResourceView* texRV, ID3D11ShaderResourceView* specRV, ID3D11ShaderResourceView* normalRV) : 
+		vertexBuffer(vBuffer), indexBuffer(iBuffer), numIndices(numIndices), material(mat), parts(parts), textureRV(texRV), specularRV(specRV), normalMapRV(normalRV)
+	{
+		vertexBuffer->AddRef();
+		indexBuffer->AddRef();
+		if (texRV) texRV->AddRef();
+		if (specRV) specRV->AddRef();
+		if (normalMapRV) normalMapRV->AddRef();
+	}
 
 	~MeshData()
 	{

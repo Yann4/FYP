@@ -68,11 +68,11 @@ public:
 	void setCullState(bool cull) { shouldBeFrustumCulled = cull; }
 
 	bool getMovementState() { return objectMoves; }
-	void setMovementState(bool objectMoves) { this->objectMoves = objectMoves; }
+	void setMovementState(bool objectDoesMove) { objectMoves = objectDoesMove; }
 
 	bool getIsGround() { return isGround; }
-	void setIsGround(bool isGround) { this->isGround = isGround; }
+	void setIsGround(bool isTheGround) { isGround = isTheGround; }
 
 	bool getOnGround() { return onGround; }
-	void setOnGround(bool onGround) { this->onGround = onGround; }
+	void setOnGround(bool isOnGround) { onGround = isOnGround; }
 };

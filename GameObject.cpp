@@ -32,9 +32,6 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* frameConst
 
 GameObject::~GameObject()
 {
-	context = nullptr;
-	objectConstBuffer = nullptr;
-	frameConstBuffer = nullptr;
 	mesh = nullptr;
 }
 
@@ -184,7 +181,7 @@ void GameObject::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, F
 		cb.useTextures = 1;
 	}
 
-	for (int i = 0; i < mesh->parts.size(); i++)
+	for (unsigned int i = 0; i < mesh->parts.size(); i++)
 	{
 		if (mesh->parts.at(i).material == nullptr)
 		{

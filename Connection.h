@@ -9,14 +9,15 @@ class Node;
 class Connection
 {
 private:
-	Spline spline;
+	Spline* spline;
 public:
 	Node* start;
 	Node* end;
 	int cost;
 
-	Connection() :start(nullptr), end(nullptr), cost(-1) {};
-	Connection(Node* start, Node* end, int cost, ID3D11DeviceContext* context, ID3D11Device* device);
+	Connection() :start(nullptr), end(nullptr), spline(nullptr), cost(-1) {};
+	Connection(Node* start, Node* end, int cost, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11InputLayout* splineLayout);
+	~Connection();
 
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
 };

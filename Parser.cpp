@@ -42,7 +42,7 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 		
 		if (line.find("mtllib") != std::string::npos)
 		{
-			int i = 7;
+			unsigned int i = 7;
 			while (line[i] != '.')
 			{
 				mtlFileName += line[i];
@@ -55,7 +55,7 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 		if (line.find("usemtl ") != std::string::npos)
 		{
 			std::string mtlName;
-			int i = 7;
+			unsigned int i = 7;
 			while (i < line.size() && line[i] != '\n')
 			{
 				mtlName += line[i];
@@ -120,10 +120,10 @@ int Parser::readObjFile(ID3D11Device* _pd3dDevice, std::string fileName, MeshDat
 
 		if (line.find("f ") != std::string::npos)
 		{
-			int v1, v2, v3;
-			int vn1, vn2, vn3;
-			int vt1, vt2, vt3;
-			sscanf_s(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
+			float v1, v2, v3;
+			float vn1, vn2, vn3;
+			float vt1, vt2, vt3;
+			sscanf_s(line.c_str(), "f %f/%f/%f %f/%f/%f %f/%f/%f", &v1, &vt1, &vn1, &v2, &vt2, &vn2, &v3, &vt3, &vn3);
 
 			if (v1 < vIndexOffset)
 			{

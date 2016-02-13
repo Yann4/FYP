@@ -23,6 +23,7 @@ private:
 public:
 	Surface();
 	Surface(std::vector<Spline>& splines, ID3D11DeviceContext* context, ID3D11Device* device);
+	~Surface();
 
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
 };

@@ -31,6 +31,8 @@ void Skybox::init(ID3D11DeviceContext* context, ID3D11Device* _pd3dDevice, LPCTS
 	_pd3dDevice->CreateBuffer(&bd, nullptr, &_pConstantBuffer);
 
 	_pImmediateContext = context;
+	_pImmediateContext->AddRef();
+
 	sphereWorld = DirectX::XMMatrixIdentity();
 
 	CreateSphere(_pd3dDevice, 10, 10);
@@ -70,9 +72,8 @@ void Skybox::init(ID3D11DeviceContext* context, ID3D11Device* _pd3dDevice, LPCTS
 
 Skybox::~Skybox()
 {
-	_pImmediateContext = nullptr;
-	_pConstantBuffer = nullptr;
-
+	if (_pImmediateContext) _pImmediateContext->Release();
+	if (_pConstantBuffer) _pConstantBuffer->Release();
 	if (CubesTexSamplerState) CubesTexSamplerState->Release();
 	if (sphereIBuff) sphereIBuff->Release();
 	if (sphereVBuff) sphereVBuff->Release();

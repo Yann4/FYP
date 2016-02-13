@@ -4,15 +4,36 @@ using namespace DirectX;
 Spline::Spline()
 {
 	context = nullptr;
+	splineLayout = nullptr;
+	vertexBuffer = nullptr;
+	indexBuffer = nullptr;
+	constBuffer = nullptr;
 	controlPoints = std::vector<XMFLOAT3>();
 	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 }
 
-Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device): controlPoints(controlPoints), context(context)
+Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device, ID3D11InputLayout* layout): controlPoints(controlPoints), context(context), splineLayout(layout)
 {
+	vertexBuffer = nullptr;
+	indexBuffer = nullptr;
+	constBuffer = nullptr;
+	context->AddRef();
+	splineLayout->AddRef();
+	device->AddRef();
+
 	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 	generateLine();
 	createBuffers(device);
+	device->Release();
+}
+
+Spline::~Spline()
+{
+	if(context) context->Release();
+	if(splineLayout) splineLayout->Release();
+	if (vertexBuffer) vertexBuffer->Release();
+	if (indexBuffer) indexBuffer->Release();
+	if (constBuffer) constBuffer->Release();
 }
 
 void Spline::generateLine()
@@ -100,6 +121,14 @@ XMFLOAT3 Spline::lerp(XMFLOAT3 a, XMFLOAT3 b, float u)
 
 void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)
 {
+	ID3D11InputLayout* prevLayout = nullptr;
+	context->IAGetInputLayout(&prevLayout);
+
+	if (prevLayout != splineLayout)
+	{
+		context->IASetInputLayout(splineLayout);
+	}
+
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 
 	context->VSSetShader(vShader, nullptr, 0);
@@ -123,4 +152,9 @@ void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camer
 	context->DrawIndexed(NUM_POINTS, 0, 0);
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	if (prevLayout != splineLayout)
+	{
+		context->IASetInputLayout(prevLayout);
+	}
 }

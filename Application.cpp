@@ -32,32 +32,43 @@ Application::Application()
 {
 	_hInst = nullptr;
 	_hWnd = nullptr;
+	
 	_driverType = D3D_DRIVER_TYPE_NULL;
 	_featureLevel = D3D_FEATURE_LEVEL_11_0;
+	
 	_pd3dDevice = nullptr;
 	_pImmediateContext = nullptr;
 	_pSwapChain = nullptr;
 	_pRenderTargetView = nullptr;
+
+	_depthStencilView = nullptr;
+	_depthStencilBuffer = nullptr;
+
 	_pVertexShader = nullptr;
 	_pPixelShader = nullptr;
+	
 	skyboxPS = nullptr;
 	skyboxVS = nullptr;
+	
 	lineVS = nullptr;
 	linePS = nullptr;
-	basicVertexLayout = nullptr;
+	
 	_pVertexLayout = nullptr;
+	basicVertexLayout = nullptr;
+
+	_wireFrame = nullptr;
+	_solid = nullptr;
+	wfRender = false;
+
+	samplerLinear = nullptr;
+
+	frameConstantBuffer = nullptr;
+	objectConstantBuffer = nullptr;
+
 	squareMesh = new MeshData();
 	houseMesh = new MeshData();
 	pipeMesh = new MeshData();
 	grassMesh = new MeshData();
-	frameConstantBuffer = nullptr;
-	objectConstantBuffer = nullptr;
-	samplerLinear = nullptr;
-	_depthStencilBuffer = nullptr;
-	_depthStencilView = nullptr;
-	_solid = nullptr;
-	_wireFrame = nullptr;
-	samplerLinear = nullptr;
 
 	cameraMoveSpeed = 0.1f;
 	cameraPanSpeed = 0.25f;
@@ -86,7 +97,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
     if (FAILED(InitDevice()))
     {
-        //Cleanup();
+        Cleanup();
 
         return E_FAIL;
     }
@@ -479,10 +490,10 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	*   *
 	*/
 
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1, position.y, position.z - scale.z - 0.1));
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1, position.y, position.z + scale.z + 0.1));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1, position.y, position.z - scale.z - 0.1));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1, position.y, position.z + scale.z + 0.1));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1f, position.y, position.z - scale.z - 0.1f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1f, position.y, position.z + scale.z + 0.1f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1f, position.y, position.z - scale.z - 0.1f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1f, position.y, position.z + scale.z + 0.1f));
 
 }
 
@@ -578,7 +589,7 @@ void Application::readInitFile(std::string fileName)
 					controlPoints.push_back(position);
 				}
 			}
-			splines.push_back(Spline(controlPoints, _pImmediateContext, _pd3dDevice));			
+			splines.push_back(Spline(controlPoints, _pImmediateContext, _pd3dDevice, basicVertexLayout));			
 		}
 	}
 }
@@ -590,7 +601,7 @@ void Application::initObjects()
 	initialisePipe();
 	initialiseGrass();
 
-	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, squareMesh);
+	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, squareMesh, basicVertexLayout);
 
 	readInitFile("worldData.txt");
 	skybox = Skybox();
@@ -621,29 +632,42 @@ void Application::initObjects()
 void Application::Cleanup()
 {
     if (_pImmediateContext) _pImmediateContext->ClearState();
-    if (objectConstantBuffer) objectConstantBuffer->Release();
-	if (frameConstantBuffer) frameConstantBuffer->Release();
-    if (_pVertexLayout) _pVertexLayout->Release();
-    if (_pVertexShader) _pVertexShader->Release();
-    if (_pPixelShader) _pPixelShader->Release();
-    if (_pRenderTargetView) _pRenderTargetView->Release();
-    if (_pSwapChain) _pSwapChain->Release();
-    if (_pImmediateContext) _pImmediateContext->Release();
-    if (_pd3dDevice) _pd3dDevice->Release();
+	if (_pImmediateContext) _pImmediateContext->Release();
+	if (_pSwapChain) _pSwapChain->Release();
+	if (_pRenderTargetView) _pRenderTargetView->Release();
+
 	if (_depthStencilView) _depthStencilView->Release();
 	if (_depthStencilBuffer) _depthStencilBuffer->Release();
-	if (_wireFrame) _wireFrame->Release();
-	if (_solid) _solid->Release();
+
+	if (_pVertexShader) _pVertexShader->Release();
+	if (_pPixelShader) _pPixelShader->Release();
+
 	if (skyboxPS) skyboxPS->Release();
 	if (skyboxVS) skyboxVS->Release();
+
 	if (lineVS) lineVS->Release();
 	if (linePS) linePS->Release();
+
+	if (_pVertexLayout) _pVertexLayout->Release();
 	if (basicVertexLayout) basicVertexLayout->Release();
 
+	if (_wireFrame) _wireFrame->Release();
+	if (_solid) _solid->Release();
+
+	if (samplerLinear) samplerLinear->Release();
+
+    if (objectConstantBuffer) objectConstantBuffer->Release();
+	if (frameConstantBuffer) frameConstantBuffer->Release();
+	
 	delete squareMesh;
 	delete houseMesh;
 	delete pipeMesh;
 	delete grassMesh;
+
+	//How 'bout we don't look to closely at this
+	//skybox.~Skybox();
+	//navGraph.~Graph();
+	//if (_pd3dDevice) _pd3dDevice->Release();
 }
 
 void Application::onMouseMove(WPARAM btnState, int x, int y)
@@ -704,7 +728,7 @@ void Application::handleMessages()
 			camera.Pitch(0.001f);
 			break;
 		case PLACE_CRATE:
-			placeCrate(XMFLOAT3(distr(generator), 0.5, distr(generator)), XMFLOAT3(1, 1, 1), XMFLOAT3(0, 0, 0));
+			placeCrate(XMFLOAT3((float)distr(generator), 0.5f, (float)distr(generator)), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
 			break;
 		case TOGGLE_WIREFRAME:
 			if (!wfRender)
@@ -732,10 +756,10 @@ void Application::handleMessages()
 	}
 }
 
-void Application::updateGraph(std::vector<BoundingBox>& objects)
+void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
 {
 	graphMutex.lock();
-	navGraph.calculateGraph(objects);
+	navGraph.calculateGraph(objectsBBs);
 	graphMutex.unlock();
 }
 
@@ -766,7 +790,7 @@ void Application::Update()
 
 	camera.Update();
 	skybox.Update(&camera);
-	std::vector<GameObject*> allObjects = objects.getAllElements();
+	allObjects = objects.getAllElements();
 
 	if (graphMutex.try_lock())
 	{
@@ -855,10 +879,8 @@ void Application::Draw()
 		perFrameCB.spotLight.range = 0;
 	}
 
-
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &perFrameCB, 0, 0);
 
-	std::vector<GameObject*> allObjects = objects.getAllElements();
 	for (GameObject* object : allObjects)
 	{
 		object->Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);

@@ -404,7 +404,9 @@
     <ClCompile Include="Surface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DX11 Framework.fx" />
+    <None Include="DX11 Framework.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />

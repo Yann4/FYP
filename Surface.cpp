@@ -23,6 +23,8 @@ Example order of vectors
 */
 Surface::Surface(vector<Spline>& splines, ID3D11DeviceContext* context, ID3D11Device* device) : context(context)
 {
+	context->AddRef();
+
 	vector<Vertex> vertices;
 	vector<WORD> indices;
 
@@ -54,7 +56,7 @@ Surface::Surface(vector<Spline>& splines, ID3D11DeviceContext* context, ID3D11De
 
 	device->CreateBuffer(&bd, &InitData, &vertexBuffer);
 	
-	unsigned int pointsInSpline = 101;
+	WORD pointsInSpline = 101;
 	
 	for (WORD topLeftIndex = 0; topLeftIndex < vertices.size() - pointsInSpline - 1; topLeftIndex++)
 	{
@@ -87,6 +89,14 @@ Surface::Surface(vector<Spline>& splines, ID3D11DeviceContext* context, ID3D11De
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	device->CreateBuffer(&bd, nullptr, &constBuffer);
+}
+
+Surface::~Surface()
+{
+	if (context) context->Release();
+	if (vertexBuffer) vertexBuffer->Release();
+	if (indexBuffer) indexBuffer->Release();
+	if (constBuffer) constBuffer->Release();
 }
 
 void Surface::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)

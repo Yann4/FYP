@@ -9,7 +9,7 @@ nearZ(0.01f), farZ(10), aspect(0.5f), yFov(XM_PIDIV2), nearWindHeight(0), farWin
 	setLens(yFov, aspect, nearZ, farZ);
 }
 
-Camera::Camera(float fovY, float aspect, float znear, float zfar) : position(XMFLOAT4(0, 0, -3, 0)), lookAt(XMFLOAT4(0, 0, 1, 0)), right(XMFLOAT4(1, 0, 0, 0)),
+Camera::Camera(float fovY, float aspect, float znear, float zfar) : position(XMFLOAT4(0, 3, -3, 0)), lookAt(XMFLOAT4(0, 0, 1, 0)), right(XMFLOAT4(1, 0, 0, 0)),
 up(XMFLOAT4(0, 1, 0, 0))
 {
 	setLens(fovY, aspect, znear, zfar);

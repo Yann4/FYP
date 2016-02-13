@@ -8,7 +8,7 @@
 #(x,y,z) on a new line for however many control points
 #END
 
-GRASS (0,0,0) (50,0.1,50) (0,0,0)
+GRASS (0,-0.5,0) (50,1,50) (0,0,0)
 CRATE (3,0.5,3) (1,1,1) (0,0,0)
 CRATE (0,0.5,0) (1,1,1) (0,0,0)
 CRATE (-3,0.5,-3) (1,1,1) (0,0,0)

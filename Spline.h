@@ -24,6 +24,7 @@ class Spline
 {
 private:
 	ID3D11DeviceContext* context;
+	ID3D11InputLayout* splineLayout;
 
 	std::vector<DirectX::XMFLOAT3> controlPoints;
 	std::vector<DirectX::XMFLOAT3> linePoints;
@@ -37,7 +38,8 @@ private:
 	int NUM_POINTS = 101;
 public:
 	Spline();
-	Spline(std::vector<DirectX::XMFLOAT3> controlPoints, ID3D11DeviceContext* context, ID3D11Device* device);
+	Spline(std::vector<DirectX::XMFLOAT3> controlPoints, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11InputLayout* layout);
+	~Spline();
 
 private:
 	void generateLine();

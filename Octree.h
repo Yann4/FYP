@@ -254,7 +254,7 @@ std::vector<T*> Octree<T>::getElementsInBounds(DirectX::XMFLOAT3 centre, DirectX
 
 	if (boundingBox.intersects(examine))
 	{
-		for (int i = 0; i < elements.size(); i++)
+		for (unsigned int i = 0; i < elements.size(); i++)
 		{
 			toRet.push_back(&(elements.at(i).data));
 		}
@@ -277,7 +277,7 @@ std::vector<T*> Octree<T>::getAllElements()
 {
 	std::vector<T*> toRet = std::vector<T*>();
 
-	for (int i = 0; i < elements.size(); i++)
+	for (unsigned int i = 0; i < elements.size(); i++)
 	{
 		toRet.push_back(&(elements.at(i).data));
 	}

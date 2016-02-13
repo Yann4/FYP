@@ -55,8 +55,6 @@ private:
 	ID3D11VertexShader*     lineVS;
 	ID3D11PixelShader*      linePS;
 
-	Skybox skybox;
-
 	ID3D11InputLayout*      _pVertexLayout;
 	ID3D11InputLayout*		basicVertexLayout;
 	
@@ -88,6 +86,8 @@ private:
 	Octree<GameObject> objects;
 	std::vector<GameObject*> allObjects;
 	std::vector<Spline> splines;
+
+	Skybox skybox;
 
 	Graph navGraph;
 	std::mutex graphMutex;
@@ -127,7 +127,7 @@ private:
 
 public:
 	Application();
-	Application(const Application& other) {  }
+	Application(const Application& other){}
 	~Application();
 
 	HRESULT Initialise(HINSTANCE hInstance, int nCmdShow);
