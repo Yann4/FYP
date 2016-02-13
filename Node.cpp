@@ -6,6 +6,9 @@ Node::Node()
 {
 	position = XMFLOAT3(0, 0, 0);
 	neighbours = vector<Connection>();
+	g_score = 0;
+	h_score = 0;
+	parent = nullptr;
 }
 
 Node::Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh) : position(position), context(context), device(device)
@@ -14,6 +17,9 @@ Node::Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Devic
 	object = GameObject(context, constBuffer, objBuffer, mesh, position);
 	object.setScale(0.1f, 0.1f, 0.1f);
 	object.UpdateMatrix();
+	g_score = 0;
+	h_score = 0;
+	parent = nullptr;
 }
 
 bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
@@ -92,4 +98,9 @@ void Node::Draw(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* Connec
 	}
 
 	object.Draw(NodePShader, NodeVShader, frustum, cam);
+}
+
+void Node::clearConnections()
+{
+	neighbours.clear();
 }

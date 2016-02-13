@@ -717,6 +717,7 @@ void Application::handleMessages()
 				_pImmediateContext->RSSetState(_solid);
 				wfRender = false;
 			}
+			break;
 		case TOGGLE_FLASHLIGHT:
 			flashlightOn = !flashlightOn;
 			break;
@@ -785,6 +786,11 @@ void Application::Update()
 
 	for (GameObject* object : allObjects)
 	{
+		if (object == nullptr)
+		{
+			continue;
+		}
+
 		object->Update(t);
 		
 		if (!object->getCollider())

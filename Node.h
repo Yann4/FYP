@@ -18,6 +18,10 @@ private:
 	ID3D11Device* device;
 	GameObject object;
 public:
+	float g_score;
+	float h_score;
+	Node* parent;
+public:
 	Node();
 	Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh);
 
@@ -29,6 +33,16 @@ public:
 	void acceptArc(Connection arc);
 
 	void Draw(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam);
+
+	void clearConnections();
+
+	inline float f_score() { return g_score + h_score; }
+
+	inline void resetSearchParams(){
+		g_score = 0;
+		h_score = 0;
+		parent = nullptr;
+	}
 
 private:
 	bool hasVisionOf(Node& other, std::vector<DirectX::BoundingBox>& objects);
