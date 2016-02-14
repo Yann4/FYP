@@ -670,6 +670,39 @@ void Application::Cleanup()
 	//if (_pd3dDevice) _pd3dDevice->Release();
 }
 
+
+void Application::fireBox()
+{
+	XMFLOAT3 cameraPos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+	XMFLOAT3 cameraForwards = camera.getForwards();
+
+	XMVECTOR posVect = XMLoadFloat3(&cameraPos);
+	XMVECTOR forwardsVector = XMLoadFloat3(&cameraForwards);
+	forwardsVector = XMVector3Normalize(forwardsVector);
+	XMStoreFloat3(&cameraForwards, forwardsVector);
+
+	std::vector<BoundingBox> groundBoxes;
+	for (auto object : allObjects)
+	{
+		if (object->getIsGround())
+		{
+			groundBoxes.push_back(object->getBoundingBox());
+		}
+	}
+
+	float distance;
+	for (BoundingBox box : groundBoxes)
+	{
+		if (box.Intersects(posVect, forwardsVector, distance))
+		{
+			posVect = XMVector3Transform(posVect, XMMatrixTranslation(cameraForwards.x * distance, cameraForwards.y * distance, cameraForwards.z * distance));
+			posVect = XMVector3Transform(posVect, XMMatrixTranslation(0, 0.2, 0));
+			XMStoreFloat3(&cameraPos, posVect);
+			placeCrate(cameraPos, XMFLOAT3(1, 1, 1), XMFLOAT3(0, 0, 0));
+		}
+	}
+}
+
 void Application::onMouseMove(WPARAM btnState, int x, int y)
 {
 	if ((btnState & MK_LBUTTON) != 0)
@@ -728,7 +761,8 @@ void Application::handleMessages()
 			camera.Pitch(0.001f);
 			break;
 		case PLACE_CRATE:
-			placeCrate(XMFLOAT3((float)distr(generator), 0.5f, (float)distr(generator)), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
+			fireBox();
+			//placeCrate(XMFLOAT3((float)distr(generator), 0.5f, (float)distr(generator)), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
 			break;
 		case TOGGLE_WIREFRAME:
 			if (!wfRender)

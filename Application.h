@@ -5,6 +5,7 @@
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <directxcolors.h>
+#include <DirectXCollision.h>
 #include "resource.h"
 #include "DDSTextureLoader.h"
 
@@ -119,6 +120,7 @@ private:
 
 	void updateGraph(std::vector<DirectX::BoundingBox>& objects);
 
+	void fireBox();
 	static void pushEvent(Event toPush);
 	void handleMessages();
 
