@@ -119,29 +119,32 @@ XMFLOAT3 Spline::lerp(XMFLOAT3 a, XMFLOAT3 b, float u)
 	return a;
 }
 
-void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam)
+void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, bool partOfSplineBatch)
 {
 	ID3D11InputLayout* prevLayout = nullptr;
-	context->IAGetInputLayout(&prevLayout);
 
-	if (prevLayout != splineLayout)
+	if (!partOfSplineBatch)
 	{
-		context->IASetInputLayout(splineLayout);
-	}
+		context->IAGetInputLayout(&prevLayout);
 
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+		if (prevLayout != splineLayout)
+		{
+			context->IASetInputLayout(splineLayout);
+		}
+
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+
+		LineCBuffer lCB;
+		lCB.world = XMMatrixIdentity();
+		lCB.view = XMMatrixTranspose(cam.getView());
+		lCB.projection = XMMatrixTranspose(cam.getProjection());
+
+		context->UpdateSubresource(constBuffer, 0, nullptr, &lCB, 0, 0);
+		context->VSSetConstantBuffers(0, 1, &constBuffer);
+	}
 
 	context->VSSetShader(vShader, nullptr, 0);
 	context->PSSetShader(pShader, nullptr, 0);
-
-	LineCBuffer lCB;
-	lCB.world = XMMatrixIdentity();
-	lCB.view = XMMatrixTranspose(cam.getView());
-	lCB.projection = XMMatrixTranspose(cam.getProjection());
-
-	context->UpdateSubresource(constBuffer, 0, nullptr, &lCB, 0, 0);
-
-	context->VSSetConstantBuffers(0, 1, &constBuffer);
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -151,10 +154,12 @@ void Spline::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camer
 
 	context->DrawIndexed(NUM_POINTS, 0, 0);
 
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	if (prevLayout != splineLayout)
+	if (!partOfSplineBatch)
 	{
-		context->IASetInputLayout(prevLayout);
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		if (prevLayout != splineLayout)
+		{
+			context->IASetInputLayout(prevLayout);
+		}
 	}
 }

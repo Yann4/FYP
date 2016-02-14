@@ -98,8 +98,28 @@ void Graph::DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* 
 {
 	for (Node* n : graphNodes)
 	{
-		n->Draw(ConnectionPShader, ConnectionVShader, NodePShader, NodeVShader, frustum, cam);
+		n->DrawNode(NodePShader, NodeVShader, frustum, cam);
 	}
+
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	LineCBuffer lCB;
+	lCB.world = XMMatrixIdentity();
+	lCB.view = XMMatrixTranspose(cam.getView());
+	lCB.projection = XMMatrixTranspose(cam.getProjection());
+
+	context->UpdateSubresource(constBuffer, 0, nullptr, &lCB, 0, 0);
+	context->VSSetConstantBuffers(0, 1, &constBuffer);
+
+	ID3D11InputLayout* prevLayout = nullptr;
+	context->IAGetInputLayout(&prevLayout);
+
+	context->IASetInputLayout(splineInputLayout);
+	for (Node* n : graphNodes)
+	{
+		n->DrawConnections(ConnectionPShader, ConnectionVShader, cam);
+	}
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetInputLayout(prevLayout);
 }
 
 Node* Graph::getNearestNode(XMFLOAT3 position)

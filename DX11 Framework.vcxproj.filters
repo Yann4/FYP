@@ -145,9 +145,6 @@
     <Text Include="input_map.txt">
       <Filter>Input</Filter>
     </Text>
-    <Text Include="cube.txt">
-      <Filter>Data files</Filter>
-    </Text>
     <Text Include="worldData.txt">
       <Filter>Data files</Filter>
     </Text>
@@ -189,6 +186,9 @@
   </ItemGroup>
   <ItemGroup>
     <Object Include="pipe.obj">
+      <Filter>Data files</Filter>
+    </Object>
+    <Object Include="box.obj">
       <Filter>Data files</Filter>
     </Object>
   </ItemGroup>

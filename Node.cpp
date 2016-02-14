@@ -114,14 +114,17 @@ float Node::distanceFrom(XMFLOAT3 pos)
 	return length.x;
 }
 
-void Node::Draw(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam)
+void Node::DrawNode(ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam)
+{
+	object.Draw(NodePShader, NodeVShader, frustum, cam);
+}
+
+void Node::DrawConnections(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, Camera& cam)
 {
 	for (Connection* c : neighbours)
 	{
 		c->Draw(ConnectionPShader, ConnectionVShader, cam);
 	}
-
-	object.Draw(NodePShader, NodeVShader, frustum, cam);
 }
 
 void Node::clearConnections()

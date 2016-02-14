@@ -75,7 +75,7 @@ Application::Application()
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
 	flashlightOn = false;
-	renderGraph = false;
+	renderGraph = true;
 }
 
 Application::~Application()
@@ -223,7 +223,7 @@ HRESULT Application::initialiseCube()
 	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(squareMesh->normalMapRV));
 
 	Parser p;
-	p.readObjFile(_pd3dDevice, "cube.txt", squareMesh, nullptr);
+	p.readObjFile(_pd3dDevice, "box.obj", squareMesh, nullptr);
 	return S_OK;
 }
 
@@ -490,10 +490,10 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	*   *
 	*/
 
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1f, position.y, position.z - scale.z - 0.1f));
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.1f, position.y, position.z + scale.z + 0.1f));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1f, position.y, position.z - scale.z - 0.1f));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.1f, position.y, position.z + scale.z + 0.1f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - (scale.x * 0.1f), position.y + 0.2f, position.z - scale.z - (scale.x * 0.1f)));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - (scale.x * 0.1f), position.y + 0.2f, position.z + scale.z + (scale.x * 0.1f)));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + (scale.x * 0.1f), position.y + 0.2f, position.z - scale.z - (scale.x * 0.1f)));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + (scale.x * 0.1f), position.y + 0.2f, position.z + scale.z + (scale.x * 0.1f)));
 
 }
 
@@ -762,7 +762,6 @@ void Application::handleMessages()
 			break;
 		case PLACE_CRATE:
 			fireBox();
-			//placeCrate(XMFLOAT3((float)distr(generator), 0.5f, (float)distr(generator)), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
 			break;
 		case TOGGLE_WIREFRAME:
 			if (!wfRender)
@@ -930,7 +929,7 @@ void Application::Draw()
 	
 	for (Spline s : splines)
 	{
-		s.Draw(linePS, lineVS, camera);
+		s.Draw(linePS, lineVS, camera, true);
 	}
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);

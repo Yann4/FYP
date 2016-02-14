@@ -117,7 +117,7 @@ void GameObject::moveFromCollision(float x, float y, float z)
 }
 BoundingBox GameObject::getBoundingBox()
 {
-	return BoundingBox(position, XMFLOAT3(scale.x / 2, scale.y / 2, scale.z / 2));
+	return BoundingBox(position, XMFLOAT3(scale.x, scale.y, scale.z));
 }
 
 //UpdateMatrix() should be called at the end of Update, as it flushes any transformations to the world matrix

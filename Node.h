@@ -34,7 +34,8 @@ public:
 	bool giveArc(Node& other, std::vector<DirectX::BoundingBox>& objects);
 	void acceptArc(Connection* arc);
 
-	void Draw(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam);
+	void DrawNode(ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam);
+	void DrawConnections(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, Camera& cam);
 
 	void clearConnections();
 

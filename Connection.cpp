@@ -26,6 +26,6 @@ void Connection::Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, C
 {
 	if (spline != nullptr)
 	{
-		spline->Draw(pShader, vShader, cam);
+		spline->Draw(pShader, vShader, cam, true);
 	}
 }

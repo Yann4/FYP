@@ -48,7 +48,7 @@ private:
 	DirectX::XMFLOAT3 lerp(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b, float u);
 
 public:
-	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
+	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, bool topologyNeedsSetting);
 
 	inline std::vector<DirectX::XMFLOAT3> getLinePoints() { return linePoints; }
 };
