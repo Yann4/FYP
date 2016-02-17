@@ -93,6 +93,7 @@ private:
 	Graph navGraph;
 	std::mutex graphMutex;
 	bool renderGraph;
+	float graphYPosition;
 
 	Input input;
 	static std::queue<Event> inputEventQueue;
