@@ -50,6 +50,8 @@ void Graph::calculateGraph(vector<BoundingBox> objects)
 		return;
 	}
 
+	trimNodeList();
+
 	constexpr int searchRadius = 20;
 	constexpr int maxNeighbours = 30;
 
@@ -142,6 +144,52 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 	return nearest;
 }
 
+void Graph::trimNodeList()
+{
+	float nearbyRadiusSq = pow(0.5f, 2);
+	for (int i = 0; i < graphNodes.size(); i++)
+	{
+		XMFLOAT3 cPos = graphNodes.at(i)->Position();
+		XMVECTOR checkedPos = XMLoadFloat3(&cPos);
+
+		for (int j = 0; j < graphNodes.size(); j++)
+		{
+			if (j == i)
+			{
+				continue;
+			}
+			XMFLOAT3 compPos = graphNodes.at(j)->Position();
+			XMVECTOR comparePos = XMLoadFloat3(&compPos);
+
+			XMVECTOR distSq = XMVector3LengthSq(comparePos - checkedPos);
+			XMFLOAT3 dSq;
+			XMStoreFloat3(&dSq, distSq);
+
+			if (dSq.x < nearbyRadiusSq)
+			{
+				//combine into one node
+				//Calculate new node
+				XMVECTOR avg = ((comparePos - checkedPos) / 2) + checkedPos;
+				//XMFLOAT3 newPos = XMFLOAT3(((cPos.x + compPos.x) / 2.0f), (cPos.y + compPos.y) / 2.0f, (cPos.z + compPos.z) / 2.0f);
+				XMFLOAT3 newPos;
+				XMStoreFloat3(&newPos, avg);
+				giveNode(newPos);
+				//Remove old nodes
+				delete graphNodes[i];
+				delete graphNodes[j];
+				
+				graphNodes.erase(graphNodes.begin() + i);
+				graphNodes.erase(graphNodes.begin() + j);
+				i = 0;
+				j = 0;
+			}
+		}
+	}
+}
+
+/*
+PATHFINDING
+*/
 //Euclidean heurstic
 float Graph::heuristic(XMFLOAT3 start, XMFLOAT3 end)
 {

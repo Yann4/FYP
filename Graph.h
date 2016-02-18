@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <stack>
+#include <cmath>
 
 #include "Node.h"
 
@@ -43,4 +44,7 @@ private:
 	std::stack<DirectX::XMFLOAT3> aStar(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end);
 
 	float heuristic(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b);
+
+	//Combines nodes that are too close together
+	void trimNodeList();
 };

@@ -75,7 +75,7 @@ Application::Application()
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
 	flashlightOn = false;
-	renderGraph = true;
+	renderGraph = false;
 
 	graphYPosition = 1.0f;
 }
