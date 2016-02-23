@@ -31,7 +31,7 @@ public:
 
 	void giveNode(DirectX::XMFLOAT3 position);
 
-	void calculateGraph(std::vector<DirectX::BoundingBox> objects);
+	void calculateGraph(std::vector<DirectX::BoundingBox>& objects);
 
 	void DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam);
 
@@ -46,5 +46,8 @@ private:
 	float heuristic(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b);
 
 	//Combines nodes that are too close together
-	void trimNodeList();
+	//Also, removes nodes that are inside blocks
+	void trimNodeList(std::vector<DirectX::BoundingBox>& objects);
+
+	void trimConnections();
 };

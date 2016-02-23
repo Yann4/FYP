@@ -12,7 +12,7 @@ Spline::Spline()
 	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 }
 
-Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device, ID3D11InputLayout* layout): controlPoints(controlPoints), context(context), splineLayout(layout)
+Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device, ID3D11InputLayout* layout): controlPoints(controlPoints), context(context), splineLayout(layout), device(device)
 {
 	vertexBuffer = nullptr;
 	indexBuffer = nullptr;
@@ -24,7 +24,7 @@ Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * contex
 	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 	generateLine();
 	createBuffers(device);
-	device->Release();
+	colour = XMFLOAT4(0, 0, 0, 1.0);
 }
 
 Spline::~Spline()
@@ -66,7 +66,7 @@ void Spline::createBuffers(ID3D11Device* device)
 	{
 		Vertex v;
 		v.position = XMFLOAT4(linePoints.at(i).x, linePoints.at(i).y, linePoints.at(i).z, 1.0f);
-		v.colour = XMFLOAT4(0, 0, 0, 1.0);
+		v.colour = colour;
 		vertices[i] = v;
 	}
 

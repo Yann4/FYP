@@ -43,56 +43,44 @@ void Graph::giveNode(XMFLOAT3 position)
 	graphUpToDate = false;
 }
 
-void Graph::calculateGraph(vector<BoundingBox> objects)
+void Graph::calculateGraph(vector<BoundingBox>& objects)
 {
 	if (graphUpToDate)
 	{
 		return;
 	}
 
-	trimNodeList();
+	trimNodeList(objects);
 
 	constexpr int searchRadius = 20;
-	constexpr int maxNeighbours = 30;
 
-	vector<int> checked;
+	for (auto node : graphNodes)
+	{
+		node->clearConnections();
+	}
+
 	for (unsigned int i = 0; i < graphNodes.size(); i++)
 	{
-		graphNodes.at(i)->clearConnections();
 		for (unsigned int j = 0; j < graphNodes.size(); j++)
 		{
-			checked.push_back(j);
 			if (graphNodes.at(i)->distanceFrom(graphNodes.at(j)->Position()) > searchRadius)
 			{
 				continue;
 			}
 
 			graphNodes.at(i)->giveArc(*graphNodes.at(j), objects);
-
-			if (graphNodes.at(i)->getNeighbours().size() >= maxNeighbours)
-			{
-				break;
-			}
 		}
 
 		if (graphNodes.at(i)->getNeighbours().size() <= 2)
 		{
 			for (unsigned int j = 0; j < graphNodes.size(); j++)
 			{
-				if (std::find(checked.begin(), checked.end(), j) != checked.end())
-				{
-					graphNodes.at(i)->giveArc(*graphNodes.at(j), objects);
-				}
-
-				if (graphNodes.at(i)->getNeighbours().size() >= maxNeighbours)
-				{
-					break;
-				}
+				graphNodes.at(i)->giveArc(*graphNodes.at(j), objects);
 			}
 		}
-		checked.clear();
 	}
 
+	trimConnections();
 	graphUpToDate = true;
 }
 
@@ -144,13 +132,34 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 	return nearest;
 }
 
-void Graph::trimNodeList()
+void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
 {
-	float nearbyRadiusSq = pow(0.5f, 2);
+	float nearbyRadiusSq = pow(1.0f, 2);
 	for (int i = 0; i < graphNodes.size(); i++)
 	{
+		bool nodeErased = false;
 		XMFLOAT3 cPos = graphNodes.at(i)->Position();
 		XMVECTOR checkedPos = XMLoadFloat3(&cPos);
+
+		BoundingBox nodeBox = BoundingBox(cPos, XMFLOAT3(0.02f,0.02f,0.02f));
+
+		//If the node is inside a gameObject, delete it because it can't be reached
+		for (BoundingBox object : objects)
+		{
+			if (object.Intersects(nodeBox))
+			{
+				delete graphNodes[i];
+				graphNodes.erase(graphNodes.begin() + i);
+				nodeErased = true;
+				i--;
+				break;
+			}
+		}
+
+		if (nodeErased)
+		{
+			continue;
+		}
 
 		for (int j = 0; j < graphNodes.size(); j++)
 		{
@@ -165,23 +174,81 @@ void Graph::trimNodeList()
 			XMFLOAT3 dSq;
 			XMStoreFloat3(&dSq, distSq);
 
+			//Combine two close nodes into one node
 			if (dSq.x < nearbyRadiusSq)
 			{
-				//combine into one node
-				//Calculate new node
+				//Calculate new node location
 				XMVECTOR avg = ((comparePos - checkedPos) / 2) + checkedPos;
-				//XMFLOAT3 newPos = XMFLOAT3(((cPos.x + compPos.x) / 2.0f), (cPos.y + compPos.y) / 2.0f, (cPos.z + compPos.z) / 2.0f);
+
 				XMFLOAT3 newPos;
 				XMStoreFloat3(&newPos, avg);
+
+				//Create new node
 				giveNode(newPos);
+
 				//Remove old nodes
 				delete graphNodes[i];
 				delete graphNodes[j];
 				
 				graphNodes.erase(graphNodes.begin() + i);
-				graphNodes.erase(graphNodes.begin() + j);
+				if (j > i)
+				{
+					graphNodes.erase(graphNodes.begin() + j - 1);
+				}
+				else
+				{
+					graphNodes.erase(graphNodes.begin() + j);
+				}
 				i = 0;
-				j = 0;
+				break;
+			}
+		}
+	}
+}
+
+void Graph::trimConnections()
+{
+	const float overlapRad = 0.75f;
+
+	for (int i = 0; i < graphNodes.size(); i++)
+	{
+		vector<Connection*>* neighs = graphNodes.at(i)->getNeighboursRef();
+		for (int j = 0; j < neighs->size(); j++)
+		{
+			XMFLOAT3 start, end;
+			XMVECTOR sV, eV;
+
+			start = neighs->at(j)->start->Position();
+			end = neighs->at(j)->end->Position();
+			sV = XMLoadFloat3(&start);
+			eV = XMLoadFloat3(&end);
+
+			for (int k = 0; k < graphNodes.size(); k++)
+			{
+				if (graphNodes.at(k) == neighs->at(j)->start || graphNodes.at(k) == neighs->at(j)->end)
+				{
+					continue;
+				}
+				XMFLOAT3 nPos = graphNodes.at(k)->Position();
+				XMVECTOR n = XMLoadFloat3(&nPos);
+
+				//Formula taken from http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html to get distance of a point from a line
+
+				XMVECTOR numerator = XMVectorAbs(XMVector3Cross(n - sV, n - eV));
+				XMVECTOR denominator = XMVectorAbs(eV - sV);
+				XMFLOAT3 num, denom;
+				XMStoreFloat3(&num, numerator);
+				XMStoreFloat3(&denom, denominator);
+				float dist = num.y / denom.z;
+
+				if (dist <= overlapRad)
+				{
+					//Node is close to line
+					neighs->at(j)->makeRed();
+					//neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
+					//graphNodes.at(i)->removeNeighbourAt(j);
+					break;
+				}
 			}
 		}
 	}

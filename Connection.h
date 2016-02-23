@@ -20,4 +20,6 @@ public:
 	~Connection();
 
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
+	void makeRed() { spline->changeColour(DirectX::XMFLOAT4(1, 0, 0, 1.0)); }
+	void makeBlue() { spline->changeColour(DirectX::XMFLOAT4(0, 0, 1.0, 1.0)); }
 };

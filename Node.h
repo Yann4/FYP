@@ -47,6 +47,17 @@ public:
 		parent = nullptr;
 	}
 
+	inline void removeNeighbourAt(unsigned int index)
+	{
+		if (index < neighbours.size())
+		{
+			delete neighbours[index];
+			neighbours.erase(neighbours.begin() + index);
+		}
+	}
+	bool removeConnectionTo(Node* node);
+	inline std::vector<Connection*>* getNeighboursRef() { return &neighbours; }
+
 private:
 	bool hasVisionOf(Node& other, std::vector<DirectX::BoundingBox>& objects);
 };

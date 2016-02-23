@@ -42,18 +42,22 @@ Node::~Node()
 
 bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 {
-	for (Connection* a : neighbours)
-	{
-		if (a->end == &other)
-		{
-			return false;
-		}
-	}
+	//If we are checking against this node, we shouldn't put an arc there
 	if (other.Position().x == position.x && other.Position().y == position.y && other.Position().z == position.z)
 	{
 		return false;
 	}
 
+	//If we already have a connection to that node, we should skip adding an extra connection
+	for (Connection* a : neighbours)
+	{
+		if (a->end->Position().x == other.Position().x && a->end->Position().y == other.Position().y && a->end->Position().z == other.Position().z)
+		{
+			return false;
+		}
+	}
+
+	//If there isn't line of sight to the other node, there shouldn't be a connection
 	if (!hasVisionOf(other, objects))
 	{
 		return false;
@@ -68,6 +72,7 @@ bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 	XMFLOAT3 length;
 	XMStoreFloat3(&length, XMVector3Length(direction));
 	
+	//Hook the connection up both ways
 	neighbours.push_back(new Connection(this, &other, (int)length.x, context, device, splineInputLayout));
 	other.acceptArc(new Connection(&other, this, (int)length.x, context, device, splineInputLayout));
 
@@ -76,6 +81,7 @@ bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 
 void Node::acceptArc(Connection* arc)
 {
+	arc->makeBlue(); //Blue for reverse arcs for testing
 	neighbours.push_back(arc);
 }
 
@@ -112,6 +118,19 @@ float Node::distanceFrom(XMFLOAT3 pos)
 	XMStoreFloat3(&length, XMVector3Length(direction));
 	
 	return length.x;
+}
+
+bool Node::removeConnectionTo(Node* node)
+{
+	for (int i = 0; i < neighbours.size(); i++)
+	{
+		if (node->Position().x == neighbours.at(i)->end->Position().x && node->Position().y == neighbours.at(i)->end->Position().y && node->Position().z == neighbours.at(i)->end->Position().z)
+		{
+			removeNeighbourAt(i);
+			return true;
+		}
+	}
+	return false;
 }
 
 void Node::DrawNode(ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam)

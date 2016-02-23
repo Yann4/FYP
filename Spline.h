@@ -25,6 +25,9 @@ class Spline
 private:
 	ID3D11DeviceContext* context;
 	ID3D11InputLayout* splineLayout;
+	ID3D11Device* device;
+	
+	DirectX::XMFLOAT4 colour;
 
 	std::vector<DirectX::XMFLOAT3> controlPoints;
 	std::vector<DirectX::XMFLOAT3> linePoints;
@@ -51,4 +54,9 @@ public:
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, bool topologyNeedsSetting);
 
 	inline std::vector<DirectX::XMFLOAT3> getLinePoints() { return linePoints; }
+	inline void changeColour(DirectX::XMFLOAT4 colour)
+	{
+		this->colour = colour;
+		createBuffers(device);
+	}
 };
