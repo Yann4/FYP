@@ -208,13 +208,33 @@ void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
 
 void Graph::trimConnections()
 {
-	const float overlapRad = 0.75f;
+	const float overlapRad = 1.0f;
+	//This is the maximum cost that a connection can have and
+	//be overlooked in the trimming process. It's to allow short,
+	//sensible arcs
+	const int maxCostOfFreePass = 2;
+	//If a connection is this length or longer, there's probably a better path
+	const int minCostOfInstantDel = 7;
 
 	for (int i = 0; i < graphNodes.size(); i++)
 	{
+		//If a connection comes within overlapRad distance of a node that it is not the connected node, delete the connection
 		vector<Connection*>* neighs = graphNodes.at(i)->getNeighboursRef();
 		for (int j = 0; j < neighs->size(); j++)
 		{
+			if (neighs->at(j)->cost <= maxCostOfFreePass)
+			{
+				continue;
+			}
+
+			if (neighs->at(j)->cost >= minCostOfInstantDel)
+			{
+				neighs->at(j)->makeRed();
+				neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
+				graphNodes.at(i)->removeNeighbourAt(j);
+				continue;
+			}
+
 			XMFLOAT3 start, end;
 			XMVECTOR sV, eV;
 
@@ -229,6 +249,7 @@ void Graph::trimConnections()
 				{
 					continue;
 				}
+
 				XMFLOAT3 nPos = graphNodes.at(k)->Position();
 				XMVECTOR n = XMLoadFloat3(&nPos);
 
@@ -244,9 +265,9 @@ void Graph::trimConnections()
 				if (dist <= overlapRad)
 				{
 					//Node is close to line
-					neighs->at(j)->makeRed();
-					//neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
-					//graphNodes.at(i)->removeNeighbourAt(j);
+					//neighs->at(j)->makeRed();
+					neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
+					graphNodes.at(i)->removeNeighbourAt(j);
 					break;
 				}
 			}

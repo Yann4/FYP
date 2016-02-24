@@ -492,10 +492,10 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	*   *
 	*/
 
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - (scale.x * 0.1f), graphYPosition, position.z - scale.z - (scale.x * 0.1f)));
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - (scale.x * 0.1f), graphYPosition, position.z + scale.z + (scale.x * 0.1f)));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + (scale.x * 0.1f), graphYPosition, position.z - scale.z - (scale.x * 0.1f)));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + (scale.x * 0.1f), graphYPosition, position.z + scale.z + (scale.x * 0.1f)));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.2f, graphYPosition, position.z - scale.z - 0.2f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.2f, graphYPosition, position.z + scale.z + 0.2f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.2f, graphYPosition, position.z - scale.z - 0.2f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.2f, graphYPosition, position.z + scale.z + 0.2f));
 
 }
 
@@ -698,9 +698,9 @@ void Application::fireBox()
 		if (box.Intersects(posVect, forwardsVector, distance))
 		{
 			posVect = XMVector3Transform(posVect, XMMatrixTranslation(cameraForwards.x * distance, cameraForwards.y * distance, cameraForwards.z * distance));
-			posVect = XMVector3Transform(posVect, XMMatrixTranslation(0, 1, 0));
 			XMStoreFloat3(&cameraPos, posVect);
-			placeCrate(cameraPos, XMFLOAT3(1, 1, 1), XMFLOAT3(0, 0, 0));
+			cameraPos.y = graphYPosition;
+			placeCrate(cameraPos, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0, 0, 0));
 		}
 	}
 }
