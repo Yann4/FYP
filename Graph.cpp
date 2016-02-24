@@ -1,6 +1,7 @@
 #include "Graph.h"
 
 using std::vector;
+using std::find;
 using namespace DirectX;
 
 Graph::Graph() : context(nullptr), device(nullptr),
@@ -8,6 +9,7 @@ constBuffer(nullptr), objBuffer(nullptr), nodeMesh(nullptr), splineInputLayout(n
 {
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
+	colourConnectionsRed = true;
 }
 
 Graph::Graph(ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineInputLayout): context(context), device(device),
@@ -15,6 +17,7 @@ constBuffer(constBuffer), objBuffer(objBuffer), nodeMesh(mesh), splineInputLayou
 {
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
+	colourConnectionsRed = true;
 
 	context->AddRef();
 	device->AddRef();
@@ -50,38 +53,224 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 		return;
 	}
 
+	//Remove/Consolidate as many nodes as possible
 	trimNodeList(objects);
 
 	constexpr int searchRadius = 20;
 
+	//Remove all existing connections
 	for (auto node : graphNodes)
 	{
 		node->clearConnections();
 	}
 
+	vector<unsigned int> nodesChecked;
+	//For each node, a check against every other node needs to be performed
 	for (unsigned int i = 0; i < graphNodes.size(); i++)
 	{
 		for (unsigned int j = 0; j < graphNodes.size(); j++)
 		{
+			nodesChecked.push_back(j);
+
+			if (i == j)
+			{
+				continue;
+			}
+
+			//If the other node is outside of the initial search radius, continue
 			if (graphNodes.at(i)->distanceFrom(graphNodes.at(j)->Position()) > searchRadius)
 			{
 				continue;
 			}
 
+			//If made it here, the view checks need to be performed.
 			graphNodes.at(i)->giveArc(*graphNodes.at(j), objects);
 		}
 
-		if (graphNodes.at(i)->getNeighbours().size() <= 2)
+		//At minimum, the nodes will need to be connected to the other two corners of the box
+		//and ideally one other node
+		if (graphNodes.at(i)->getNeighbours().size() <= 3)
 		{
 			for (unsigned int j = 0; j < graphNodes.size(); j++)
 			{
+				//If we've already checked against this indexed node, don't check it again
+				if (find(nodesChecked.begin(), nodesChecked.end(), j) == nodesChecked.end())
+				{
+					continue;
+				}
+
+				//Perform line of sight checks
 				graphNodes.at(i)->giveArc(*graphNodes.at(j), objects);
 			}
 		}
+		nodesChecked.clear();
 	}
 
 	trimConnections();
 	graphUpToDate = true;
+}
+
+void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
+{
+	float nearbyRadiusSq = pow(1.0f, 2);
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
+	{
+		bool nodeErased = false;
+		XMFLOAT3 cPos = graphNodes.at(i)->Position();
+		XMVECTOR checkedPos = XMLoadFloat3(&cPos);
+
+		BoundingBox nodeBox = BoundingBox(cPos, XMFLOAT3(0.05f, 0.05f, 0.05f));
+
+		//If the node is inside a gameObject, delete it because it can't be reached
+		for (BoundingBox object : objects)
+		{
+			if (object.Intersects(nodeBox))
+			{
+				delete graphNodes[i];
+				graphNodes.erase(graphNodes.begin() + i);
+				nodeErased = true;
+				i--;
+				break;
+			}
+		}
+
+		if (nodeErased)
+		{
+			continue;
+		}
+
+		for (unsigned int j = 0; j < graphNodes.size(); j++)
+		{
+			if (j == i)
+			{
+				continue;
+			}
+
+			XMFLOAT3 compPos = graphNodes.at(j)->Position();
+			XMVECTOR comparePos = XMLoadFloat3(&compPos);
+
+			XMVECTOR distSq = XMVector3LengthSq(comparePos - checkedPos);
+			XMFLOAT3 dSq;
+			XMStoreFloat3(&dSq, distSq);
+
+			//Combine two close nodes into one node
+			if (dSq.x < nearbyRadiusSq)
+			{
+				//Calculate new node location
+				XMVECTOR avg = ((comparePos - checkedPos) / 2) + checkedPos;
+
+				XMFLOAT3 newPos;
+				XMStoreFloat3(&newPos, avg);
+
+				//Create new node
+				giveNode(newPos);
+
+				//Remove old nodes
+				delete graphNodes[i];
+				delete graphNodes[j];
+
+				graphNodes.erase(graphNodes.begin() + i);
+				if (j > i)
+				{
+					graphNodes.erase(graphNodes.begin() + j - 1);
+				}
+				else
+				{
+					graphNodes.erase(graphNodes.begin() + j);
+				}
+				i = 0;
+				break;
+			}
+		}
+	}
+}
+
+void Graph::trimConnections()
+{
+	const float overlapRad = 1.0f;
+	//This is the maximum cost that a connection can have and
+	//be overlooked in the trimming process. It's to allow short,
+	//sensible arcs
+	const int maxCostOfFreePass = 2;
+
+	//If a connection is this length or longer, there's probably a better path
+	const int minCostOfInstantDel = 7;
+
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
+	{
+		//If a connection comes within overlapRad distance of a node that it is not the connected node, delete the connection
+		vector<Connection*>* neighs = graphNodes.at(i)->getNeighboursRef();
+		for (unsigned int j = 0; j < neighs->size(); j++)
+		{
+			if (neighs->at(j)->cost <= maxCostOfFreePass)
+			{
+				continue;
+			}
+
+			if (neighs->at(j)->cost >= minCostOfInstantDel)
+			{
+				//To make sure the node is not being cut off from everything else
+				if (neighs->at(j)->end->getNeighboursRef()->size() <= 2)
+				{
+					continue;
+				}
+
+				if (colourConnectionsRed)
+				{
+					neighs->at(j)->setColour(XMFLOAT3(1,0,0));
+				}
+				else
+				{
+					neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
+					graphNodes.at(i)->removeNeighbourAt(j);
+				}
+				continue;
+			}
+
+			XMFLOAT3 start, end;
+			XMVECTOR sV, eV;
+
+			start = neighs->at(j)->start->Position();
+			end = neighs->at(j)->end->Position();
+			sV = XMLoadFloat3(&start);
+			eV = XMLoadFloat3(&end);
+
+			for (unsigned int k = 0; k < graphNodes.size(); k++)
+			{
+				if (graphNodes.at(k) == neighs->at(j)->start || graphNodes.at(k) == neighs->at(j)->end)
+				{
+					continue;
+				}
+
+				XMFLOAT3 nPos = graphNodes.at(k)->Position();
+				XMVECTOR n = XMLoadFloat3(&nPos);
+
+				//Formula taken from http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html to get distance of a point from a line
+
+				XMVECTOR numerator = XMVectorAbs(XMVector3Cross(n - sV, n - eV));
+				XMVECTOR denominator = XMVectorAbs(eV - sV);
+				XMFLOAT3 num, denom;
+				XMStoreFloat3(&num, numerator);
+				XMStoreFloat3(&denom, denominator);
+				float dist = num.y / denom.z;
+
+				if (dist <= overlapRad)
+				{
+					//Node is close to line
+					if (colourConnectionsRed)
+					{
+						neighs->at(j)->setColour(XMFLOAT3(1,0,0));
+					}
+					else
+					{
+						neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
+						graphNodes.at(i)->removeNeighbourAt(j);
+					}
+					break;
+				}
+			}
+		}
+	}
 }
 
 void Graph::DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam)
@@ -132,154 +321,17 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 	return nearest;
 }
 
-void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
-{
-	float nearbyRadiusSq = pow(1.0f, 2);
-	for (int i = 0; i < graphNodes.size(); i++)
-	{
-		bool nodeErased = false;
-		XMFLOAT3 cPos = graphNodes.at(i)->Position();
-		XMVECTOR checkedPos = XMLoadFloat3(&cPos);
-
-		BoundingBox nodeBox = BoundingBox(cPos, XMFLOAT3(0.02f,0.02f,0.02f));
-
-		//If the node is inside a gameObject, delete it because it can't be reached
-		for (BoundingBox object : objects)
-		{
-			if (object.Intersects(nodeBox))
-			{
-				delete graphNodes[i];
-				graphNodes.erase(graphNodes.begin() + i);
-				nodeErased = true;
-				i--;
-				break;
-			}
-		}
-
-		if (nodeErased)
-		{
-			continue;
-		}
-
-		for (int j = 0; j < graphNodes.size(); j++)
-		{
-			if (j == i)
-			{
-				continue;
-			}
-			XMFLOAT3 compPos = graphNodes.at(j)->Position();
-			XMVECTOR comparePos = XMLoadFloat3(&compPos);
-
-			XMVECTOR distSq = XMVector3LengthSq(comparePos - checkedPos);
-			XMFLOAT3 dSq;
-			XMStoreFloat3(&dSq, distSq);
-
-			//Combine two close nodes into one node
-			if (dSq.x < nearbyRadiusSq)
-			{
-				//Calculate new node location
-				XMVECTOR avg = ((comparePos - checkedPos) / 2) + checkedPos;
-
-				XMFLOAT3 newPos;
-				XMStoreFloat3(&newPos, avg);
-
-				//Create new node
-				giveNode(newPos);
-
-				//Remove old nodes
-				delete graphNodes[i];
-				delete graphNodes[j];
-				
-				graphNodes.erase(graphNodes.begin() + i);
-				if (j > i)
-				{
-					graphNodes.erase(graphNodes.begin() + j - 1);
-				}
-				else
-				{
-					graphNodes.erase(graphNodes.begin() + j);
-				}
-				i = 0;
-				break;
-			}
-		}
-	}
-}
-
-void Graph::trimConnections()
-{
-	const float overlapRad = 1.0f;
-	//This is the maximum cost that a connection can have and
-	//be overlooked in the trimming process. It's to allow short,
-	//sensible arcs
-	const int maxCostOfFreePass = 2;
-	//If a connection is this length or longer, there's probably a better path
-	const int minCostOfInstantDel = 7;
-
-	for (int i = 0; i < graphNodes.size(); i++)
-	{
-		//If a connection comes within overlapRad distance of a node that it is not the connected node, delete the connection
-		vector<Connection*>* neighs = graphNodes.at(i)->getNeighboursRef();
-		for (int j = 0; j < neighs->size(); j++)
-		{
-			if (neighs->at(j)->cost <= maxCostOfFreePass)
-			{
-				continue;
-			}
-
-			if (neighs->at(j)->cost >= minCostOfInstantDel)
-			{
-				neighs->at(j)->makeRed();
-				neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
-				graphNodes.at(i)->removeNeighbourAt(j);
-				continue;
-			}
-
-			XMFLOAT3 start, end;
-			XMVECTOR sV, eV;
-
-			start = neighs->at(j)->start->Position();
-			end = neighs->at(j)->end->Position();
-			sV = XMLoadFloat3(&start);
-			eV = XMLoadFloat3(&end);
-
-			for (int k = 0; k < graphNodes.size(); k++)
-			{
-				if (graphNodes.at(k) == neighs->at(j)->start || graphNodes.at(k) == neighs->at(j)->end)
-				{
-					continue;
-				}
-
-				XMFLOAT3 nPos = graphNodes.at(k)->Position();
-				XMVECTOR n = XMLoadFloat3(&nPos);
-
-				//Formula taken from http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html to get distance of a point from a line
-
-				XMVECTOR numerator = XMVectorAbs(XMVector3Cross(n - sV, n - eV));
-				XMVECTOR denominator = XMVectorAbs(eV - sV);
-				XMFLOAT3 num, denom;
-				XMStoreFloat3(&num, numerator);
-				XMStoreFloat3(&denom, denominator);
-				float dist = num.y / denom.z;
-
-				if (dist <= overlapRad)
-				{
-					//Node is close to line
-					//neighs->at(j)->makeRed();
-					neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
-					graphNodes.at(i)->removeNeighbourAt(j);
-					break;
-				}
-			}
-		}
-	}
-}
-
 /*
 PATHFINDING
 */
-//Euclidean heurstic
+
+//Heuristics
 float Graph::heuristic(XMFLOAT3 start, XMFLOAT3 end)
+{
+	return euclideanHeuristicSq(start, end);
+}
+
+float Graph::euclideanHeuristic(XMFLOAT3 start, XMFLOAT3 end)
 {
 	XMVECTOR sv, ev;
 	sv = XMLoadFloat3(&start);
@@ -287,6 +339,18 @@ float Graph::heuristic(XMFLOAT3 start, XMFLOAT3 end)
 
 	XMFLOAT3 dist;
 	XMStoreFloat3(&dist, XMVector3Length(sv - ev));
+
+	return abs(dist.x);
+}
+
+float Graph::euclideanHeuristicSq(XMFLOAT3 start, XMFLOAT3 end)
+{
+	XMVECTOR sv, ev;
+	sv = XMLoadFloat3(&start);
+	ev = XMLoadFloat3(&end);
+
+	XMFLOAT3 dist;
+	XMStoreFloat3(&dist, XMVector3LengthSq(sv - ev));
 
 	return abs(dist.x);
 }

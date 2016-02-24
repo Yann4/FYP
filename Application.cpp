@@ -783,6 +783,9 @@ void Application::handleMessages()
 		case TOGGLE_GRAPH_RENDER:
 			renderGraph = !renderGraph;
 			break;
+		case TOGGLE_GRAPH_COLOURING:
+			navGraph.flipColouringConnections();
+			break;
 		case NO_SUCH_EVENT:
 		default:
 			break;

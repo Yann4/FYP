@@ -107,6 +107,10 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return TOGGLE_GRAPH_RENDER;
 	}
+	else if (eventName == "TOGGLE_GRAPH_COLOURING")
+	{
+		return TOGGLE_GRAPH_COLOURING;
+	}
 	else
 	{
 		return NO_SUCH_EVENT;

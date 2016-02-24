@@ -56,7 +56,7 @@ public:
 	inline std::vector<DirectX::XMFLOAT3> getLinePoints() { return linePoints; }
 	inline void changeColour(DirectX::XMFLOAT4 colour)
 	{
-		this->colour = colour;
+		Spline::colour = colour;
 		createBuffers(device);
 	}
 };

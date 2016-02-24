@@ -81,7 +81,6 @@ bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 
 void Node::acceptArc(Connection* arc)
 {
-	arc->makeBlue(); //Blue for reverse arcs for testing
 	neighbours.push_back(arc);
 }
 

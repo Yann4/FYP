@@ -16,6 +16,7 @@ private:
 	std::vector<Node*> graphNodes;
 
 	bool graphUpToDate;
+	bool colourConnectionsRed;
 
 	ID3D11DeviceContext* context;
 	ID3D11Device* device;
@@ -37,6 +38,23 @@ public:
 
 	inline bool needsRecalculating() { return !graphUpToDate; }
 
+	inline void flipColouringConnections() 
+	{
+		colourConnectionsRed = !colourConnectionsRed; 
+		trimConnections(); 
+		if (!colourConnectionsRed)
+		{
+			for (auto n : graphNodes)
+			{
+				std::vector<Connection*>* neighs = n->getNeighboursRef();
+				for (unsigned int i = 0; i < neighs->size(); i++)
+				{
+					neighs->at(i)->setColour(DirectX::XMFLOAT3(0, 0, 0));
+				}
+			}
+		}
+	}
+
 	std::stack<DirectX::XMFLOAT3> findPath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end) { return aStar(start, end); }
 private:
 	Node* getNearestNode(DirectX::XMFLOAT3 position);
@@ -44,6 +62,9 @@ private:
 	std::stack<DirectX::XMFLOAT3> aStar(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end);
 
 	float heuristic(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b);
+
+	float euclideanHeuristic(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b);
+	float euclideanHeuristicSq(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b);
 
 	//Combines nodes that are too close together
 	//Also, removes nodes that are inside blocks
