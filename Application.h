@@ -73,7 +73,7 @@ private:
 	Camera camera;
 	Frustum viewFrustum;
 
-	MeshData* squareMesh;
+	MeshData* cubeMesh;
 	
 	std::vector<Material> houseMaterials;
 	MeshData* houseMesh;
@@ -112,7 +112,6 @@ private:
 
 	void readInitFile(std::string fileName);
 	HRESULT initialiseCube();
-	HRESULT initialiseHouse();
 	HRESULT initialisePipe();
 	HRESULT initialiseGrass();
 	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);

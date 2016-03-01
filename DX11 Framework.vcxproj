@@ -375,8 +375,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="grassmtl.txt" />
-    <Text Include="house.txt" />
-    <Text Include="housemtl.txt" />
     <Text Include="input_map.txt" />
     <Text Include="plane.txt" />
     <Text Include="worldData.txt">
@@ -384,6 +382,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -406,6 +405,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Agent.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Camera.h" />

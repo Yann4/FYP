@@ -18,13 +18,14 @@ private:
 	ID3D11Device* device;
 	ID3D11InputLayout* splineInputLayout;
 	GameObject object;
+	unsigned int id;
 public:
 	float g_score;
 	float h_score;
 	Node* parent;
 public:
 	Node();
-	Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineLayout);
+	Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineLayout, unsigned int id);
 	~Node();
 
 	inline std::vector<Connection*> getNeighbours() { return neighbours; }
@@ -40,6 +41,8 @@ public:
 	void clearConnections();
 
 	inline float f_score() { return g_score + h_score; }
+
+	inline unsigned int ID() { return id; }
 
 	inline void resetSearchParams(){
 		g_score = 0;

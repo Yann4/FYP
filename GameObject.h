@@ -37,9 +37,9 @@ protected:
 public:
 	GameObject();
 	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos);
-	~GameObject();
+	virtual ~GameObject();
 
-	void Update(float deltaTime);
+	virtual void Update(float deltaTime);
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam);
 
 	void setScale(float x, float y, float z);
@@ -52,6 +52,7 @@ public:
 	DirectX::BoundingBox getBoundingBox();
 
 	inline DirectX::XMFLOAT3 Pos(){ return position; };
+	
 	inline DirectX::XMFLOAT3 Size()
 	{
 		DirectX::XMFLOAT3 size;
@@ -59,6 +60,7 @@ public:
 		DirectX::XMStoreFloat3(&size, sizeV);
 		return size;
 	}
+
 	inline DirectX::XMFLOAT3 Rotation() { return rotation; };
 
 	bool getCollider() { return collider; }

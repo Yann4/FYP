@@ -13,10 +13,11 @@ Node::Node()
 	context = nullptr;
 	device = nullptr;
 	splineInputLayout = nullptr;
+	id = 0;
 }
 
-Node::Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineLayout) :
-	position(position), context(context), device(device), splineInputLayout(splineLayout)
+Node::Node(DirectX::XMFLOAT3 position, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineLayout, unsigned int id) :
+	position(position), context(context), device(device), splineInputLayout(splineLayout), id(id)
 {
 	neighbours = vector<Connection*>();
 	object = GameObject(context, constBuffer, objBuffer, mesh, position);
@@ -43,7 +44,7 @@ Node::~Node()
 bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 {
 	//If we are checking against this node, we shouldn't put an arc there
-	if (other.Position().x == position.x && other.Position().y == position.y && other.Position().z == position.z)
+	if (other.ID() == id)
 	{
 		return false;
 	}
@@ -51,7 +52,7 @@ bool Node::giveArc(Node& other, std::vector<BoundingBox>& objects)
 	//If we already have a connection to that node, we should skip adding an extra connection
 	for (Connection* a : neighbours)
 	{
-		if (a->end->Position().x == other.Position().x && a->end->Position().y == other.Position().y && a->end->Position().z == other.Position().z)
+		if (a->end->ID() == other.ID())
 		{
 			return false;
 		}

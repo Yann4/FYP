@@ -24,6 +24,8 @@ constBuffer(constBuffer), objBuffer(objBuffer), nodeMesh(mesh), splineInputLayou
 	constBuffer->AddRef();
 	objBuffer->AddRef();
 	splineInputLayout->AddRef();
+
+	top_id = 0;
 }
 
 Graph::~Graph()
@@ -42,7 +44,7 @@ Graph::~Graph()
 
 void Graph::giveNode(XMFLOAT3 position)
 {
-	graphNodes.push_back(new Node(position, context, device, constBuffer, objBuffer, nodeMesh, splineInputLayout));
+	graphNodes.push_back(new Node(position, context, device, constBuffer, objBuffer, nodeMesh, splineInputLayout, top_id++));
 	graphUpToDate = false;
 }
 
@@ -56,7 +58,7 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 	//Remove/Consolidate as many nodes as possible
 	trimNodeList(objects);
 
-	constexpr int searchRadius = 20;
+	constexpr int searchRadius = 10;
 
 	//Remove all existing connections
 	for (auto node : graphNodes)
@@ -94,7 +96,7 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 			for (unsigned int j = 0; j < graphNodes.size(); j++)
 			{
 				//If we've already checked against this indexed node, don't check it again
-				if (find(nodesChecked.begin(), nodesChecked.end(), j) == nodesChecked.end())
+				if (find(nodesChecked.begin(), nodesChecked.end(), j) != nodesChecked.end())
 				{
 					continue;
 				}

@@ -65,7 +65,7 @@ Application::Application()
 	frameConstantBuffer = nullptr;
 	objectConstantBuffer = nullptr;
 
-	squareMesh = new MeshData();
+	cubeMesh = new MeshData();
 	houseMesh = new MeshData();
 	pipeMesh = new MeshData();
 	grassMesh = new MeshData();
@@ -216,32 +216,25 @@ HRESULT Application::InitShadersAndInputLayout()
 
 HRESULT Application::initialiseCube()
 {
-	squareMesh->material.diffuse = XMFLOAT4(0.8f, 0.7f, 0.5f, 1.0f);
-	squareMesh->material.specular = XMFLOAT4(0.4f, 0.35f, 0.25f, 1.0f);
-	squareMesh->material.ambient = XMFLOAT4(0.4, 0.35, 0.25, 0.2);
+	cubeMesh->material.diffuse = XMFLOAT4(0.8f, 0.7f, 0.5f, 1.0f);
+	cubeMesh->material.specular = XMFLOAT4(0.4f, 0.35f, 0.25f, 1.0f);
+	cubeMesh->material.ambient = XMFLOAT4(0.4, 0.35, 0.25, 0.2);
 
-	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(squareMesh->textureRV));
-	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(squareMesh->specularRV));
-	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(squareMesh->normalMapRV));
+	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_COLOR.dds", nullptr, &(cubeMesh->textureRV));
+	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_SPEC.dds", nullptr, &(cubeMesh->specularRV));
+	CreateDDSTextureFromFile(_pd3dDevice, L"Crate_NRM.dds", nullptr, &(cubeMesh->normalMapRV));
 
 	Parser p;
-	p.readObjFile(_pd3dDevice, "box.obj", squareMesh, nullptr);
+	p.readObjFile(_pd3dDevice, "box.obj", cubeMesh, nullptr);
 	return S_OK;
 }
 
 HRESULT Application::initialiseGrass()
 {
-	*grassMesh = *squareMesh;
+	*grassMesh = *cubeMesh;
 	CreateDDSTextureFromFile(_pd3dDevice, L"grass.dds", nullptr, &(grassMesh->textureRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"specularWhite.dds", nullptr, &(grassMesh->specularRV));
 	CreateDDSTextureFromFile(_pd3dDevice, L"normalUp.dds", nullptr, &(grassMesh->normalMapRV));	
-	return S_OK;
-}
-
-HRESULT Application::initialiseHouse()
-{
-	Parser p;
-	p.readObjFile(_pd3dDevice, "house.txt", houseMesh, &houseMaterials);
 	return S_OK;
 }
 
@@ -478,7 +471,7 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	}
 	graphMutex.unlock();
 
-	GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, squareMesh, position);
+	GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, cubeMesh, position);
 	temp.setScale(scale.x, scale.y, scale.z);
 	temp.setRotation(rotation.x, rotation.y, rotation.z);
 	temp.UpdateMatrix();
@@ -492,10 +485,10 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	*   *
 	*/
 
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.2f, graphYPosition, position.z - scale.z - 0.2f));
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.2f, graphYPosition, position.z + scale.z + 0.2f));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.2f, graphYPosition, position.z - scale.z - 0.2f));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.2f, graphYPosition, position.z + scale.z + 0.2f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.3f, graphYPosition, position.z - scale.z - 0.3f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.3f, graphYPosition, position.z + scale.z + 0.3f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.3f, graphYPosition, position.z - scale.z - 0.3f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.3f, graphYPosition, position.z + scale.z + 0.3f));
 
 }
 
@@ -550,14 +543,6 @@ void Application::readInitFile(std::string fileName)
 			{
 				placeCrate(position, scale, rotation);
 			}
-			else if (name == "HOUSE")
-			{
-				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, houseMesh, position);
-				temp.setScale(scale.x, scale.y, scale.z);
-				temp.setRotation(rotation.x, rotation.y, rotation.z);
-				temp.UpdateMatrix();
-				objects.insert(temp, temp.Pos(), temp.Size());
-			}
 			else if (name == "PIPE")
 			{
 				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, pipeMesh, position);
@@ -599,13 +584,13 @@ void Application::readInitFile(std::string fileName)
 void Application::initObjects()
 {
 	initialiseCube();
-	initialiseHouse();
 	initialisePipe();
 	initialiseGrass();
 
-	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, squareMesh, basicVertexLayout);
+	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, cubeMesh, basicVertexLayout);
 
 	readInitFile("worldData.txt");
+
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 
@@ -661,7 +646,7 @@ void Application::Cleanup()
     if (objectConstantBuffer) objectConstantBuffer->Release();
 	if (frameConstantBuffer) frameConstantBuffer->Release();
 	
-	delete squareMesh;
+	delete cubeMesh;
 	delete houseMesh;
 	delete pipeMesh;
 	delete grassMesh;
