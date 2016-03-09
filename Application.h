@@ -22,6 +22,7 @@
 #include "Surface.h"
 #include "Octree.h"
 #include "Graph.h"
+#include "Agent.h"
 
 #include <queue>
 #include <fstream>
@@ -84,9 +85,15 @@ private:
 	MeshData* grassMesh;
 	std::vector<Material> grassMaterial;
 
-	Octree<GameObject> objects;
-	std::vector<GameObject*> allObjects;
+	MeshData* agentMesh;
+	std::vector<Material> agentMaterial;
+
+	//Octree<GameObject> objects;
+	//std::vector<GameObject*> allObjects;
+	std::vector<GameObject> objects;
 	std::vector<Spline> splines;
+
+	std::vector<Agent> agents;
 
 	Skybox skybox;
 
@@ -115,6 +122,8 @@ private:
 	HRESULT initialisePipe();
 	HRESULT initialiseGrass();
 	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
+
+	void initialiseAgents(int numAgents);
 
 	void initObjects();
 

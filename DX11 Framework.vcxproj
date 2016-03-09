@@ -397,6 +397,7 @@
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Spline.cpp" />
+    <ClCompile Include="Steering.cpp" />
     <ClCompile Include="Surface.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -423,6 +424,7 @@
     <CLInclude Include="resource.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Spline.h" />
+    <ClInclude Include="Steering.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TimeSlice.h" />
     <ResourceCompile Include="DX11 Framework.rc" />

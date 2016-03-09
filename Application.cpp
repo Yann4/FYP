@@ -1,6 +1,7 @@
 #include "Application.h"
 
 using namespace DirectX;
+using std::vector;
 
 //This is a static variable that's been declared in Application.h
 std::queue<Event> Application::inputEventQueue;
@@ -69,11 +70,13 @@ Application::Application()
 	houseMesh = new MeshData();
 	pipeMesh = new MeshData();
 	grassMesh = new MeshData();
+	agentMesh = new MeshData();
 
 	cameraMoveSpeed = 0.1f;
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
-	objects = Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
+	objects = vector<GameObject>();//= Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
+	agents = vector<Agent>();
 	flashlightOn = false;
 	renderGraph = false;
 
@@ -476,7 +479,8 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	temp.setRotation(rotation.x, rotation.y, rotation.z);
 	temp.UpdateMatrix();
 	temp.setCollider(true);
-	objects.insert(temp, temp.Pos(), temp.Size());
+	//objects.insert(temp, temp.Pos(), temp.Size());
+	objects.push_back(temp);
 
 	/*
 	from top down:
@@ -549,7 +553,8 @@ void Application::readInitFile(std::string fileName)
 				temp.setScale(scale.x, scale.y, scale.z);
 				temp.setRotation(rotation.x, rotation.y, rotation.z);
 				temp.UpdateMatrix();
-				objects.insert(temp, temp.Pos(), temp.Size());
+				//objects.insert(temp, temp.Pos(), temp.Size());
+				objects.push_back(temp);
 			}
 			else if (name == "GRASS")
 			{
@@ -561,7 +566,8 @@ void Application::readInitFile(std::string fileName)
 				temp.setCollider(true);
 				temp.setMovementState(false);
 				temp.setIsGround(true);
-				objects.insert(temp, temp.Pos(), temp.Size());
+				//objects.insert(temp, temp.Pos(), temp.Size());
+				objects.push_back(temp);
 			}
 		}
 		else if (std::regex_match(line, captures, splineMatch))
@@ -581,6 +587,16 @@ void Application::readInitFile(std::string fileName)
 	}
 }
 
+void Application::initialiseAgents(int numAgents)
+{
+	*agentMesh = *cubeMesh;
+
+	//Actually write this function
+	agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, XMFLOAT3(0, 1.0f, -2)));
+	agents.at(0).setScale(0.2f, 0.5f, 0.2f);
+	agents.at(0).UpdateMatrix();
+}
+
 void Application::initObjects()
 {
 	initialiseCube();
@@ -593,6 +609,8 @@ void Application::initObjects()
 
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
+
+	initialiseAgents(1);
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
@@ -650,6 +668,7 @@ void Application::Cleanup()
 	delete houseMesh;
 	delete pipeMesh;
 	delete grassMesh;
+	delete agentMesh;
 
 	//How 'bout we don't look to closely at this
 	//skybox.~Skybox();
@@ -669,11 +688,11 @@ void Application::fireBox()
 	XMStoreFloat3(&cameraForwards, forwardsVector);
 
 	std::vector<BoundingBox> groundBoxes;
-	for (auto object : allObjects)
+	for (auto object : objects)
 	{
-		if (object->getIsGround())
+		if (object.getIsGround())
 		{
-			groundBoxes.push_back(object->getBoundingBox());
+			groundBoxes.push_back(object.getBoundingBox());
 		}
 	}
 
@@ -789,7 +808,7 @@ void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
 void Application::Update()
 {
     // Update our time
-    static float t = 0.0f;
+    static double t = 0.0f;
 
     if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
     {
@@ -813,7 +832,18 @@ void Application::Update()
 
 	camera.Update();
 	skybox.Update(&camera);
-	allObjects = objects.getAllElements();
+	//allObjects = objects.getAllElements();
+
+	std::vector<BoundingBox> bbs;
+	for (GameObject o : objects)
+	{
+		bbs.push_back(o.getBoundingBox());
+	}
+	
+	for (unsigned int i = 0; i < agents.size(); i++)
+	{
+		agents.at(i).Update(t, bbs);
+	}
 
 	if (graphMutex.try_lock())
 	{
@@ -821,57 +851,46 @@ void Application::Update()
 		if (navGraph.needsRecalculating())
 		{
 			/*Update the navigation graph*/
-			std::vector<BoundingBox> bbs;
-			for (GameObject* o : allObjects)
-			{
-				bbs.push_back(o->getBoundingBox());
-			}
-
 			std::thread(&Application::updateGraph, this, bbs).detach();
 		}
 	}
 
-	for (GameObject* object : allObjects)
+	for (int i = 0; i < objects.size(); i++)
 	{
-		if (object == nullptr)
+		objects.at(i).Update(t);
+		
+		if (!objects.at(i).getCollider())
 		{
 			continue;
 		}
 
-		object->Update(t);
-		
-		if (!object->getCollider())
-		{
-			continue;
-		}
+		XMFLOAT3 size = objects.at(i).Size();
 
-		XMFLOAT3 size = object->Size();
-
-		std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
+		//std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
 		
-		for (GameObject* closeObject : neighbourhood)
+		for (int j = 0; j < objects.size(); j++)
 		{
-			if (closeObject == object || !closeObject->getCollider())
+			if (i == j || !objects.at(j).getCollider())
 			{
 				continue;
 			}
 			Collision::MTV mtv;
 
-			Collision::AABB objAABB = Collision::AABB(object->Pos(), object->Size());
+			Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
 
-			Collision::AABB closeAABB = Collision::AABB(closeObject->Pos(), closeObject->Size());
+			Collision::AABB closeAABB = Collision::AABB(objects.at(j).Pos(), objects.at(j).Size());
 			
 			if(Collision::boundingBoxCollision(objAABB, closeAABB, mtv))
 			{
-				if (object->getIsGround())
+				if (objects.at(i).getIsGround())
 				{
-					closeObject->setOnGround(true);
+					objects.at(j).setOnGround(true);
 				}
-				if (closeObject->getIsGround())
+				if (objects.at(j).getIsGround())
 				{
-					object->setOnGround(true);
+					objects.at(i).setOnGround(true);
 				}
-				object->moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+				objects.at(i).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
 			}
 		}
 	}
@@ -904,9 +923,14 @@ void Application::Draw()
 
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &perFrameCB, 0, 0);
 
-	for (GameObject* object : allObjects)
+	for (GameObject object : objects)
 	{
-		object->Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+	}
+
+	for (Agent a : agents)
+	{
+		a.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
 	}
 
 	if (renderGraph && graphMutex.try_lock())
