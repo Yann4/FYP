@@ -89,18 +89,20 @@ bool Node::hasVisionOf(Node& other, std::vector<BoundingBox>& objects)
 {
 	XMVECTOR myPos = XMLoadFloat3(&position);
 
-	for (BoundingBox box : objects)
+	for (unsigned int i = 0; i < objects.size(); i++)
 	{
 		XMFLOAT3 otherPosition = other.Position();
 		XMVECTOR otherPos = XMLoadFloat3(&otherPosition);
 	
-		XMVECTOR direction = otherPos - myPos;
-		XMFLOAT3 length;
-		XMStoreFloat3(&length, XMVector3Length(direction));
+		XMVECTOR direction = XMVector3Normalize(myPos - otherPos);
+		float len;
 
-		if (box.Intersects(myPos, XMVector3Normalize(direction), length.x))
+		if (objects.at(i).Intersects(otherPos, direction, len))
 		{
-			return false;
+			if (len < XMVectorGetX(XMVector3Length(myPos - otherPos)))
+			{
+				return false;
+			}
 		}
 	}
 

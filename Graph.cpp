@@ -9,7 +9,7 @@ constBuffer(nullptr), objBuffer(nullptr), nodeMesh(nullptr), splineInputLayout(n
 {
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
-	colourConnectionsRed = true;
+	colourConnectionsRed = false;
 }
 
 Graph::Graph(ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineInputLayout): context(context), device(device),
@@ -17,7 +17,7 @@ constBuffer(constBuffer), objBuffer(objBuffer), nodeMesh(mesh), splineInputLayou
 {
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
-	colourConnectionsRed = true;
+	colourConnectionsRed = false;
 
 	context->AddRef();
 	device->AddRef();

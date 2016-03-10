@@ -835,9 +835,12 @@ void Application::Update()
 	//allObjects = objects.getAllElements();
 
 	std::vector<BoundingBox> bbs;
-	for (GameObject o : objects)
+	for (unsigned int i = 0; i < objects.size(); i++)
 	{
-		bbs.push_back(o.getBoundingBox());
+		if (!objects.at(i).getIsGround())
+		{
+			bbs.push_back(objects.at(i).getBoundingBox());
+		}
 	}
 	
 	for (unsigned int i = 0; i < agents.size(); i++)
