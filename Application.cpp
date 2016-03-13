@@ -592,7 +592,7 @@ void Application::initialiseAgents(int numAgents)
 	*agentMesh = *cubeMesh;
 
 	//Actually write this function
-	agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, XMFLOAT3(0, 1.0f, -2)));
+	agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, XMFLOAT3(0, 1.0f, -2)));
 	agents.at(0).setScale(0.2f, 0.5f, 0.2f);
 	agents.at(0).UpdateMatrix();
 }
@@ -732,10 +732,6 @@ void Application::pushEvent(Event toPush)
 
 void Application::handleMessages()
 {
-	std::random_device rd;
-	std::mt19937 generator(rd());
-	std::uniform_int_distribution<int> distr(-10, 10);
-
 	while (!inputEventQueue.empty())
 	{
 		Event next = inputEventQueue.front();
@@ -842,10 +838,26 @@ void Application::Update()
 			bbs.push_back(objects.at(i).getBoundingBox());
 		}
 	}
+
+	splines.empty();
 	
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
-		agents.at(i).Update(t, bbs);
+		XMFLOAT3 f = agents.at(i).Update(t, bbs);
+
+		XMVECTOR fw = XMLoadFloat3(&f);
+
+		vector<XMFLOAT3> cps;
+		cps.push_back(agents.at(i).Pos());
+
+		XMVECTOR p = XMLoadFloat3(&cps.at(0));
+		fw += p;
+
+		XMStoreFloat3(&f, fw);
+
+		cps.push_back(f);
+
+		splines.push_back(Spline(cps, _pImmediateContext, _pd3dDevice, basicVertexLayout));
 	}
 
 	if (graphMutex.try_lock())
@@ -944,9 +956,9 @@ void Application::Draw()
 
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
 	
-	for (Spline s : splines)
+	for (unsigned int i = 0; i < splines.size(); i++)
 	{
-		s.Draw(linePS, lineVS, camera, true);
+		splines.at(i).Draw(linePS, lineVS, camera, true);
 	}
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);

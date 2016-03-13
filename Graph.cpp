@@ -190,10 +190,11 @@ void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
 void Graph::trimConnections()
 {
 	const float overlapRad = 1.0f;
+
 	//This is the maximum cost that a connection can have and
 	//be overlooked in the trimming process. It's to allow short,
 	//sensible arcs
-	const int maxCostOfFreePass = 2;
+	const float maxCostOfFreePass = 2.0f;
 
 	//If a connection is this length or longer, there's probably a better path
 	const int minCostOfInstantDel = 7;
@@ -251,10 +252,8 @@ void Graph::trimConnections()
 
 				XMVECTOR numerator = XMVectorAbs(XMVector3Cross(n - sV, n - eV));
 				XMVECTOR denominator = XMVectorAbs(eV - sV);
-				XMFLOAT3 num, denom;
-				XMStoreFloat3(&num, numerator);
-				XMStoreFloat3(&denom, denominator);
-				float dist = num.y / denom.z;
+
+				float dist = XMVectorGetX(XMVector3Length(numerator)) / XMVectorGetX(XMVector3Length(denominator));
 
 				if (dist <= overlapRad)
 				{

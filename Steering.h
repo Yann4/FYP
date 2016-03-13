@@ -3,6 +3,7 @@
 #include <DirectXCollision.h>
 #include <vector>
 #include <array>
+#include <stack>
 #include <algorithm>
 #include <limits>
 
@@ -27,7 +28,7 @@ namespace Steering
 	};
 
 	//AggregateForces() will truncate to a maximum of this value
-	constexpr float MaxForce = 0.001f;
+	constexpr float MaxForce = 0.0001f;
 
 	//Returns the force seeking from the current position to the destination
 	DirectX::XMFLOAT3 seekForce(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 destination);
@@ -37,6 +38,10 @@ namespace Steering
 
 	//Projects whiskers out from the position and uses them to generate a force steering away from obstacles
 	DirectX::XMFLOAT3 obstacleAvoidForce(std::vector<DirectX::BoundingBox>& objects, DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 forwards);
+
+	//Returns a force moving towards a target, intended for use with a stack of targets
+	//Modifies the stack reference passed in
+	DirectX::XMFLOAT3 pathFollowing(DirectX::XMFLOAT3 position, std::stack<DirectX::XMFLOAT3>& path);
 
 	//Aggregates steering forces to a single force using predetermined tweaker values
 	DirectX::XMFLOAT3 aggregateForces(DirectX::XMFLOAT3 seek = DirectX::XMFLOAT3(0, 0, 0),

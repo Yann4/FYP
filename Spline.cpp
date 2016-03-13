@@ -81,7 +81,7 @@ void Spline::createBuffers(ID3D11Device* device)
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = vertices;
 
-	device->CreateBuffer(&bd, &InitData, &vertexBuffer);
+	HRESULT hr = device->CreateBuffer(&bd, &InitData, &vertexBuffer);
 
 	ZeroMemory(&bd, sizeof(D3D11_BUFFER_DESC));
 	bd.Usage = D3D11_USAGE_DEFAULT;

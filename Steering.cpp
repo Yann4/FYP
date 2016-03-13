@@ -3,6 +3,7 @@
 using namespace DirectX;
 using std::vector;
 using std::array;
+using std::stack;
 
 XMFLOAT3 Steering::seekForce(XMFLOAT3 position, XMFLOAT3 destination)
 {
@@ -163,8 +164,7 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 			//Calculate force
 			XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, forwardWhisker);
 			XMVECTOR norm = XMLoadFloat3(&normal);
-			//norm *= dist;
-			
+
 			//Return force
 			XMStoreFloat3(&steeringForce, norm);
 			return steeringForce;
@@ -184,7 +184,6 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 			//Calculate force
 			XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, leftWhisker);
 			XMVECTOR norm = XMLoadFloat3(&normal);
-			//norm *= dist;
 
 			//Return force
 			XMStoreFloat3(&steeringForce, norm);
@@ -206,7 +205,6 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 			//Calculate force
 			XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, rightWhisker);
 			XMVECTOR norm = XMLoadFloat3(&normal);
-			//norm *= dist;
 
 			//Return force
 			XMStoreFloat3(&steeringForce, norm);
@@ -215,6 +213,28 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 	}
 
 	return steeringForce;
+}
+
+XMFLOAT3 Steering::pathFollowing(XMFLOAT3 position, stack<XMFLOAT3>& path)
+{
+	if (path.empty())
+	{
+		return XMFLOAT3(0, 0, 0);
+	}
+
+	XMVECTOR pos = XMLoadFloat3(&position);
+	const float radius = 0.5f;
+
+	XMFLOAT3 next = path.top();
+	XMVECTOR target = XMLoadFloat3(&next);
+
+	if (radius > XMVectorGetX(XMVector3Length(target - pos)))
+	{
+		path.pop();
+		return pathFollowing(position, path);
+	}
+
+	return seekForce(position, next);
 }
 
 XMFLOAT3 Steering::aggregateForces(XMFLOAT3 seek, XMFLOAT3 arrive, XMFLOAT3 obstacleAvoid)
