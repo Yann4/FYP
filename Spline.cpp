@@ -29,11 +29,11 @@ Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * contex
 
 Spline::~Spline()
 {
-	if(context) context->Release();
-	if(splineLayout) splineLayout->Release();
+	/*if (context) context->Release();
+	if (splineLayout) splineLayout->Release();
 	if (vertexBuffer) vertexBuffer->Release();
 	if (indexBuffer) indexBuffer->Release();
-	if (constBuffer) constBuffer->Release();
+	if (constBuffer) constBuffer->Release();*/
 }
 
 void Spline::generateLine()
@@ -103,7 +103,9 @@ void Spline::createBuffers(ID3D11Device* device)
 	bd.ByteWidth = sizeof(LineCBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &constBuffer);
+	hr = device->CreateBuffer(&bd, nullptr, &constBuffer);
+
+	hr = S_OK;
 }
 
 XMFLOAT3 Spline::lerp(XMFLOAT3 a, XMFLOAT3 b, float u)

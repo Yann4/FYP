@@ -241,7 +241,7 @@ XMFLOAT3 Steering::aggregateForces(XMFLOAT3 seek, XMFLOAT3 arrive, XMFLOAT3 obst
 {
 	float seekTweak = 0.5f;
 	float arriveTweak = 0.7f;
-	float oaTweak = 1.0f;
+	float oaTweak = 2.0f;
 
 	XMVECTOR seekV = XMLoadFloat3(&seek);
 	XMVECTOR arriveV = XMLoadFloat3(&arrive);

@@ -5,7 +5,7 @@ using namespace DirectX;
 
 Agent::Agent() : GameObject()
 {
-	facing = XMFLOAT3(1, 0, 0);
+	facing = XMFLOAT3(0, 0, 1);
 	navGraph = nullptr;
 }
 
@@ -13,7 +13,7 @@ Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D
 	GameObject(devContext, constantBuffer, objectBuffer, mesh, pos)
 {
 	navGraph = graph;
-	facing = XMFLOAT3(0, 0, 1);
+	facing = XMFLOAT3(1, 0, 0);
 }
 
 Agent::~Agent()
@@ -54,21 +54,25 @@ DirectX::XMFLOAT3 Agent::forceToUnitsMoved(XMFLOAT3 force, double delta)
 void Agent::move(XMFLOAT3 moveBy)
 {
 	XMVECTOR heading = XMLoadFloat3(&moveBy);
-	heading = XMVector3Normalize(heading);
 
 	if (XMVectorGetX(XMVector3LengthSq(heading)) == 0)
 	{
 		return;
 	}
+	
+	heading = XMVector3Normalize(heading);
+
+	XMVECTOR oldPos = XMLoadFloat3(&position);
 
 	setTranslation(moveBy.x, moveBy.y, moveBy.z);
+	
+	XMVECTOR newPos = XMLoadFloat3(&position);
+	heading = newPos - oldPos;
+	heading = XMVector3Normalize(heading);
 
-	XMVECTOR pos = XMLoadFloat3(&position);
-	XMVECTOR newPos = XMVector3Transform(pos, XMMatrixTranslation(moveBy.x, moveBy.y, moveBy.z));
-	newPos = XMVector3Normalize(newPos);
 	XMVECTOR prevHeading = XMLoadFloat3(&facing);
 
-	XMVECTOR angle = XMVector3Dot(newPos, prevHeading);
+	XMVECTOR angle = XMVector3Dot(heading, prevHeading);
 	float theta = acosf(XMVectorGetX(angle));
 
 	theta = theta - rotation.y;

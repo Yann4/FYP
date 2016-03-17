@@ -839,13 +839,14 @@ void Application::Update()
 		}
 	}
 
-	splines.empty();
+	splines.clear();
 	
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
 		XMFLOAT3 f = agents.at(i).Update(t, bbs);
 
 		XMVECTOR fw = XMLoadFloat3(&f);
+		fw = XMVector3Normalize(fw);
 
 		vector<XMFLOAT3> cps;
 		cps.push_back(agents.at(i).Pos());
@@ -958,7 +959,7 @@ void Application::Draw()
 	
 	for (unsigned int i = 0; i < splines.size(); i++)
 	{
-		splines.at(i).Draw(linePS, lineVS, camera, true);
+		splines.at(i).Draw(linePS, lineVS, camera, false);
 	}
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);

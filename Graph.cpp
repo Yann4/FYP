@@ -294,10 +294,12 @@ void Graph::DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* 
 	context->IAGetInputLayout(&prevLayout);
 
 	context->IASetInputLayout(splineInputLayout);
+
 	for (Node* n : graphNodes)
 	{
 		n->DrawConnections(ConnectionPShader, ConnectionVShader, cam);
 	}
+
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetInputLayout(prevLayout);
 }

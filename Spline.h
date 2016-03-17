@@ -51,7 +51,7 @@ private:
 	DirectX::XMFLOAT3 lerp(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b, float u);
 
 public:
-	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, bool topologyNeedsSetting);
+	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, bool partOfSplineBatch);
 
 	inline std::vector<DirectX::XMFLOAT3> getLinePoints() { return linePoints; }
 	inline void changeColour(DirectX::XMFLOAT4 colour)
