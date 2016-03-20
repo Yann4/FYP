@@ -459,6 +459,8 @@ std::stack<DirectX::XMFLOAT3> Graph::aStar(DirectX::XMFLOAT3 startPos, DirectX::
 		temp = temp->parent;
 	}
 
+	path.push(start->Position());
+
 	for (auto n : open)
 	{
 		n->resetSearchParams();
@@ -468,6 +470,6 @@ std::stack<DirectX::XMFLOAT3> Graph::aStar(DirectX::XMFLOAT3 startPos, DirectX::
 	{
 		n->resetSearchParams();
 	}
-
+	bool isEmpty = path.empty();
 	return path;
 }

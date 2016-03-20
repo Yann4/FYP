@@ -11,6 +11,8 @@ class Agent : public GameObject
 private:
 	DirectX::XMFLOAT3 facing;
 	
+	DirectX::XMFLOAT3 velocity;
+
 	Graph* navGraph;
 	std::stack<DirectX::XMFLOAT3> path;
 public:
@@ -21,6 +23,6 @@ public:
 	DirectX::XMFLOAT3 Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 
 private:
-	DirectX::XMFLOAT3 forceToUnitsMoved(DirectX::XMFLOAT3 force, double delta);
-	void move(DirectX::XMFLOAT3 moveBy);
+	void forceToVelocity(DirectX::XMFLOAT3 force, double delta);
+	void move(double delta);
 };

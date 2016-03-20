@@ -85,12 +85,52 @@ XMFLOAT3 Steering::normalOfIntersection(BoundingBox box, XMFLOAT3 position, XMFL
 	XMVECTOR b = XMLoadFloat3(&triangle.at(1).vertex);
 	XMVECTOR c = XMLoadFloat3(&triangle.at(2).vertex);
 
-	XMVECTOR normal = XMVector3Normalize(XMVector3Cross(a - b, a - c));
+	XMVECTOR ab = b - a;
+	XMVECTOR ac = c - a;
+	XMVECTOR bc = c - b;
+
+	//Find hypotenuse of triangle - ab, ac or bc
+	float abLenSq = XMVectorGetX(XMVector3LengthSq(ab));
+	float acLenSq = XMVectorGetX(XMVector3LengthSq(ac));
+	float bcLenSq = XMVectorGetX(XMVector3LengthSq(bc));
+	
+	XMVECTOR hypotenuse;
+	XMVECTOR point;
+	if (abLenSq > acLenSq)
+	{
+		if (abLenSq > bcLenSq)
+		{
+			//AB is hypotenuse
+			point = a;
+			hypotenuse = ab;
+		}
+		else
+		{
+			//BC is hypotenuse
+			point = b;
+			hypotenuse = bc;
+		}
+	}
+	else if (acLenSq > bcLenSq)
+	{
+		//AC is hypotenuse
+		point = a;
+		hypotenuse = ac;
+	}
+	else
+	{
+		//BC is hypotenuse
+		point = b;
+		hypotenuse = bc;
+	}
+
+	//The midpoint of the face - the centre of the box will always give a vector pointing outside of the box
+	XMVECTOR faceMidpoint = point + (hypotenuse / 2);
+	XMVECTOR boxCentre = XMLoadFloat3(&box.Center);
+
+	XMVECTOR normal = XMVector3Normalize(faceMidpoint - boxCentre);
 	XMFLOAT3 norm;
 	XMStoreFloat3(&norm, normal);
-
-	norm.x = -norm.x;
-	norm.z = -norm.z;
 
 	return norm;
 }
@@ -110,8 +150,8 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 
 	//Unit length whisker vectors
 	XMVECTOR fWhisker = XMVector3Normalize(XMLoadFloat3(&forwards));
-	XMVECTOR lWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationAxis(rotationAxis, whiskerAngleRad)));
-	XMVECTOR rWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationAxis(rotationAxis, -whiskerAngleRad)));
+	XMVECTOR lWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationNormal(rotationAxis, whiskerAngleRad)));
+	XMVECTOR rWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationNormal(rotationAxis, -whiskerAngleRad)));
 
 	BoundingBox nearestBox = BoundingBox();
 	float nearestBoxDistSq = (std::numeric_limits<float>::max)();
@@ -128,46 +168,36 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 		*/
 		
 		XMVECTOR dSq = XMVector3LengthSq(boxPos - pos);
-		XMFLOAT3 distSq;
-		XMStoreFloat3(&distSq, dSq);
 		
 		//No point in checking the y axis as the agents only operate on the xz plane
 		float boxRadius = fmaxf(box.Extents.x, box.Extents.z);
 
-		if (distSq.x > pow(whiskerLength + boxRadius, 2))
+		if (XMVectorGetX(dSq) > pow(whiskerLength + boxRadius, 2))
 		{
 			continue;
 		}
 
 		//We're only taking into account the nearest box
 		//This could wind out being a problem
-		if (distSq.x < nearestBoxDistSq)
+		if (XMVectorGetX(dSq) < nearestBoxDistSq)
 		{
-			nearestBoxDistSq = distSq.x;
+			nearestBoxDistSq = XMVectorGetX(dSq);
 			nearestBox = box;
 		}
 	}
 
 	float dist = -1.0f;
+	float nearestDist = -1.0f;
 
+	XMVECTOR intersectionWhisker;
+
+	//Check intersections with all of the whiskers, but the whisker with the most imminent collision is the one that will be used
 	if (nearestBox.Intersects(pos, fWhisker, dist))
 	{
 		if (dist < whiskerLength)
 		{
-			//Gets the point on the surface of the bounding box
-			XMVECTOR poi = pos + (dist * fWhisker);
-
-			XMFLOAT3 pointOfIntersection, forwardWhisker;
-			XMStoreFloat3(&pointOfIntersection, poi);
-			XMStoreFloat3(&forwardWhisker, fWhisker);
-
-			//Calculate force
-			XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, forwardWhisker);
-			XMVECTOR norm = XMLoadFloat3(&normal);
-
-			//Return force
-			XMStoreFloat3(&steeringForce, norm);
-			return steeringForce;
+			intersectionWhisker = fWhisker;
+			nearestDist = dist;
 		}
 	}
 
@@ -175,41 +205,62 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 	{
 		if (dist < whiskerLength)
 		{
-			//Gets the point on the surface of the bounding box
-			XMVECTOR poi = pos + (dist * lWhisker);
-
-			XMFLOAT3 pointOfIntersection, leftWhisker;
-			XMStoreFloat3(&leftWhisker, lWhisker);
-
-			//Calculate force
-			XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, leftWhisker);
-			XMVECTOR norm = XMLoadFloat3(&normal);
-
-			//Return force
-			XMStoreFloat3(&steeringForce, norm);
-			return steeringForce;
+			if (dist < nearestDist)
+			{
+				intersectionWhisker = lWhisker;
+				nearestDist = dist;
+			}
+			else if (nearestDist == -1.0f)
+			{
+				intersectionWhisker = lWhisker;
+				nearestDist = dist;
+			}
 		}
 	}
-	
+
 	if (nearestBox.Intersects(pos, rWhisker, dist))
 	{
 		if (dist < whiskerLength)
 		{
-			//Gets the point on the surface of the bounding box
-			XMVECTOR poi = pos + (dist * rWhisker);
-
-			XMFLOAT3 pointOfIntersection, rightWhisker;
-			XMStoreFloat3(&pointOfIntersection, poi);
-			XMStoreFloat3(&rightWhisker, rWhisker);
-
-			//Calculate force
-			XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, rightWhisker);
-			XMVECTOR norm = XMLoadFloat3(&normal);
-
-			//Return force
-			XMStoreFloat3(&steeringForce, norm);
-			return steeringForce;
+			if (dist < nearestDist)
+			{
+				intersectionWhisker = lWhisker;
+				nearestDist = dist;
+			}
+			else if (nearestDist == -1.0f)
+			{
+				intersectionWhisker = lWhisker;
+				nearestDist = dist;
+			}
 		}
+	}
+
+	if (nearestDist != -1.0f)
+	{
+		//Gets the point on the surface of the bounding box
+		XMVECTOR poi = pos + (nearestDist * intersectionWhisker);
+
+		XMFLOAT3 pointOfIntersection, whisker;
+		XMStoreFloat3(&pointOfIntersection, poi);
+		XMStoreFloat3(&whisker, intersectionWhisker);
+
+		//Calculate force
+		XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, whisker);
+		XMVECTOR norm = XMLoadFloat3(&normal);
+
+		//Scale the force proportionally to the distance from the intersection
+
+		//Get 0-1 percentage scale factor
+		float scale = (whiskerLength - nearestDist) / whiskerLength;
+
+		//Do the scale
+		const float scaleFactor = 3.0f;
+		scale *= scaleFactor;
+		norm = norm * scale;
+
+		//Return force
+		XMStoreFloat3(&steeringForce, norm);
+		return steeringForce;
 	}
 
 	return steeringForce;
@@ -239,9 +290,9 @@ XMFLOAT3 Steering::pathFollowing(XMFLOAT3 position, stack<XMFLOAT3>& path)
 
 XMFLOAT3 Steering::aggregateForces(XMFLOAT3 seek, XMFLOAT3 arrive, XMFLOAT3 obstacleAvoid)
 {
-	float seekTweak = 0.5f;
+	float seekTweak = 0.7f;
 	float arriveTweak = 0.7f;
-	float oaTweak = 2.0f;
+	float oaTweak = 0.9f;
 
 	XMVECTOR seekV = XMLoadFloat3(&seek);
 	XMVECTOR arriveV = XMLoadFloat3(&arrive);

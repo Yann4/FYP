@@ -479,7 +479,6 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	temp.setRotation(rotation.x, rotation.y, rotation.z);
 	temp.UpdateMatrix();
 	temp.setCollider(true);
-	//objects.insert(temp, temp.Pos(), temp.Size());
 	objects.push_back(temp);
 
 	/*
@@ -489,10 +488,10 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	*   *
 	*/
 
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.3f, graphYPosition, position.z - scale.z - 0.3f));
-	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.3f, graphYPosition, position.z + scale.z + 0.3f));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.3f, graphYPosition, position.z - scale.z - 0.3f));
-	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.3f, graphYPosition, position.z + scale.z + 0.3f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.45f, graphYPosition, position.z - scale.z - 0.45f));
+	navGraph.giveNode(XMFLOAT3(position.x - scale.x - 0.45f, graphYPosition, position.z + scale.z + 0.45f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.45f, graphYPosition, position.z - scale.z - 0.45f));
+	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.45f, graphYPosition, position.z + scale.z + 0.45f));
 
 }
 
@@ -828,7 +827,6 @@ void Application::Update()
 
 	camera.Update();
 	skybox.Update(&camera);
-	//allObjects = objects.getAllElements();
 
 	std::vector<BoundingBox> bbs;
 	for (unsigned int i = 0; i < objects.size(); i++)
@@ -838,27 +836,10 @@ void Application::Update()
 			bbs.push_back(objects.at(i).getBoundingBox());
 		}
 	}
-
-	splines.clear();
 	
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
 		XMFLOAT3 f = agents.at(i).Update(t, bbs);
-
-		XMVECTOR fw = XMLoadFloat3(&f);
-		fw = XMVector3Normalize(fw);
-
-		vector<XMFLOAT3> cps;
-		cps.push_back(agents.at(i).Pos());
-
-		XMVECTOR p = XMLoadFloat3(&cps.at(0));
-		fw += p;
-
-		XMStoreFloat3(&f, fw);
-
-		cps.push_back(f);
-
-		splines.push_back(Spline(cps, _pImmediateContext, _pd3dDevice, basicVertexLayout));
 	}
 
 	if (graphMutex.try_lock())
@@ -884,7 +865,7 @@ void Application::Update()
 
 		//std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
 		
-		for (int j = 0; j < objects.size(); j++)
+		for (unsigned int j = 0; j < objects.size(); j++)
 		{
 			if (i == j || !objects.at(j).getCollider())
 			{
@@ -907,6 +888,23 @@ void Application::Update()
 					objects.at(i).setOnGround(true);
 				}
 				objects.at(i).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+			}
+		}
+
+		for (unsigned int j = 0; j < agents.size(); j++)
+		{
+			Collision::MTV mtv;
+			Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
+			Collision::AABB agentAABB = Collision::AABB(agents.at(j).Pos(), agents.at(j).Size());
+
+			if (Collision::boundingBoxCollision(agentAABB, objAABB, mtv))
+			{
+				if (objects.at(i).getIsGround())
+				{
+					agents.at(j).setOnGround(true);
+				}
+
+				agents.at(j).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
 			}
 		}
 	}
