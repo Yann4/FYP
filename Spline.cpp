@@ -23,7 +23,7 @@ Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * contex
 
 	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
 	generateLine();
-	createBuffers(device);
+	createBuffers();
 	colour = XMFLOAT4(0, 0, 0, 1.0);
 }
 
@@ -57,7 +57,7 @@ void Spline::generateLine()
 	}
 }
 
-void Spline::createBuffers(ID3D11Device* device)
+void Spline::createBuffers()
 {
 	Vertex vertices[101];
 	WORD indices[101];

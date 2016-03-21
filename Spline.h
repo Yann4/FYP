@@ -46,7 +46,7 @@ public:
 
 private:
 	void generateLine();
-	void createBuffers(ID3D11Device* device);
+	void createBuffers();
 
 	DirectX::XMFLOAT3 lerp(DirectX::XMFLOAT3 a, DirectX::XMFLOAT3 b, float u);
 
@@ -54,9 +54,9 @@ public:
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam, bool partOfSplineBatch);
 
 	inline std::vector<DirectX::XMFLOAT3> getLinePoints() { return linePoints; }
-	inline void changeColour(DirectX::XMFLOAT4 colour)
+	inline void changeColour(DirectX::XMFLOAT4 newColour)
 	{
-		Spline::colour = colour;
-		createBuffers(device);
+		colour = newColour;
+		createBuffers();
 	}
 };

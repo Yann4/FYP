@@ -47,5 +47,5 @@ namespace Steering
 	DirectX::XMFLOAT3 aggregateForces(DirectX::XMFLOAT3 seek = DirectX::XMFLOAT3(0, 0, 0),
 		DirectX::XMFLOAT3 arrive = DirectX::XMFLOAT3(0, 0, 0), DirectX::XMFLOAT3 obstacleAvoid = DirectX::XMFLOAT3(0, 0, 0));
 
-	DirectX::XMFLOAT3 normalOfIntersection(DirectX::BoundingBox box, DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 direction);
+	DirectX::XMFLOAT3 normalOfIntersection(DirectX::BoundingBox box, DirectX::XMFLOAT3 position);
 };

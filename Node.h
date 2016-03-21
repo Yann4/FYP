@@ -61,6 +61,12 @@ public:
 	bool removeConnectionTo(Node* node);
 	inline std::vector<Connection*>* getNeighboursRef() { return &neighbours; }
 
+	inline void moveNode(DirectX::XMFLOAT3 moveTo) { 
+		object.setTranslation(-position.x, -position.y, -position.z);
+		object.setTranslation(moveTo.x, moveTo.y, moveTo.z);
+		position = moveTo;
+	}
+
 private:
 	bool hasVisionOf(Node& other, std::vector<DirectX::BoundingBox>& objects);
 };

@@ -57,7 +57,7 @@ public:
 		}
 	}
 
-	std::stack<DirectX::XMFLOAT3> findPath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end) { return aStar(start, end); }
+	inline std::stack<DirectX::XMFLOAT3> findPath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end) { return aStar(start, end); }
 private:
 	Node* getNearestNode(DirectX::XMFLOAT3 position);
 

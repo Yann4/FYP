@@ -164,22 +164,13 @@ void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
 				XMFLOAT3 newPos;
 				XMStoreFloat3(&newPos, avg);
 
-				//Create new node
-				giveNode(newPos);
-
-				//Remove old nodes
-				delete graphNodes[i];
+				//Move one node
+				graphNodes.at(i)->moveNode(newPos);
+				
+				//Delete the other
 				delete graphNodes[j];
+				graphNodes.erase(graphNodes.begin() + j);
 
-				graphNodes.erase(graphNodes.begin() + i);
-				if (j > i)
-				{
-					graphNodes.erase(graphNodes.begin() + j - 1);
-				}
-				else
-				{
-					graphNodes.erase(graphNodes.begin() + j);
-				}
 				i = 0;
 				break;
 			}
@@ -189,7 +180,7 @@ void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)
 
 void Graph::trimConnections()
 {
-	const float overlapRad = 1.0f;
+	const float overlapRad = 0.5f;
 
 	//This is the maximum cost that a connection can have and
 	//be overlooked in the trimming process. It's to allow short,
@@ -197,7 +188,7 @@ void Graph::trimConnections()
 	const float maxCostOfFreePass = 2.0f;
 
 	//If a connection is this length or longer, there's probably a better path
-	const int minCostOfInstantDel = 7;
+	const float minCostOfInstantDel = 7.0f;
 
 	for (unsigned int i = 0; i < graphNodes.size(); i++)
 	{
@@ -205,57 +196,45 @@ void Graph::trimConnections()
 		vector<Connection*>* neighs = graphNodes.at(i)->getNeighboursRef();
 		for (unsigned int j = 0; j < neighs->size(); j++)
 		{
-			if (neighs->at(j)->cost <= maxCostOfFreePass)
-			{
-				continue;
-			}
-
-			if (neighs->at(j)->cost >= minCostOfInstantDel)
-			{
-				//To make sure the node is not being cut off from everything else
-				if (neighs->at(j)->end->getNeighboursRef()->size() <= 2)
-				{
-					continue;
-				}
-
-				if (colourConnectionsRed)
-				{
-					neighs->at(j)->setColour(XMFLOAT3(1,0,0));
-				}
-				else
-				{
-					neighs->at(j)->end->removeConnectionTo(neighs->at(j)->start);
-					graphNodes.at(i)->removeNeighbourAt(j);
-				}
-				continue;
-			}
-
 			XMFLOAT3 start, end;
-			XMVECTOR sV, eV;
+			XMVECTOR x1, x2;
 
 			start = neighs->at(j)->start->Position();
 			end = neighs->at(j)->end->Position();
-			sV = XMLoadFloat3(&start);
-			eV = XMLoadFloat3(&end);
+
+			XMFLOAT2 s = XMFLOAT2(start.x, start.z);
+			XMFLOAT2 e = XMFLOAT2(end.x, end.z);
+
+			x1 = XMLoadFloat2(&s);
+			x2 = XMLoadFloat2(&e);
+
+			XMVECTOR denominator = XMVector3Length(x2 - x1);
 
 			for (unsigned int k = 0; k < graphNodes.size(); k++)
 			{
-				if (graphNodes.at(k) == neighs->at(j)->start || graphNodes.at(k) == neighs->at(j)->end)
+				if (graphNodes.at(k)->ID() == neighs->at(j)->start->ID() || graphNodes.at(k)->ID() == neighs->at(j)->end->ID())
 				{
 					continue;
 				}
 
 				XMFLOAT3 nPos = graphNodes.at(k)->Position();
-				XMVECTOR n = XMLoadFloat3(&nPos);
+				XMFLOAT2 node = XMFLOAT2(nPos.x, nPos.z);
+				XMVECTOR p = XMLoadFloat2(&node);
 
-				//Formula taken from http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html to get distance of a point from a line
+				//Formula taken from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+				//to get the distance of a point from a line BETWEEN two points
+				const float lenSq = XMVectorGetX(XMVector2LengthSq(x2 - x1));
+				
+				if (lenSq == 0.0f)
+				{
+					continue;
+				}
 
-				XMVECTOR numerator = XMVectorAbs(XMVector3Cross(n - sV, n - eV));
-				XMVECTOR denominator = XMVectorAbs(eV - sV);
+				const float t = fmaxf(0.0f, fminf(1.0f, XMVectorGetX(XMVector2Dot(p - x1, x2 - x1)) / lenSq));
+				XMVECTOR projection = x1 + t * (x2 - x1);
+				float dist = XMVectorGetX(XMVector2Length(projection - p));
 
-				float dist = XMVectorGetX(XMVector3Length(numerator)) / XMVectorGetX(XMVector3Length(denominator));
-
-				if (dist <= overlapRad)
+				if (dist < overlapRad)
 				{
 					//Node is close to line
 					if (colourConnectionsRed)
@@ -470,6 +449,6 @@ std::stack<DirectX::XMFLOAT3> Graph::aStar(DirectX::XMFLOAT3 startPos, DirectX::
 	{
 		n->resetSearchParams();
 	}
-	bool isEmpty = path.empty();
+
 	return path;
 }

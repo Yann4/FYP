@@ -675,7 +675,6 @@ void Application::Cleanup()
 	//if (_pd3dDevice) _pd3dDevice->Release();
 }
 
-
 void Application::fireBox()
 {
 	XMFLOAT3 cameraPos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
@@ -852,7 +851,7 @@ void Application::Update()
 		}
 	}
 
-	for (int i = 0; i < objects.size(); i++)
+	for (unsigned int i = 0; i < objects.size(); i++)
 	{
 		objects.at(i).Update(t);
 		

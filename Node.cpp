@@ -124,7 +124,7 @@ float Node::distanceFrom(XMFLOAT3 pos)
 
 bool Node::removeConnectionTo(Node* node)
 {
-	for (int i = 0; i < neighbours.size(); i++)
+	for (unsigned int i = 0; i < neighbours.size(); i++)
 	{
 		if (node->Position().x == neighbours.at(i)->end->Position().x && node->Position().y == neighbours.at(i)->end->Position().y && node->Position().z == neighbours.at(i)->end->Position().z)
 		{

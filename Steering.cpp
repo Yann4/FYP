@@ -46,7 +46,7 @@ XMFLOAT3 Steering::arriveForce(XMFLOAT3 position, XMFLOAT3 destination, float ra
 	return steerForce;
 }
 
-XMFLOAT3 Steering::normalOfIntersection(BoundingBox box, XMFLOAT3 position, XMFLOAT3 direction)
+XMFLOAT3 Steering::normalOfIntersection(BoundingBox box, XMFLOAT3 position)
 {
 	//Fetching corners of the bounding box so the normal can be calculated
 	array<XMFLOAT3, 8> corners;
@@ -245,7 +245,7 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 		XMStoreFloat3(&whisker, intersectionWhisker);
 
 		//Calculate force
-		XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection, whisker);
+		XMFLOAT3 normal = normalOfIntersection(nearestBox, pointOfIntersection);
 		XMVECTOR norm = XMLoadFloat3(&normal);
 
 		//Scale the force proportionally to the distance from the intersection
