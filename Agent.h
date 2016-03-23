@@ -5,6 +5,8 @@
 #include "GameObject.h"
 #include "Steering.h"
 #include "Graph.h"
+#include "Marpo.h"
+#include "AgentController.h"
 
 class Agent : public GameObject
 {
@@ -14,14 +16,20 @@ private:
 	DirectX::XMFLOAT3 velocity;
 
 	Graph* navGraph;
-	std::stack<DirectX::XMFLOAT3> path;
+
+	Marpo fsm;
+	Controller handle;
+
 public:
 	Agent();
 	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, DirectX::XMFLOAT3 pos);
 	~Agent();
 
 	DirectX::XMFLOAT3 Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
+	
+	void updateController();
 
+	inline DirectX::XMFLOAT3 getFacing() { return facing; }
 private:
 	void forceToVelocity(DirectX::XMFLOAT3 force, double delta);
 	void move(double delta);

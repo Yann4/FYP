@@ -147,6 +147,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -393,12 +394,15 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Marpo.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Spline.cpp" />
+    <ClCompile Include="State.cpp" />
     <ClCompile Include="Steering.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="TravelToPositionState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DX11 Framework.fx">
@@ -407,6 +411,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
+    <ClInclude Include="AgentController.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Camera.h" />
@@ -418,15 +423,18 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Marpo.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Spline.h" />
+    <ClInclude Include="State.h" />
     <ClInclude Include="Steering.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TimeSlice.h" />
+    <ClInclude Include="TravelToPositionState.h" />
     <ResourceCompile Include="DX11 Framework.rc" />
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@ Agent::Agent() : GameObject()
 	facing = XMFLOAT3(1, 0, 0);
 	velocity = XMFLOAT3(0, 0, 0);
 	navGraph = nullptr;
+	handle = Controller(position, facing);
 }
 
 Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, DirectX::XMFLOAT3 pos) :
@@ -16,6 +17,7 @@ Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D
 	navGraph = graph;
 	facing = XMFLOAT3(1, 0, 0);
 	velocity = XMFLOAT3(0, 0, 0);
+	handle = Controller(position, facing);
 }
 
 Agent::~Agent()
@@ -25,17 +27,11 @@ Agent::~Agent()
 
 XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
-	if (path.empty())
-	{
-		path = navGraph->findPath(position, XMFLOAT3(4, 0, -4));
-	}
+	updateController();
 
-	XMFLOAT3 seek = pathFollowing(position, path);
-	XMFLOAT3 oa = obstacleAvoidForce(objects, position, facing);
+	fsm.Update(deltaTime, objects);
 
-	XMFLOAT3 force = aggregateForces(seek, XMFLOAT3(0, 0, 0), oa);
-
-	forceToVelocity(force, deltaTime);
+	forceToVelocity(handle.force, deltaTime);
 	move(deltaTime);
 
 	UpdateMatrix();
@@ -43,6 +39,18 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 	velocity = XMFLOAT3(0, 0, 0);
 
 	return facing;
+}
+
+void Agent::updateController()
+{
+	handle.facing = facing;
+	handle.force = XMFLOAT3(0, 0, 0);
+	handle.position = position;
+
+	if (!fsm.initialised())
+	{
+		fsm.Initialise(&handle);
+	}
 }
 
 void Agent::forceToVelocity(XMFLOAT3 force, double delta)

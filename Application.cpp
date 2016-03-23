@@ -75,7 +75,7 @@ Application::Application()
 	cameraMoveSpeed = 0.1f;
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
-	objects = vector<GameObject>();//= Octree<GameObject>(XMFLOAT3(0, 0, 0), XMFLOAT3(500, 500, 500));
+	objects = vector<GameObject>();
 	agents = vector<Agent>();
 	flashlightOn = false;
 	renderGraph = false;

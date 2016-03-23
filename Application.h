@@ -88,8 +88,6 @@ private:
 	MeshData* agentMesh;
 	std::vector<Material> agentMaterial;
 
-	//Octree<GameObject> objects;
-	//std::vector<GameObject*> allObjects;
 	std::vector<GameObject> objects;
 	std::vector<Spline> splines;
 

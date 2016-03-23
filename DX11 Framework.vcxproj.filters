@@ -33,6 +33,12 @@
     <Filter Include="Graph">
       <UniqueIdentifier>{c18325fe-8366-4afe-b4c1-7a5b741b8f03}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Finite State Machine">
+      <UniqueIdentifier>{0c61e6c5-ed9f-424e-9309-883380c837bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Finite State Machine\States">
+      <UniqueIdentifier>{36b32f71-5bd3-476d-a280-bafd28709e82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -80,6 +86,19 @@
     <ClInclude Include="Agent.h">
       <Filter>Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Steering.h" />
+    <ClInclude Include="Marpo.h">
+      <Filter>Finite State Machine</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>Finite State Machine\States</Filter>
+    </ClInclude>
+    <ClInclude Include="TravelToPositionState.h">
+      <Filter>Finite State Machine\States</Filter>
+    </ClInclude>
+    <ClInclude Include="AgentController.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -121,6 +140,16 @@
     </ClCompile>
     <ClCompile Include="Agent.cpp">
       <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Steering.cpp" />
+    <ClCompile Include="Marpo.cpp">
+      <Filter>Finite State Machine</Filter>
+    </ClCompile>
+    <ClCompile Include="TravelToPositionState.cpp">
+      <Filter>Finite State Machine\States</Filter>
+    </ClCompile>
+    <ClCompile Include="State.cpp">
+      <Filter>Finite State Machine\States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

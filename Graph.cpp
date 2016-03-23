@@ -221,7 +221,7 @@ void Graph::trimConnections()
 				XMFLOAT2 node = XMFLOAT2(nPos.x, nPos.z);
 				XMVECTOR p = XMLoadFloat2(&node);
 
-				//Formula taken from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+				//Formula adapted from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 				//to get the distance of a point from a line BETWEEN two points
 				const float lenSq = XMVectorGetX(XMVector2LengthSq(x2 - x1));
 				
