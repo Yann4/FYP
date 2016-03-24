@@ -23,5 +23,5 @@ public:
 
 	//Returns priority of state to be pushed if required
 	//If NONE, `toPush` hasn't been altered
-	virtual Priority Exit(State* toPush);
+	virtual Priority Exit(State** toPush);
 };

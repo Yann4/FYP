@@ -4,6 +4,7 @@
 #include "State.h"
 #include "TravelToPositionState.h"
 #include "RouteToState.h"
+#include "ExploreState.h"
 
 #include <stack>
 #include <array>
@@ -20,10 +21,9 @@ private:
 	std::stack<State*> immediate;
 	std::stack<State*> reactionary;
 
-	std::array<State*, 0> states;
-
 public:
 	Marpo();
+
 	void Initialise(Controller* owner, Graph* graph);
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

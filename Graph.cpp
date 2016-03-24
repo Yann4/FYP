@@ -307,6 +307,80 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 	return nearest;
 }
 
+vector<XMFLOAT3> Graph::getUnvisitedLocations()
+{
+	vector<XMFLOAT3> unvisited = vector<XMFLOAT3>();
+
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
+	{
+		if (!graphNodes.at(i)->Visited())
+		{
+			unvisited.push_back(graphNodes.at(i)->Position());
+		}
+	}
+
+	return unvisited;
+}
+
+std::vector<Node*> Graph::getUnvisitedNodes()
+{
+	vector<Node*> unvisited = vector<Node*>();
+
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
+	{
+		if (!graphNodes.at(i)->Visited())
+		{
+			unvisited.push_back(graphNodes.at(i));
+		}
+	}
+
+	return unvisited;
+}
+
+XMFLOAT3 Graph::getNearestUnvisitedLocation(XMFLOAT3 currentPos)
+{
+	vector<XMFLOAT3> unvisited = getUnvisitedLocations();
+	XMVECTOR currentPosition = XMLoadFloat3(&currentPos);
+
+	XMFLOAT3 nearest = currentPos;
+	float shortestDistanceSquared = D3D11_FLOAT32_MAX;
+
+	for (unsigned int i = 0; i < unvisited.size(); i++)
+	{
+		XMVECTOR node = XMLoadFloat3(&unvisited.at(i));
+
+		float distToNodeSq = XMVectorGetX(XMVector3LengthSq(node - currentPosition));
+
+		if (distToNodeSq < shortestDistanceSquared)
+		{
+			shortestDistanceSquared = distToNodeSq;
+			nearest = unvisited.at(i);
+		}
+	}
+
+	return nearest;
+}
+
+void Graph::visitLocation(XMFLOAT3 location)
+{
+	vector<Node*> unvisited = getUnvisitedNodes();
+	const float distThresholdSq = powf(0.5f, 2);
+
+	XMVECTOR loc = XMLoadFloat3(&location);
+
+	for (unsigned int i = 0; i < unvisited.size(); i++)
+	{
+		XMVECTOR nodePos = XMLoadFloat3(&unvisited.at(i)->Position());
+		float distance = XMVectorGetX(XMVector3LengthSq(nodePos - loc));
+
+		if (distance < distThresholdSq)
+		{
+			unvisited.at(i)->setVisited();
+			return;
+		}
+	}
+}
+
 /*
 PATHFINDING
 */
@@ -323,10 +397,7 @@ float Graph::euclideanHeuristic(XMFLOAT3 start, XMFLOAT3 end)
 	sv = XMLoadFloat3(&start);
 	ev = XMLoadFloat3(&end);
 
-	XMFLOAT3 dist;
-	XMStoreFloat3(&dist, XMVector3Length(sv - ev));
-
-	return abs(dist.x);
+	return XMVectorGetX(XMVector3Length(sv - ev));
 }
 
 float Graph::euclideanHeuristicSq(XMFLOAT3 start, XMFLOAT3 end)
@@ -335,10 +406,7 @@ float Graph::euclideanHeuristicSq(XMFLOAT3 start, XMFLOAT3 end)
 	sv = XMLoadFloat3(&start);
 	ev = XMLoadFloat3(&end);
 
-	XMFLOAT3 dist;
-	XMStoreFloat3(&dist, XMVector3LengthSq(sv - ev));
-
-	return abs(dist.x);
+	return XMVectorGetX(XMVector3LengthSq(sv - ev));
 }
 
 std::stack<DirectX::XMFLOAT3> Graph::aStar(DirectX::XMFLOAT3 startPos, DirectX::XMFLOAT3 endPos)

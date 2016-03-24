@@ -16,7 +16,7 @@ public:
 	void Update (double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 	Priority shouldEnter();
 	bool shouldExit();
-	Priority Exit(State* toPush);
+	Priority Exit(State** toPush);
 
 public:
 	const float distThreshold = 0.5f;

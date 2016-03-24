@@ -63,6 +63,12 @@ public:
 
 	inline bool isBusy() { return graphBusy; }
 	inline void flipBusy() { graphBusy = !graphBusy; }
+
+	std::vector<DirectX::XMFLOAT3> getUnvisitedLocations();
+	std::vector<Node*> getUnvisitedNodes();
+	DirectX::XMFLOAT3 getNearestUnvisitedLocation(DirectX::XMFLOAT3 currentPos);
+
+	void visitLocation(DirectX::XMFLOAT3 location);
 private:
 	Node* getNearestNode(DirectX::XMFLOAT3 position);
 

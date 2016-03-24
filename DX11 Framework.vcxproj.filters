@@ -102,6 +102,9 @@
     <ClInclude Include="RouteToState.h">
       <Filter>Finite State Machine\States</Filter>
     </ClInclude>
+    <ClInclude Include="ExploreState.h">
+      <Filter>Finite State Machine\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -155,6 +158,9 @@
       <Filter>Finite State Machine\States</Filter>
     </ClCompile>
     <ClCompile Include="RouteToState.cpp">
+      <Filter>Finite State Machine\States</Filter>
+    </ClCompile>
+    <ClCompile Include="ExploreState.cpp">
       <Filter>Finite State Machine\States</Filter>
     </ClCompile>
   </ItemGroup>

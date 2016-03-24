@@ -17,7 +17,7 @@ void Marpo::Initialise(Controller* owner, Graph* graph)
 	this->owner = owner;
 	navGraph = graph;
 
-	longTerm.push(new RouteToState(owner, &immediate, navGraph, DirectX::XMFLOAT3(-5, 1, -5)));
+	//longTerm.push(new RouteToState(owner, &immediate, navGraph, DirectX::XMFLOAT3(-5, 1, -5)));
 }
 
 void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
@@ -31,33 +31,40 @@ void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 	{
 		State* currentState = currentStack->top();
 
-		//Run the update
-		currentState->Update(deltaTime, objects);
-		
-		//Check if it's finished
-		if (currentState->shouldExit())
+		if (currentState != nullptr)
 		{
-			//Some states return other states to be run.
-			//Check if this is one of these, and update appropriately
-			State* st = nullptr;
-			Priority prio = currentState->Exit(st);
-			
-			delete currentState;
-			currentStack->pop();
+			//Run the update
+			currentState->Update(deltaTime, objects);
 
-			pushWithPriority(st, prio);
+			//Check if it's finished
+			if (currentState->shouldExit())
+			{
+				//Some states return other states to be run.
+				//Check if this is one of these, and update appropriately
+				State* st = nullptr;
+				Priority prio = currentState->Exit(&st);
+
+				delete currentState;
+				currentStack->pop();
+
+				pushWithPriority(st, prio);
+			}
 		}
 	}
 }
 
 void Marpo::checkForStatesToPush()
 {
-	for (unsigned int i = 0; i < states.size(); i++)
+	Priority prio;
+
+	ExploreState es = ExploreState(owner, &longTerm, &immediate, navGraph);
+	prio = es.shouldEnter();
+	
+	if (prio != NONE)
 	{
-		Priority prio = states.at(i)->shouldEnter();
-		
-		pushWithPriority(states.at(i), prio);
+		pushWithPriority(new ExploreState(owner, &longTerm, &immediate, navGraph), prio);
 	}
+
 }
 
 void Marpo::pushWithPriority(State* state, Priority prio)

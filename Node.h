@@ -19,6 +19,9 @@ private:
 	ID3D11InputLayout* splineInputLayout;
 	GameObject object;
 	unsigned int id;
+
+	bool visited;
+
 public:
 	float g_score;
 	float h_score;
@@ -67,6 +70,8 @@ public:
 		position = moveTo;
 	}
 
+	inline bool Visited() { return visited; }
+	inline void setVisited() { visited = true; }
 private:
 	bool hasVisionOf(Node& other, std::vector<DirectX::BoundingBox>& objects);
 };

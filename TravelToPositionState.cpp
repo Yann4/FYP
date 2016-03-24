@@ -36,7 +36,7 @@ bool TravelToPositionState::shouldExit()
 	return false;
 }
 
-Priority TravelToPositionState::Exit(State* toPush)
+Priority TravelToPositionState::Exit(State** toPush)
 {
 	return NONE;
 }

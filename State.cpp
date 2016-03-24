@@ -26,7 +26,7 @@ bool State::shouldExit()
 	return true;
 }
 
-Priority State::Exit(State* toPush)
+Priority State::Exit(State** toPush)
 {
 	return NONE;
 }

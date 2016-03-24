@@ -11,7 +11,9 @@ RouteToState::RouteToState(Controller* owner, std::stack<State*>* immediateStack
 	}
 
 	path = navGraph->findPath(owner->position, targetDestination);
-	
+
+	navGraph->visitLocation(owner->position);
+
 	if (!path.empty())
 	{
 		immediateStack->push(new TravelToPositionState(owner, path.top()));
@@ -29,6 +31,8 @@ void RouteToState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 	if (atNextNode())
 	{
 		path.pop();
+		
+		navGraph->visitLocation(owner->position);
 
 		if (!path.empty())
 		{
@@ -44,11 +48,12 @@ Priority RouteToState::shouldEnter()
 
 bool RouteToState::shouldExit()
 {
-	return !path.empty();
+	return path.empty();
 }
 
-Priority RouteToState::Exit(State* toPush)
+Priority RouteToState::Exit(State** toPush)
 {
+	navGraph->visitLocation(owner->position);
 	return NONE;
 }
 
