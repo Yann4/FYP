@@ -9,7 +9,7 @@ class TravelToPositionState : public State
 {
 private:
 	DirectX::XMFLOAT3 position;
-	const float distThreshold = 0.5f;
+
 public:
 	TravelToPositionState(Controller* owner, DirectX::XMFLOAT3 destination);
 	
@@ -17,4 +17,7 @@ public:
 	Priority shouldEnter();
 	bool shouldExit();
 	Priority Exit(State* toPush);
+
+public:
+	const float distThreshold = 0.5f;
 };

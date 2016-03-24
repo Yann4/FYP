@@ -397,6 +397,7 @@
     <ClCompile Include="Marpo.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="RouteToState.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Spline.cpp" />
     <ClCompile Include="State.cpp" />
@@ -428,6 +429,7 @@
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Parser.h" />
     <CLInclude Include="resource.h" />
+    <ClInclude Include="RouteToState.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Spline.h" />
     <ClInclude Include="State.h" />

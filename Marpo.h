@@ -3,6 +3,7 @@
 
 #include "State.h"
 #include "TravelToPositionState.h"
+#include "RouteToState.h"
 
 #include <stack>
 #include <array>
@@ -13,6 +14,7 @@ class Marpo
 {
 private:
 	Controller* owner;
+	Graph* navGraph;
 
 	std::stack<State*> longTerm;
 	std::stack<State*> immediate;
@@ -22,7 +24,7 @@ private:
 
 public:
 	Marpo();
-	void Initialise(Controller* owner);
+	void Initialise(Controller* owner, Graph* graph);
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 

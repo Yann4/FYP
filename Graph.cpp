@@ -10,6 +10,7 @@ constBuffer(nullptr), objBuffer(nullptr), nodeMesh(nullptr), splineInputLayout(n
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
 	colourConnectionsRed = false;
+	graphBusy = false;
 }
 
 Graph::Graph(ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineInputLayout): context(context), device(device),
@@ -18,6 +19,7 @@ constBuffer(constBuffer), objBuffer(objBuffer), nodeMesh(mesh), splineInputLayou
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
 	colourConnectionsRed = false;
+	graphBusy = false;
 
 	context->AddRef();
 	device->AddRef();
@@ -54,6 +56,7 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 	{
 		return;
 	}
+	flipBusy();
 
 	//Remove/Consolidate as many nodes as possible
 	trimNodeList(objects);
@@ -110,6 +113,7 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 
 	trimConnections();
 	graphUpToDate = true;
+	flipBusy();
 }
 
 void Graph::trimNodeList(std::vector<DirectX::BoundingBox>& objects)

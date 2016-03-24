@@ -835,11 +835,6 @@ void Application::Update()
 			bbs.push_back(objects.at(i).getBoundingBox());
 		}
 	}
-	
-	for (unsigned int i = 0; i < agents.size(); i++)
-	{
-		XMFLOAT3 f = agents.at(i).Update(t, bbs);
-	}
 
 	if (graphMutex.try_lock())
 	{
@@ -849,6 +844,11 @@ void Application::Update()
 			/*Update the navigation graph*/
 			std::thread(&Application::updateGraph, this, bbs).detach();
 		}
+	}
+
+	for (unsigned int i = 0; i < agents.size(); i++)
+	{
+		XMFLOAT3 f = agents.at(i).Update(t, bbs);
 	}
 
 	for (unsigned int i = 0; i < objects.size(); i++)

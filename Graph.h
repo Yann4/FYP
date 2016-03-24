@@ -27,6 +27,8 @@ private:
 
 	unsigned int top_id;
 
+	bool graphBusy;
+
 public:
 	Graph();
 	Graph(ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineInputLayout);
@@ -58,6 +60,9 @@ public:
 	}
 
 	inline std::stack<DirectX::XMFLOAT3> findPath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end) { return aStar(start, end); }
+
+	inline bool isBusy() { return graphBusy; }
+	inline void flipBusy() { graphBusy = !graphBusy; }
 private:
 	Node* getNearestNode(DirectX::XMFLOAT3 position);
 

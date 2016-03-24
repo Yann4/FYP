@@ -49,7 +49,7 @@ void Agent::updateController()
 
 	if (!fsm.initialised())
 	{
-		fsm.Initialise(&handle);
+		fsm.Initialise(&handle, navGraph);
 	}
 }
 
