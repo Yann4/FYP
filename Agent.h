@@ -25,7 +25,7 @@ public:
 	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, DirectX::XMFLOAT3 pos);
 	~Agent();
 
-	DirectX::XMFLOAT3 Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
+	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 	
 	void updateController();
 

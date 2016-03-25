@@ -107,8 +107,8 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
         return E_FAIL;
     }
 
-	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
-
+	//camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
+	player = Player(XMFLOAT3(1, 1.5f, 1), _WindowWidth, _WindowHeight);
 	input = Input("input_map.txt");
 	viewFrustum = Frustum();
 	return S_OK;
@@ -677,8 +677,8 @@ void Application::Cleanup()
 
 void Application::fireBox()
 {
-	XMFLOAT3 cameraPos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-	XMFLOAT3 cameraForwards = camera.getForwards();
+	XMFLOAT3 cameraPos = player.Position();//XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+	XMFLOAT3 cameraForwards = player.getCamera()->getForwards();//camera.getForwards();
 
 	XMVECTOR posVect = XMLoadFloat3(&cameraPos);
 	XMVECTOR forwardsVector = XMLoadFloat3(&cameraForwards);
@@ -714,13 +714,13 @@ void Application::onMouseMove(WPARAM btnState, int x, int y)
 		float dx = XMConvertToRadians(cameraPanSpeed * (x - lastMousePos.x));
 		float dy = XMConvertToRadians(cameraPanSpeed * (y - lastMousePos.y));
 
-		camera.Pitch(dy);
-		camera.Yaw(dx);
+		player.getCamera()->Pitch(dy);
+		player.getCamera()->Yaw(dx);
 	}
 
 	lastMousePos.x = (float)x;
 	lastMousePos.y = (float)y;
-	camera.Update();
+	player.getCamera()->Update();
 }
 
 void Application::pushEvent(Event toPush)
@@ -730,6 +730,7 @@ void Application::pushEvent(Event toPush)
 
 void Application::handleMessages()
 {
+	vector<Event> playerEvents = vector<Event>();
 	while (!inputEventQueue.empty())
 	{
 		Event next = inputEventQueue.front();
@@ -737,28 +738,32 @@ void Application::handleMessages()
 		switch (next)
 		{
 		case WALK_FORWARDS:
-			camera.Walk(0.001f);
+			//camera.Walk(0.001f);
+			playerEvents.push_back(next);
 			break;
 		case WALK_BACKWARDS:
-			camera.Walk(-0.001f);
+			//camera.Walk(-0.001f);
+			playerEvents.push_back(next);
 			break;
 		case STRAFE_LEFT:
-			camera.Strafe(-0.001f);
+			//camera.Strafe(-0.001f);
+			playerEvents.push_back(next);
 			break;
 		case STRAFE_RIGHT:
-			camera.Strafe(0.001f);
+			//camera.Strafe(0.001f);
+			playerEvents.push_back(next);
 			break;
 		case YAW_LEFT:
-			camera.Yaw(-0.001f);
+			//camera.Yaw(-0.001f);
 			break;
 		case YAW_RIGHT:
-			camera.Yaw(0.001f);
+			//camera.Yaw(0.001f);
 			break;
 		case PITCH_UP:
-			camera.Pitch(-0.001f);
+			//camera.Pitch(-0.001f);
 			break;
 		case PITCH_DOWN:
-			camera.Pitch(0.001f);
+			//camera.Pitch(0.001f);
 			break;
 		case PLACE_CRATE:
 			fireBox();
@@ -790,6 +795,8 @@ void Application::handleMessages()
 		}
 		inputEventQueue.pop();
 	}
+
+	player.inputUpdate(playerEvents);
 }
 
 void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
@@ -824,8 +831,8 @@ void Application::Update()
 	input.handleInput(&Application::pushEvent);
 	handleMessages();
 
-	camera.Update();
-	skybox.Update(&camera);
+	player.Update();//camera.Update();
+	skybox.Update(player.getCamera());
 
 	std::vector<BoundingBox> bbs;
 	for (unsigned int i = 0; i < objects.size(); i++)
@@ -848,8 +855,10 @@ void Application::Update()
 
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
-		XMFLOAT3 f = agents.at(i).Update(t, bbs);
+		agents.at(i).Update(t, bbs);
 	}
+
+	Collision::AABB playerBB = Collision::AABB(player.Position(), player.Size());
 
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
@@ -860,19 +869,22 @@ void Application::Update()
 			continue;
 		}
 
-		XMFLOAT3 size = objects.at(i).Size();
+		XMFLOAT3 size = objects.at(i).Size();		
 
-		//std::vector<GameObject*> neighbourhood = objects.getElementsInBounds(object->Pos(), size);
-		
+		Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
+		Collision::MTV mtv;
+
+		if (Collision::boundingBoxCollision(playerBB, objAABB, mtv))
+		{
+			player.moveFromCollision(XMFLOAT3(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude));
+		}
+
 		for (unsigned int j = 0; j < objects.size(); j++)
 		{
 			if (i == j || !objects.at(j).getCollider())
 			{
 				continue;
 			}
-			Collision::MTV mtv;
-
-			Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
 
 			Collision::AABB closeAABB = Collision::AABB(objects.at(j).Pos(), objects.at(j).Size());
 			
@@ -892,8 +904,6 @@ void Application::Update()
 
 		for (unsigned int j = 0; j < agents.size(); j++)
 		{
-			Collision::MTV mtv;
-			Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
 			Collision::AABB agentAABB = Collision::AABB(agents.at(j).Pos(), agents.at(j).Size());
 
 			if (Collision::boundingBoxCollision(agentAABB, objAABB, mtv))
@@ -908,7 +918,7 @@ void Application::Update()
 		}
 	}
 
-	viewFrustum.constructFrustum(camera.viewDistance() * 2, camera.fov() * 2, camera.aspectRatio() * 2, 0, camera.zFar() * 2, camera.getView());
+	viewFrustum.constructFrustum(player.getCamera()->viewDistance() * 2, player.getCamera()->fov() * 2, player.getCamera()->aspectRatio() * 2, 0, player.getCamera()->zFar() * 2, player.getCamera()->getView());
 }
 
 void Application::Draw()
@@ -920,13 +930,13 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	perFrameCB.eyePos = XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+	perFrameCB.eyePos = player.Position(); //XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
 
 	perFrameCB.pointLight.position = perFrameCB.eyePos;
 	if (flashlightOn)
 	{
 		perFrameCB.spotLight.range = 15;
-		perFrameCB.spotLight.direction = camera.getForwards();
+		perFrameCB.spotLight.direction = player.getCamera()->getForwards();
 		perFrameCB.spotLight.position = perFrameCB.eyePos;
 	}
 	else
@@ -938,30 +948,30 @@ void Application::Draw()
 
 	for (GameObject object : objects)
 	{
-		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, *player.getCamera());
 	}
 
 	for (Agent a : agents)
 	{
-		a.Draw(_pPixelShader, _pVertexShader, viewFrustum, camera);
+		a.Draw(_pPixelShader, _pVertexShader, viewFrustum, *player.getCamera());
 	}
 
 	if (renderGraph && graphMutex.try_lock())
 	{
 		graphMutex.unlock();
-		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, camera);
+		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, *player.getCamera());
 	}
 
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
 	
 	for (unsigned int i = 0; i < splines.size(); i++)
 	{
-		splines.at(i).Draw(linePS, lineVS, camera, false);
+		splines.at(i).Draw(linePS, lineVS, *player.getCamera(), false);
 	}
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
-	skybox.Draw(skyboxVS, skyboxPS, &camera);
+	skybox.Draw(skyboxVS, skyboxPS, player.getCamera());
     //
     // Present our back buffer to our front buffer
     //

@@ -28,13 +28,17 @@ public:
 	void setLens(float foVY, float aspect, float znear, float zfar);
 	void Update();
 
-	void Strafe(float d), Walk(float d);
-	void Pitch(float delta), Yaw(float delta);
+	void Strafe(float d);
+	void Walk(float d);
+	void Pitch(float delta);
+	void Yaw(float delta);
 
 	DirectX::XMMATRIX getView() const;
 	DirectX::XMMATRIX getProjection() const;
 
 	inline DirectX::XMFLOAT4 getPosition() { return position; };
+	inline void setPosition(DirectX::XMFLOAT4 pos) { position = pos; UpdateViewMatrix(); }
+
 	inline float viewDistance() { return farZ - nearZ; };
 	
 	inline DirectX::XMFLOAT3 getForwards() { return DirectX::XMFLOAT3(lookAt.x, lookAt.y, lookAt.z); };
@@ -44,7 +48,6 @@ public:
 	inline float fov(){ return yFov; };
 	inline float nearHeight(){ return nearWindHeight; };
 	inline float farHeight(){ return farWindHeight; };
-
 
 private:
 	void UpdateViewMatrix();

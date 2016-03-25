@@ -39,6 +39,12 @@
     <Filter Include="Finite State Machine\States">
       <UniqueIdentifier>{36b32f71-5bd3-476d-a280-bafd28709e82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\Actors">
+      <UniqueIdentifier>{dc0dcc7e-0408-420f-8e30-2bb1d29391e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Props">
+      <UniqueIdentifier>{002d8a45-54ed-4c73-838b-441ea6595982}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -56,9 +62,6 @@
       <Filter>TextureLoader</Filter>
     </ClInclude>
     <ClInclude Include="Parser.h" />
-    <ClInclude Include="Skybox.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
     <ClInclude Include="TimeSlice.h" />
     <ClInclude Include="Frustum.h">
       <Filter>Objects</Filter>
@@ -67,13 +70,7 @@
       <Filter>Lights</Filter>
     </ClInclude>
     <ClInclude Include="Collision.h" />
-    <ClInclude Include="Spline.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Octree.h" />
-    <ClInclude Include="Surface.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Node.h">
       <Filter>Graph</Filter>
     </ClInclude>
@@ -82,9 +79,6 @@
     </ClInclude>
     <ClInclude Include="Connection.h">
       <Filter>Graph</Filter>
-    </ClInclude>
-    <ClInclude Include="Agent.h">
-      <Filter>Objects</Filter>
     </ClInclude>
     <ClInclude Include="Steering.h" />
     <ClInclude Include="Marpo.h">
@@ -96,14 +90,29 @@
     <ClInclude Include="TravelToPositionState.h">
       <Filter>Finite State Machine\States</Filter>
     </ClInclude>
-    <ClInclude Include="AgentController.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
     <ClInclude Include="RouteToState.h">
       <Filter>Finite State Machine\States</Filter>
     </ClInclude>
     <ClInclude Include="ExploreState.h">
       <Filter>Finite State Machine\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Agent.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="AgentController.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Objects\Props</Filter>
+    </ClInclude>
+    <ClInclude Include="Spline.h">
+      <Filter>Objects\Props</Filter>
+    </ClInclude>
+    <ClInclude Include="Surface.h">
+      <Filter>Objects\Props</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -122,19 +131,10 @@
       <Filter>TextureLoader</Filter>
     </ClCompile>
     <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="Skybox.cpp">
-      <Filter>Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Frustum.cpp">
       <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="Collision.cpp" />
-    <ClCompile Include="Spline.cpp">
-      <Filter>Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Surface.cpp">
-      <Filter>Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Node.cpp">
       <Filter>Graph</Filter>
     </ClCompile>
@@ -143,9 +143,6 @@
     </ClCompile>
     <ClCompile Include="Connection.cpp">
       <Filter>Graph</Filter>
-    </ClCompile>
-    <ClCompile Include="Agent.cpp">
-      <Filter>Objects</Filter>
     </ClCompile>
     <ClCompile Include="Steering.cpp" />
     <ClCompile Include="Marpo.cpp">
@@ -162,6 +159,21 @@
     </ClCompile>
     <ClCompile Include="ExploreState.cpp">
       <Filter>Finite State Machine\States</Filter>
+    </ClCompile>
+    <ClCompile Include="Agent.cpp">
+      <Filter>Objects\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Objects\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Objects\Props</Filter>
+    </ClCompile>
+    <ClCompile Include="Spline.cpp">
+      <Filter>Objects\Props</Filter>
+    </ClCompile>
+    <ClCompile Include="Surface.cpp">
+      <Filter>Objects\Props</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

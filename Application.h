@@ -23,6 +23,7 @@
 #include "Octree.h"
 #include "Graph.h"
 #include "Agent.h"
+#include "Player.h"
 
 #include <queue>
 #include <fstream>
@@ -71,7 +72,7 @@ private:
 
 	frameCB perFrameCB;
 
-	Camera camera;
+	//Camera camera;
 	Frustum viewFrustum;
 
 	MeshData* cubeMesh;
@@ -91,6 +92,7 @@ private:
 	std::vector<GameObject> objects;
 	std::vector<Spline> splines;
 
+	Player player;
 	std::vector<Agent> agents;
 
 	Skybox skybox;

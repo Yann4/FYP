@@ -25,7 +25,7 @@ Agent::~Agent()
 	navGraph = nullptr;
 }
 
-XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
+void Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
 	updateController();
 
@@ -37,8 +37,6 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 	UpdateMatrix();
 
 	velocity = XMFLOAT3(0, 0, 0);
-
-	return facing;
 }
 
 void Agent::updateController()
