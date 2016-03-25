@@ -7,6 +7,7 @@
 #include "Graph.h"
 #include "Marpo.h"
 #include "AgentController.h"
+#include "Blackboard.h"
 
 class Agent : public GameObject
 {
@@ -20,11 +21,14 @@ private:
 	Marpo fsm;
 	Controller handle;
 
+	Blackboard* blackboard;
+
 	const float viewDistance = 5.0f;
+	const float fieldOfView = XM_PIDIV4;
 
 public:
 	Agent();
-	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, DirectX::XMFLOAT3 pos);
+	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, Blackboard* blackboard, DirectX::XMFLOAT3 pos);
 	~Agent();
 
 	DirectX::XMFLOAT3 Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

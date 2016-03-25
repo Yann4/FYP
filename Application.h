@@ -23,6 +23,7 @@
 #include "Octree.h"
 #include "Graph.h"
 #include "Agent.h"
+#include "Blackboard.h"
 #include "Player.h"
 
 #include <queue>
@@ -94,6 +95,8 @@ private:
 
 	Player player;
 	std::vector<Agent> agents;
+
+	Blackboard blackboard;
 
 	Skybox skybox;
 

@@ -110,7 +110,10 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	//camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
 	player = Player(XMFLOAT3(1, 1.5f, 1), _WindowWidth, _WindowHeight);
 	input = Input("input_map.txt");
+
 	viewFrustum = Frustum();
+	blackboard = Blackboard();
+
 	return S_OK;
 }
 

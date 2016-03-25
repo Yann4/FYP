@@ -8,11 +8,12 @@ Agent::Agent() : GameObject()
 	facing = XMFLOAT3(1, 0, 0);
 	velocity = XMFLOAT3(0, 0, 0);
 	navGraph = nullptr;
+	blackboard = nullptr;
 	handle = Controller(position, facing);
 }
 
-Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, DirectX::XMFLOAT3 pos) :
-	GameObject(devContext, constantBuffer, objectBuffer, mesh, pos)
+Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, Blackboard* blackboard, DirectX::XMFLOAT3 pos) :
+	GameObject(devContext, constantBuffer, objectBuffer, mesh, pos), blackboard(blackboard)
 {
 	navGraph = graph;
 	facing = XMFLOAT3(1, 0, 0);
@@ -23,6 +24,7 @@ Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D
 Agent::~Agent()
 {
 	navGraph = nullptr;
+	blackboard = nullptr;
 }
 
 XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
@@ -51,8 +53,9 @@ bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& obje
 	{
 		return false;
 	}
+
 	XMVECTOR look = XMLoadFloat3(&facing);
-	XMMATRIX projmat = XMMatrixPerspectiveFovLH(XM_PIDIV4, 0.5f, 0.0f, viewDistance);
+	XMMATRIX projmat = XMMatrixPerspectiveFovLH(fieldOfView, 0.5f, 0.0f, viewDistance);
 	XMMATRIX viewMat = XMMatrixLookAtLH(me, me + look, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 	XMVECTOR det;
 	
@@ -76,10 +79,12 @@ bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& obje
 					return false;
 				}
 
+				blackboard->updatePlayerPosition(playerPosition);
 				return true;
 			}
 		}
 
+		blackboard->updatePlayerPosition(playerPosition);
 		return true;
 	}
 

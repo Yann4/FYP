@@ -33,17 +33,23 @@
     <Filter Include="Graph">
       <UniqueIdentifier>{c18325fe-8366-4afe-b4c1-7a5b741b8f03}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Finite State Machine">
-      <UniqueIdentifier>{0c61e6c5-ed9f-424e-9309-883380c837bf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Finite State Machine\States">
-      <UniqueIdentifier>{36b32f71-5bd3-476d-a280-bafd28709e82}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Objects\Actors">
       <UniqueIdentifier>{dc0dcc7e-0408-420f-8e30-2bb1d29391e2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Objects\Props">
       <UniqueIdentifier>{002d8a45-54ed-4c73-838b-441ea6595982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Spatial Data">
+      <UniqueIdentifier>{2013b161-86cf-4316-b123-5815b6d7368b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI Components">
+      <UniqueIdentifier>{e26af777-69e1-4602-89f4-77648cff7d25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI Components\Finite State Machine">
+      <UniqueIdentifier>{0c61e6c5-ed9f-424e-9309-883380c837bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI Components\Finite State Machine\States">
+      <UniqueIdentifier>{36b32f71-5bd3-476d-a280-bafd28709e82}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,14 +69,9 @@
     </ClInclude>
     <ClInclude Include="Parser.h" />
     <ClInclude Include="TimeSlice.h" />
-    <ClInclude Include="Frustum.h">
-      <Filter>Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Collision.h" />
-    <ClInclude Include="Octree.h" />
     <ClInclude Include="Node.h">
       <Filter>Graph</Filter>
     </ClInclude>
@@ -80,21 +81,20 @@
     <ClInclude Include="Connection.h">
       <Filter>Graph</Filter>
     </ClInclude>
-    <ClInclude Include="Steering.h" />
     <ClInclude Include="Marpo.h">
-      <Filter>Finite State Machine</Filter>
+      <Filter>AI Components\Finite State Machine</Filter>
     </ClInclude>
     <ClInclude Include="State.h">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClInclude>
     <ClInclude Include="TravelToPositionState.h">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClInclude>
     <ClInclude Include="RouteToState.h">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClInclude>
     <ClInclude Include="ExploreState.h">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClInclude>
     <ClInclude Include="Agent.h">
       <Filter>Objects\Actors</Filter>
@@ -114,6 +114,21 @@
     <ClInclude Include="Surface.h">
       <Filter>Objects\Props</Filter>
     </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Spatial Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
+      <Filter>Spatial Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Octree.h">
+      <Filter>Spatial Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Steering.h">
+      <Filter>AI Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Blackboard.h">
+      <Filter>AI Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -131,10 +146,6 @@
       <Filter>TextureLoader</Filter>
     </ClCompile>
     <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="Frustum.cpp">
-      <Filter>Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Node.cpp">
       <Filter>Graph</Filter>
     </ClCompile>
@@ -144,21 +155,20 @@
     <ClCompile Include="Connection.cpp">
       <Filter>Graph</Filter>
     </ClCompile>
-    <ClCompile Include="Steering.cpp" />
     <ClCompile Include="Marpo.cpp">
-      <Filter>Finite State Machine</Filter>
+      <Filter>AI Components\Finite State Machine</Filter>
     </ClCompile>
     <ClCompile Include="TravelToPositionState.cpp">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClCompile>
     <ClCompile Include="State.cpp">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClCompile>
     <ClCompile Include="RouteToState.cpp">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClCompile>
     <ClCompile Include="ExploreState.cpp">
-      <Filter>Finite State Machine\States</Filter>
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClCompile>
     <ClCompile Include="Agent.cpp">
       <Filter>Objects\Actors</Filter>
@@ -174,6 +184,18 @@
     </ClCompile>
     <ClCompile Include="Surface.cpp">
       <Filter>Objects\Props</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>Spatial Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision.cpp">
+      <Filter>Spatial Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Steering.cpp">
+      <Filter>AI Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Blackboard.cpp">
+      <Filter>AI Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
