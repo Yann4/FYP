@@ -25,7 +25,7 @@ Agent::~Agent()
 	navGraph = nullptr;
 }
 
-void Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
+XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
 	updateController();
 
@@ -37,6 +37,53 @@ void Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 	UpdateMatrix();
 
 	velocity = XMFLOAT3(0, 0, 0);
+
+	return facing;
+}
+
+bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& objects)
+{
+	XMVECTOR player = XMLoadFloat3(&playerPosition);
+	XMVECTOR me = XMLoadFloat3(&position);
+	float distToPlayer = XMVectorGetX(XMVector3Length(player - me));
+	
+	if (distToPlayer > viewDistance)
+	{
+		return false;
+	}
+	XMVECTOR look = XMLoadFloat3(&facing);
+	XMMATRIX projmat = XMMatrixPerspectiveFovLH(XM_PIDIV4, 0.5f, 0.0f, viewDistance);
+	XMMATRIX viewMat = XMMatrixLookAtLH(me, me + look, XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+	XMVECTOR det;
+	
+	BoundingFrustum viewCone = BoundingFrustum();
+	viewCone.CreateFromMatrix(viewCone, projmat);
+	viewCone.Transform(viewCone, XMMatrixInverse(&det, viewMat));
+
+	if (viewCone.Contains(player) == CONTAINS)
+	{
+		XMVECTOR toPlayer = player - me;
+		toPlayer = XMVector3Normalize(toPlayer);
+
+		for (unsigned int i = 0; i < objects.size(); i++)
+		{
+			float toIntersection;
+			
+			if (objects.at(i).Intersects(me, toPlayer, toIntersection))
+			{
+				if (toIntersection < distToPlayer)
+				{
+					return false;
+				}
+
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 void Agent::updateController()

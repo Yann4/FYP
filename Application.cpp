@@ -853,9 +853,30 @@ void Application::Update()
 		}
 	}
 
+	splines.clear();
+
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
-		agents.at(i).Update(t, bbs);
+		XMFLOAT3 f = agents.at(i).Update(t, bbs);
+		
+		XMFLOAT3 p = agents.at(i).Pos();
+
+		XMVECTOR fPos = XMLoadFloat3(&p);
+		fPos += XMLoadFloat3(&f);
+		XMStoreFloat3(&f, fPos);
+
+		vector<XMFLOAT3> cp = vector<XMFLOAT3>();
+		cp.push_back(f);
+		cp.push_back(p);
+		splines.push_back(Spline(cp, _pImmediateContext, _pd3dDevice, basicVertexLayout));
+		
+		if (agents.at(i).canSeePlayer(player.Position(), bbs))
+		{
+			splines.back().changeColour(XMFLOAT4(1, 0, 0, 1));
+		}else
+		{
+			splines.back().changeColour(XMFLOAT4(0, 1, 0, 1));
+		}
 	}
 
 	Collision::AABB playerBB = Collision::AABB(player.Position(), player.Size());

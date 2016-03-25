@@ -309,6 +309,11 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 
 vector<XMFLOAT3> Graph::getUnvisitedLocations()
 {
+	while (isBusy())
+	{
+		Sleep(2);
+	}
+
 	vector<XMFLOAT3> unvisited = vector<XMFLOAT3>();
 
 	for (unsigned int i = 0; i < graphNodes.size(); i++)

@@ -20,12 +20,16 @@ private:
 	Marpo fsm;
 	Controller handle;
 
+	const float viewDistance = 5.0f;
+
 public:
 	Agent();
 	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, DirectX::XMFLOAT3 pos);
 	~Agent();
 
-	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
+	DirectX::XMFLOAT3 Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
+	
+	bool canSeePlayer(DirectX::XMFLOAT3 playerPosition, std::vector<DirectX::BoundingBox>& objects);
 	
 	void updateController();
 
