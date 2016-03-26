@@ -129,7 +129,7 @@ private:
 	HRESULT initialiseGrass();
 	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
 
-	void initialiseAgents(int numAgents);
+	void initialiseAgents(unsigned int numAgents, std::vector<DirectX::BoundingBox>& objects, DirectX::XMFLOAT2 floorSize);
 
 	void initObjects();
 

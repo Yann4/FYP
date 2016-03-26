@@ -598,14 +598,45 @@ void Application::readInitFile(std::string fileName)
 	}
 }
 
-void Application::initialiseAgents(int numAgents)
+void Application::initialiseAgents(unsigned int numAgents, vector<BoundingBox>& objects, XMFLOAT2 floorSize)
 {
 	*agentMesh = *cubeMesh;
 
-	//Actually write this function
-	agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, &blackboard, XMFLOAT3(0, 1.0f, -2)));
-	agents.at(0).setScale(0.2f, 0.5f, 0.2f);
-	agents.at(0).UpdateMatrix();
+	std::random_device device;
+	std::mt19937 engine(device());
+	std::uniform_real_distribution<float> distrX(-floorSize.x / 2.0f, floorSize.x / 2.0f);
+	std::uniform_real_distribution<float> distrZ(-floorSize.y / 2.0f, floorSize.y / 2.0f);
+
+	XMFLOAT3 position = XMFLOAT3(distrX(engine), 1.0f, distrZ(engine));
+	
+	const float agentSize = agentMesh->size.x * 0.2f;
+	const float radius = agentSize * numAgents;
+
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+		if (objects.at(i).Contains(BoundingSphere(position, radius)))
+		{
+			position = XMFLOAT3(distrX(engine), 1.0f, distrZ(engine));
+			i = 0;
+		}
+	}
+
+	XMVECTOR centre = XMLoadFloat3(&position);
+	XMVECTOR direction = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+
+	float rotationAngle = XM_2PI / numAgents;
+
+	XMVECTOR rotationVector = XMQuaternionRotationNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotationAngle);
+
+	for (unsigned int i = 0; i < numAgents; i++)
+	{
+		XMStoreFloat3(&position, centre + direction);
+		direction = XMVector3Rotate(direction, rotationVector);
+
+		agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, &blackboard, position));
+		agents.back().setScale(0.2f, 0.5f, 0.2f);
+		agents.back().UpdateMatrix();
+	}
 }
 
 void Application::initObjects()
@@ -621,7 +652,23 @@ void Application::initObjects()
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 
-	initialiseAgents(1);
+	vector<BoundingBox> bbs = std::vector<BoundingBox>();
+	XMFLOAT2 floorSize = XMFLOAT2(0, 0);
+
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+		if (objects.at(i).getIsGround())
+		{
+			floorSize.x += objects.at(i).Size().x;
+			floorSize.y += objects.at(i).Size().z;
+		}
+		else
+		{
+			bbs.push_back(objects.at(i).getBoundingBox());
+		}
+	}
+
+	initialiseAgents(9, bbs, floorSize);
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
@@ -689,8 +736,8 @@ void Application::Cleanup()
 
 void Application::fireBox()
 {
-	XMFLOAT3 cameraPos = player.Position();//XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-	XMFLOAT3 cameraForwards = player.getCamera()->getForwards();//camera.getForwards();
+	XMFLOAT3 cameraPos = player.Position();
+	XMFLOAT3 cameraForwards = player.getCamera()->getForwards();
 
 	XMVECTOR posVect = XMLoadFloat3(&cameraPos);
 	XMVECTOR forwardsVector = XMLoadFloat3(&cameraForwards);
