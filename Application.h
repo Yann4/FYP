@@ -73,7 +73,10 @@ private:
 
 	frameCB perFrameCB;
 
-	//Camera camera;
+	Camera camera;
+	Camera* currentCamera;
+	bool playerPerspective;
+
 	Frustum viewFrustum;
 
 	MeshData* cubeMesh;

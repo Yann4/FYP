@@ -24,7 +24,7 @@ private:
 	Blackboard* blackboard;
 
 	const float viewDistance = 5.0f;
-	const float fieldOfView = XM_PIDIV4;
+	const float fieldOfView = DirectX::XM_PIDIV4;
 
 public:
 	Agent();

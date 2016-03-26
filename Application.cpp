@@ -80,6 +80,8 @@ Application::Application()
 	flashlightOn = false;
 	renderGraph = false;
 
+	currentCamera = nullptr;
+
 	graphYPosition = 1.0f;
 }
 
@@ -107,8 +109,15 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
         return E_FAIL;
     }
 
-	//camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
+	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
+	camera.setPosition(XMFLOAT4(0.0f, 10.0f, 0.0f, 1.0f));
+	camera.Pitch(XM_PIDIV2);
+
 	player = Player(XMFLOAT3(1, 1.5f, 1), _WindowWidth, _WindowHeight);
+
+	currentCamera = player.getCamera();
+	playerPerspective = true;
+
 	input = Input("input_map.txt");
 
 	viewFrustum = Frustum();
@@ -594,7 +603,7 @@ void Application::initialiseAgents(int numAgents)
 	*agentMesh = *cubeMesh;
 
 	//Actually write this function
-	agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, XMFLOAT3(0, 1.0f, -2)));
+	agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, &blackboard, XMFLOAT3(0, 1.0f, -2)));
 	agents.at(0).setScale(0.2f, 0.5f, 0.2f);
 	agents.at(0).UpdateMatrix();
 }
@@ -785,6 +794,17 @@ void Application::handleMessages()
 			break;
 		case TOGGLE_FLASHLIGHT:
 			flashlightOn = !flashlightOn;
+
+			if (playerPerspective)
+			{
+				currentCamera = &camera;
+			}
+			else
+			{
+				currentCamera = player.getCamera();
+			}
+			playerPerspective = !playerPerspective;
+
 			break;
 		case TOGGLE_GRAPH_RENDER:
 			renderGraph = !renderGraph;
@@ -834,7 +854,13 @@ void Application::Update()
 	input.handleInput(&Application::pushEvent);
 	handleMessages();
 
-	player.Update();//camera.Update();
+	player.Update();
+	
+	if (!playerPerspective)
+	{
+		camera.Update();
+	}
+
 	skybox.Update(player.getCamera());
 
 	std::vector<BoundingBox> bbs;
@@ -942,7 +968,7 @@ void Application::Update()
 		}
 	}
 
-	viewFrustum.constructFrustum(player.getCamera()->viewDistance() * 2, player.getCamera()->fov() * 2, player.getCamera()->aspectRatio() * 2, 0, player.getCamera()->zFar() * 2, player.getCamera()->getView());
+	viewFrustum.constructFrustum(currentCamera->viewDistance() * 2, currentCamera->fov() * 2, currentCamera->aspectRatio() * 2, 0, currentCamera->zFar() * 2, currentCamera->getView());
 }
 
 void Application::Draw()
@@ -954,13 +980,13 @@ void Application::Draw()
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	perFrameCB.eyePos = player.Position(); //XMFLOAT3(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
+	perFrameCB.eyePos = XMFLOAT3(currentCamera->getPosition().x, currentCamera->getPosition().y, currentCamera->getPosition().z);
 
 	perFrameCB.pointLight.position = perFrameCB.eyePos;
 	if (flashlightOn)
 	{
 		perFrameCB.spotLight.range = 15;
-		perFrameCB.spotLight.direction = player.getCamera()->getForwards();
+		perFrameCB.spotLight.direction = currentCamera->getForwards();
 		perFrameCB.spotLight.position = perFrameCB.eyePos;
 	}
 	else
@@ -972,30 +998,30 @@ void Application::Draw()
 
 	for (GameObject object : objects)
 	{
-		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, *player.getCamera());
+		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
 
 	for (Agent a : agents)
 	{
-		a.Draw(_pPixelShader, _pVertexShader, viewFrustum, *player.getCamera());
+		a.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
 
 	if (renderGraph && graphMutex.try_lock())
 	{
 		graphMutex.unlock();
-		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, *player.getCamera());
+		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
 
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
 	
 	for (unsigned int i = 0; i < splines.size(); i++)
 	{
-		splines.at(i).Draw(linePS, lineVS, *player.getCamera(), false);
+		splines.at(i).Draw(linePS, lineVS, *currentCamera, false);
 	}
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
-	skybox.Draw(skyboxVS, skyboxPS, player.getCamera());
+	skybox.Draw(skyboxVS, skyboxPS, currentCamera);
     //
     // Present our back buffer to our front buffer
     //

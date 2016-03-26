@@ -9,7 +9,7 @@ struct Data
 	float condifenceDepreciation; //Depreciation per second in confidence
 	T info;
 	
-	Data() :confidence(0), condifenceDepreciation(0), T(T())
+	Data() :confidence(0), condifenceDepreciation(0)
 	{}
 
 	Data(T info, int confidence = 100, int depreciation = 1) : confidence(confidence), condifenceDepreciation(depreciation), info(info)
