@@ -91,9 +91,9 @@ Event Input::eventValueFromString(string eventName)
 	{
 		return PITCH_DOWN;
 	}
-	else if (eventName == "TOGGLE_WIREFRAME")
+	else if (eventName == "TOGGLE_PERSPECTIVE")
 	{
-		return TOGGLE_WIREFRAME;
+		return TOGGLE_PERSPECTIVE;
 	}
 	else if (eventName == "TOGGLE_FLASHLIGHT")
 	{

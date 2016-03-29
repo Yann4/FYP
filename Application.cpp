@@ -564,7 +564,6 @@ void Application::readInitFile(std::string fileName)
 				temp.setScale(scale.x, scale.y, scale.z);
 				temp.setRotation(rotation.x, rotation.y, rotation.z);
 				temp.UpdateMatrix();
-				//objects.insert(temp, temp.Pos(), temp.Size());
 				objects.push_back(temp);
 			}
 			else if (name == "GRASS")
@@ -577,7 +576,6 @@ void Application::readInitFile(std::string fileName)
 				temp.setCollider(true);
 				temp.setMovementState(false);
 				temp.setIsGround(true);
-				//objects.insert(temp, temp.Pos(), temp.Size());
 				objects.push_back(temp);
 			}
 		}
@@ -797,19 +795,15 @@ void Application::handleMessages()
 		switch (next)
 		{
 		case WALK_FORWARDS:
-			//camera.Walk(0.001f);
 			playerEvents.push_back(next);
 			break;
 		case WALK_BACKWARDS:
-			//camera.Walk(-0.001f);
 			playerEvents.push_back(next);
 			break;
 		case STRAFE_LEFT:
-			//camera.Strafe(-0.001f);
 			playerEvents.push_back(next);
 			break;
 		case STRAFE_RIGHT:
-			//camera.Strafe(0.001f);
 			playerEvents.push_back(next);
 			break;
 		case YAW_LEFT:
@@ -827,21 +821,7 @@ void Application::handleMessages()
 		case PLACE_CRATE:
 			fireBox();
 			break;
-		case TOGGLE_WIREFRAME:
-			if (!wfRender)
-			{
-				_pImmediateContext->RSSetState(_wireFrame);
-				wfRender = true;
-			}
-			else
-			{
-				_pImmediateContext->RSSetState(_solid);
-				wfRender = false;
-			}
-			break;
-		case TOGGLE_FLASHLIGHT:
-			flashlightOn = !flashlightOn;
-
+		case TOGGLE_PERSPECTIVE:
 			if (playerPerspective)
 			{
 				currentCamera = &camera;
@@ -851,7 +831,9 @@ void Application::handleMessages()
 				currentCamera = player.getCamera();
 			}
 			playerPerspective = !playerPerspective;
-
+			break;
+		case TOGGLE_FLASHLIGHT:
+			flashlightOn = !flashlightOn;
 			break;
 		case TOGGLE_GRAPH_RENDER:
 			renderGraph = !renderGraph;

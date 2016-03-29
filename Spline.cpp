@@ -29,11 +29,11 @@ Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * contex
 
 Spline::~Spline()
 {
-	/*if (context) context->Release();
+	if (context) context->Release();
 	if (splineLayout) splineLayout->Release();
 	if (vertexBuffer) vertexBuffer->Release();
 	if (indexBuffer) indexBuffer->Release();
-	if (constBuffer) constBuffer->Release();*/
+	if (constBuffer) constBuffer->Release();
 }
 
 void Spline::generateLine()

@@ -59,4 +59,35 @@ public:
 		colour = newColour;
 		createBuffers();
 	}
+
+	/*ID3D11DeviceContext* context;
+	ID3D11InputLayout* splineLayout;
+	ID3D11Device* device;
+
+	DirectX::XMFLOAT4 colour;
+
+	std::vector<DirectX::XMFLOAT3> controlPoints;
+	std::vector<DirectX::XMFLOAT3> linePoints;
+
+	//Each spline holds own buffers because they are all unique buffers
+	//Or rather; no point in having two identical splines in the same location
+	ID3D11Buffer* vertexBuffer;
+	ID3D11Buffer* indexBuffer;
+	ID3D11Buffer* constBuffer;
+	*/
+
+	Spline& operator=(Spline other)
+	{
+		std::swap(context, other.context);
+		std::swap(splineLayout, other.splineLayout);
+		std::swap(device, other.device);
+		std::swap(colour, other.colour);
+		std::swap(controlPoints, other.controlPoints);
+		std::swap(linePoints, other.linePoints);
+
+		std::swap(vertexBuffer, other.vertexBuffer);
+		std::swap(indexBuffer, other.indexBuffer);
+		std::swap(constBuffer, other.constBuffer);
+		return *this;
+	}
 };
