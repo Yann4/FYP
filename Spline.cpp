@@ -8,23 +8,24 @@ Spline::Spline()
 	vertexBuffer = nullptr;
 	indexBuffer = nullptr;
 	constBuffer = nullptr;
-	controlPoints = std::vector<XMFLOAT3>();
-	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
+	colour = XMFLOAT4(0, 0, 0, 1);
 }
 
-Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device, ID3D11InputLayout* layout): controlPoints(controlPoints), context(context), splineLayout(layout), device(device)
+Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * context, ID3D11Device* device, ID3D11InputLayout* layout, XMFLOAT4 colour):
+	context(context), splineLayout(layout), device(device), colour(colour)
 {
 	vertexBuffer = nullptr;
 	indexBuffer = nullptr;
 	constBuffer = nullptr;
+
 	context->AddRef();
 	splineLayout->AddRef();
 	device->AddRef();
 
-	linePoints = std::vector<XMFLOAT3>(NUM_POINTS);
-	generateLine();
+	colour = XMFLOAT4(0, 0, 0, 1);
+
+	generateLine(controlPoints);
 	createBuffers();
-	colour = XMFLOAT4(0, 0, 0, 1.0);
 }
 
 Spline::~Spline()
@@ -36,8 +37,9 @@ Spline::~Spline()
 	if (constBuffer) constBuffer->Release();
 }
 
-void Spline::generateLine()
+void Spline::generateLine(const std::vector<XMFLOAT3>& controlPoints)
 {
+	std::array<XMFLOAT3, 101>();
 	unsigned int count = 0;
 	for (float perc = 0; perc <= 1; perc += 0.01f)
 	{

@@ -12,12 +12,10 @@ Marpo::Marpo()
 	navGraph = nullptr;
 }
 
-void Marpo::Initialise(Controller* owner, Graph* graph)
+void Marpo::Initialise(Controller* ownerController, Graph* graph)
 {
-	this->owner = owner;
+	owner = ownerController;
 	navGraph = graph;
-
-	//longTerm.push(new RouteToState(owner, &immediate, navGraph, DirectX::XMFLOAT3(-5, 1, -5)));
 }
 
 void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)

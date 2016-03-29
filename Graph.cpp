@@ -309,7 +309,7 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 
 vector<XMFLOAT3> Graph::getUnvisitedLocations()
 {
-	while (isBusy())
+	while (graphBusy)
 	{
 		Sleep(2);
 	}
@@ -375,7 +375,8 @@ void Graph::visitLocation(XMFLOAT3 location)
 
 	for (unsigned int i = 0; i < unvisited.size(); i++)
 	{
-		XMVECTOR nodePos = XMLoadFloat3(&unvisited.at(i)->Position());
+		XMFLOAT3 unvisitedPos = unvisited.at(i)->Position();
+		XMVECTOR nodePos = XMLoadFloat3(&unvisitedPos);
 		float distance = XMVectorGetX(XMVector3LengthSq(nodePos - loc));
 
 		if (distance < distThresholdSq)

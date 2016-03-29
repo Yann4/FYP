@@ -77,6 +77,7 @@ Application::Application()
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = vector<GameObject>();
 	agents = vector<Agent>();
+	splines = vector<Spline>(numAgents);
 	flashlightOn = false;
 	renderGraph = false;
 
@@ -113,7 +114,7 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 	camera.setPosition(XMFLOAT4(0.0f, 10.0f, 0.0f, 1.0f));
 	camera.Pitch(XM_PIDIV2);
 
-	player = Player(XMFLOAT3(1, 1.5f, 1), _WindowWidth, _WindowHeight);
+	player = Player(XMFLOAT3(1.0f, 1.5f, 1.0f), _WindowWidth, _WindowHeight);
 
 	currentCamera = player.getCamera();
 	playerPerspective = true;
@@ -596,7 +597,7 @@ void Application::readInitFile(std::string fileName)
 	}
 }
 
-void Application::initialiseAgents(unsigned int numAgents, vector<BoundingBox>& objects, XMFLOAT2 floorSize)
+void Application::initialiseAgents(unsigned int numAgents, vector<BoundingBox>& boundingBoxes, XMFLOAT2 floorSize)
 {
 	*agentMesh = *cubeMesh;
 
@@ -610,9 +611,9 @@ void Application::initialiseAgents(unsigned int numAgents, vector<BoundingBox>& 
 	const float agentSize = agentMesh->size.x * 0.2f;
 	const float radius = agentSize * numAgents;
 
-	for (unsigned int i = 0; i < objects.size(); i++)
+	for (unsigned int i = 0; i < boundingBoxes.size(); i++)
 	{
-		if (objects.at(i).Contains(BoundingSphere(position, radius)))
+		if (boundingBoxes.at(i).Contains(BoundingSphere(position, radius)))
 		{
 			position = XMFLOAT3(distrX(engine), 1.0f, distrZ(engine));
 			i = 0;
@@ -666,7 +667,7 @@ void Application::initObjects()
 		}
 	}
 
-	initialiseAgents(9, bbs, floorSize);
+	initialiseAgents(numAgents, bbs, floorSize);
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight();
@@ -915,6 +916,7 @@ void Application::Update()
 
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
+		auto splineIterator = splines.begin() + i;
 		XMFLOAT3 f = agents.at(i).Update(t, bbs);
 		
 		XMFLOAT3 p = agents.at(i).Pos();
@@ -926,14 +928,13 @@ void Application::Update()
 		vector<XMFLOAT3> cp = vector<XMFLOAT3>();
 		cp.push_back(f);
 		cp.push_back(p);
-		splines.push_back(Spline(cp, _pImmediateContext, _pd3dDevice, basicVertexLayout));
 		
 		if (agents.at(i).canSeePlayer(player.Position(), bbs))
 		{
-			splines.back().changeColour(XMFLOAT4(1, 0, 0, 1));
+			splines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(1, 0, 0, 1));
 		}else
 		{
-			splines.back().changeColour(XMFLOAT4(0, 1, 0, 1));
+			splines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(0, 1, 0, 1));
 		}
 	}
 
