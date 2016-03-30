@@ -7,12 +7,14 @@
 #include "RouteToState.h"
 #include "ExploreState.h"
 #include "InvestigateState.h"
+#include "StunnedState.h"
 
 #include <stack>
 #include <array>
 #include <vector>
 
 #include <DirectXCollision.h>
+
 class Marpo
 {
 private:

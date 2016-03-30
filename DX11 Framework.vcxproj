@@ -406,6 +406,7 @@
     <ClCompile Include="Spline.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="Steering.cpp" />
+    <ClCompile Include="StunnedState.cpp" />
     <ClCompile Include="Surface.cpp" />
     <ClCompile Include="TravelToPositionState.cpp" />
   </ItemGroup>
@@ -442,6 +443,7 @@
     <ClInclude Include="Spline.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="Steering.h" />
+    <ClInclude Include="StunnedState.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TimeSlice.h" />
     <ClInclude Include="TravelToPositionState.h" />

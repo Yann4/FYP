@@ -29,9 +29,9 @@ void ExploreState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
 	if (!pushedRoute && !graphFullyExplored)
 	{
-		longTermStack->push(new RouteToState(owner, immediateStack, navGraph, destination));
+		immediateStack->push(new RouteToState(owner, immediateStack, navGraph, destination));
 		
-		stackSize = immediateStack->size();
+		stackSize = immediateStack->size() + 1;
 		pushedRoute = true;
 	}
 }

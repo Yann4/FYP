@@ -62,7 +62,7 @@ void Marpo::checkForStatesToPush()
 	
 	if (prio != NONE)
 	{
-		//pushWithPriority(new ExploreState(owner, &longTerm, &immediate, navGraph), prio);
+		pushWithPriority(new ExploreState(owner, &longTerm, &immediate, navGraph), prio);
 	}
 
 	//Checking InvestigateState
