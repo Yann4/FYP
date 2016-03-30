@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DirectXMath.h>
+#include <vector>
 
 template <typename T>
 struct Data
@@ -21,15 +22,39 @@ struct Data
 	}
 };
 
+struct Sound
+{
+	DirectX::XMFLOAT3 position;
+	float volume; // Volume is the number of units the sound can travel
+	std::vector<unsigned int> agentsInvestigating;
+
+	Sound() : position(DirectX::XMFLOAT3(0, 0, 0)), volume(0) {}
+	Sound(DirectX::XMFLOAT3 position, float volume) : position(position), volume(volume) {}
+	
+	//Returns true if sound is now silent, false otherwise
+	bool soundFalloff(double deltaTime)
+	{
+		float falloffFactor = 1.0f;
+		volume -= falloffFactor * deltaTime;
+		if (volume >= 0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+};
+
 class Blackboard
 {
 private:
 	Data<DirectX::XMFLOAT3> playerPosition;
+	std::vector<Sound> noises;
 
 public:
 	Blackboard();
 
-	void UpdateDataConfidence(double deltaTime);
+	void Update(double deltaTime);
 
 	//Information relevant to player position
 	inline void updatePlayerPosition(DirectX::XMFLOAT3 position, float confidence = 100.0f) {
@@ -39,4 +64,15 @@ public:
 	inline Data<DirectX::XMFLOAT3> getPlayerPosition() {
 		return playerPosition;
 	};
+
+	//Information relevant to noises
+	inline void noiseMade(DirectX::XMFLOAT3 position, float volume) {
+		noises.push_back(Sound(position, volume));
+	}
+
+	std::vector<Sound*> getSoundsWithinRange(DirectX::XMFLOAT3 agentPosition, float hearingRange);
+
+private:
+	void UpdateSoundFalloff(double deltaTime);
+	void UpdateDataConfidence(double deltaTime);
 };

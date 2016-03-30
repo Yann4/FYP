@@ -714,7 +714,7 @@ void Application::initialiseAgents(vector<BoundingBox>& boundingBoxes, XMFLOAT2 
 		XMStoreFloat3(&position, centre + direction);
 		direction = XMVector3Rotate(direction, rotationVector);
 
-		agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, &blackboard, position));
+		agents.push_back(Agent(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, agentMesh, &navGraph, &blackboard, position, i));
 		agents.back().setScale(0.2f, 0.5f, 0.2f);
 		agents.back().UpdateMatrix();
 	}
@@ -835,6 +835,7 @@ void Application::fireBox()
 			XMStoreFloat3(&cameraPos, posVect);
 			cameraPos.y = graphYPosition;
 			placeCrate(cameraPos, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0, 0, 0));
+			blackboard.noiseMade(cameraPos, 50);
 		}
 	}
 }
@@ -985,6 +986,8 @@ void Application::Update()
 			std::thread(&Application::updateGraph, this, bbs).detach();
 		}
 	}
+
+	blackboard.Update(t);
 
 	splines.clear();
 

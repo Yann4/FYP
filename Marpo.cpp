@@ -12,10 +12,11 @@ Marpo::Marpo()
 	navGraph = nullptr;
 }
 
-void Marpo::Initialise(Controller* ownerController, Graph* graph)
+void Marpo::Initialise(Controller* ownerController, Graph* graph, Blackboard* bb)
 {
 	owner = ownerController;
 	navGraph = graph;
+	blackboard = bb;
 }
 
 void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
@@ -55,12 +56,22 @@ void Marpo::checkForStatesToPush()
 {
 	Priority prio;
 
+	//Checking ExploreState
 	ExploreState es = ExploreState(owner, &longTerm, &immediate, navGraph);
 	prio = es.shouldEnter();
 	
 	if (prio != NONE)
 	{
-		pushWithPriority(new ExploreState(owner, &longTerm, &immediate, navGraph), prio);
+		//pushWithPriority(new ExploreState(owner, &longTerm, &immediate, navGraph), prio);
+	}
+
+	//Checking InvestigateState
+	InvestigateState is = InvestigateState(owner, blackboard, &immediate, navGraph);
+	prio = is.shouldEnter();
+	
+	if (prio != NONE)
+	{
+		pushWithPriority(new InvestigateState(is), prio);
 	}
 
 }

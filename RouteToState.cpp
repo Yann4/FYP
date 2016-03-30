@@ -14,10 +14,7 @@ RouteToState::RouteToState(Controller* owner, std::stack<State*>* immediateStack
 
 	navGraph->visitLocation(owner->position);
 
-	if (!path.empty())
-	{
-		immediateStack->push(new TravelToPositionState(owner, path.top()));
-	}
+	path.push(owner->position);
 }
 
 RouteToState::~RouteToState()

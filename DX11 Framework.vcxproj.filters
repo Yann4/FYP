@@ -129,6 +129,9 @@
     <ClInclude Include="Blackboard.h">
       <Filter>AI Components</Filter>
     </ClInclude>
+    <ClInclude Include="InvestigateState.h">
+      <Filter>AI Components\Finite State Machine\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -196,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="Blackboard.cpp">
       <Filter>AI Components</Filter>
+    </ClCompile>
+    <ClCompile Include="InvestigateState.cpp">
+      <Filter>AI Components\Finite State Machine\States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

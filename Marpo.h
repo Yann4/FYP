@@ -1,10 +1,12 @@
 #pragma once
 #include "AgentController.h"
+#include "Blackboard.h"
 
 #include "State.h"
 #include "TravelToPositionState.h"
 #include "RouteToState.h"
 #include "ExploreState.h"
+#include "InvestigateState.h"
 
 #include <stack>
 #include <array>
@@ -16,6 +18,7 @@ class Marpo
 private:
 	Controller* owner;
 	Graph* navGraph;
+	Blackboard* blackboard;
 
 	std::stack<State*> longTerm;
 	std::stack<State*> immediate;
@@ -24,11 +27,11 @@ private:
 public:
 	Marpo();
 
-	void Initialise(Controller* owner, Graph* graph);
+	void Initialise(Controller* owner, Graph* graph, Blackboard* bb);
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 
-	inline bool initialised() { if (owner == nullptr) { return false; } return true; }
+	inline bool initialised() { return owner != nullptr; }
 
 private:
 	void pushWithPriority(State* state, Priority prio);

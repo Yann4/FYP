@@ -9,16 +9,16 @@ Agent::Agent() : GameObject()
 	velocity = XMFLOAT3(0, 0, 0);
 	navGraph = nullptr;
 	blackboard = nullptr;
-	handle = Controller(position, facing);
+	handle = Controller(position, facing, 0);
 }
 
-Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, Blackboard* blackboard, DirectX::XMFLOAT3 pos) :
-	GameObject(devContext, constantBuffer, objectBuffer, mesh, pos), blackboard(blackboard)
+Agent::Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, Blackboard* blackboard, DirectX::XMFLOAT3 pos, unsigned int ID) :
+	GameObject(devContext, constantBuffer, objectBuffer, mesh, pos), blackboard(blackboard), agentID(ID)
 {
 	navGraph = graph;
 	facing = XMFLOAT3(1, 0, 0);
 	velocity = XMFLOAT3(0, 0, 0);
-	handle = Controller(position, facing);
+	handle = Controller(position, facing, ID);
 }
 
 Agent::~Agent()
@@ -99,7 +99,7 @@ void Agent::updateController()
 
 	if (!fsm.initialised())
 	{
-		fsm.Initialise(&handle, navGraph);
+		fsm.Initialise(&handle, navGraph, blackboard);
 	}
 }
 

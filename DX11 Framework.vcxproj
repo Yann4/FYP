@@ -396,6 +396,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="InvestigateState.cpp" />
     <ClCompile Include="Marpo.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -428,6 +429,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="InvestigateState.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Marpo.h" />
     <ClInclude Include="Node.h" />

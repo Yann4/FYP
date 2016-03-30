@@ -26,9 +26,11 @@ private:
 	const float viewDistance = 5.0f;
 	const float fieldOfView = DirectX::XM_PIDIV4;
 
+	unsigned int agentID;
+
 public:
 	Agent();
-	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, Blackboard* blackboard, DirectX::XMFLOAT3 pos);
+	Agent(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, Graph* graph, Blackboard* blackboard, DirectX::XMFLOAT3 pos, unsigned int ID);
 	~Agent();
 
 	DirectX::XMFLOAT3 Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
