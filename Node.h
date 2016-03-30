@@ -5,6 +5,7 @@
 #include <directxmath.h>
 #include <DirectXCollision.h>
 #include <vector>
+
 #include "Connection.h"
 #include "GameObject.h"
 

@@ -41,4 +41,19 @@ public:
 private:
 	void forceToVelocity(DirectX::XMFLOAT3 force, double delta);
 	void move(double delta);
+
+public:
+	Agent& operator=(const Agent& other)
+	{
+		facing = other.facing;
+		velocity = other.velocity;
+
+		navGraph = other.navGraph;
+		fsm = other.fsm;
+
+		handle = other.handle;
+
+		blackboard = other.blackboard;
+		return *this;
+	}
 };

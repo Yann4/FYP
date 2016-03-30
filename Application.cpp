@@ -67,7 +67,6 @@ Application::Application()
 	objectConstantBuffer = nullptr;
 
 	cubeMesh = new MeshData();
-	houseMesh = new MeshData();
 	pipeMesh = new MeshData();
 	grassMesh = new MeshData();
 	agentMesh = new MeshData();
@@ -84,6 +83,103 @@ Application::Application()
 	currentCamera = nullptr;
 
 	graphYPosition = 1.0f;
+}
+
+Application::Application(const Application& other)
+{
+	lastMousePos =  other.lastMousePos;
+	cameraPanSpeed = other.cameraPanSpeed;
+	cameraMoveSpeed = other.cameraMoveSpeed;
+
+	flashlightOn = other.flashlightOn;
+	inputEventQueue, other.inputEventQueue;
+	input, other.input;
+
+	graphYPosition, other.graphYPosition;
+	renderGraph, other.renderGraph;
+	navGraph, other.navGraph;
+
+	skybox, other.skybox;
+
+	blackboard = other.blackboard;
+	agents = other.agents;
+	player = other.player;
+
+	splines = other.splines;
+	objects = other.objects;
+
+	agentMaterial = other.agentMaterial;
+	agentMesh = other.agentMesh;
+
+	grassMaterial = other.grassMaterial;
+	grassMesh = other.grassMesh;
+
+	pipeMaterials = other.pipeMaterials;
+	pipeMesh = other.pipeMesh;
+
+	cubeMesh = other.cubeMesh;
+
+	viewFrustum = other.viewFrustum;
+
+	playerPerspective = other.playerPerspective;
+	currentCamera = other.currentCamera;
+	camera = other.camera;
+
+	perFrameCB = other.perFrameCB;
+
+	frameConstantBuffer = other.frameConstantBuffer;
+	frameConstantBuffer->AddRef();
+	objectConstantBuffer = other.objectConstantBuffer;
+	objectConstantBuffer->AddRef();
+
+	samplerLinear = other.samplerLinear;
+	samplerLinear->AddRef();
+
+	wfRender = other.wfRender;
+	_wireFrame = other._wireFrame;
+	_wireFrame->AddRef();
+	_solid = other._solid;
+	_solid->AddRef();
+
+	basicVertexLayout = other.basicVertexLayout;
+	basicVertexLayout->AddRef();
+	_pVertexLayout = other._pVertexLayout;
+	_pVertexLayout->AddRef();
+
+	lineVS = other.lineVS;
+	lineVS->AddRef();
+	linePS = other.linePS;
+	linePS->AddRef();
+
+	skyboxVS = other.skyboxVS;
+	skyboxVS->AddRef();
+	skyboxPS = other.skyboxPS;
+	skyboxPS->AddRef();
+
+	_pVertexShader = other._pVertexShader;
+	_pVertexShader->AddRef();
+	_pPixelShader = other._pPixelShader;
+	_pPixelShader->AddRef();
+
+	_depthStencilView = other._depthStencilView;
+	_depthStencilView->AddRef();
+	_depthStencilBuffer = other._depthStencilBuffer;
+	_depthStencilBuffer->AddRef();
+
+	_pd3dDevice = other._pd3dDevice;
+	_pd3dDevice->AddRef();
+	_pImmediateContext = other._pImmediateContext;
+	_pImmediateContext->AddRef();
+	_pSwapChain = other._pSwapChain;
+	_pSwapChain->AddRef();
+	_pRenderTargetView = other._pRenderTargetView;
+	_pRenderTargetView->AddRef();
+
+	_driverType = other._driverType;
+	_featureLevel = other._featureLevel;
+
+	_hWnd = other._hWnd;
+	_hInst = other._hInst;
 }
 
 Application::~Application()
@@ -109,20 +205,6 @@ HRESULT Application::Initialise(HINSTANCE hInstance, int nCmdShow)
 
         return E_FAIL;
     }
-
-	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
-	camera.setPosition(XMFLOAT4(0.0f, 10.0f, 0.0f, 1.0f));
-	camera.Pitch(XM_PIDIV2);
-
-	player = Player(XMFLOAT3(1.0f, 1.5f, 1.0f), _WindowWidth, _WindowHeight);
-
-	currentCamera = player.getCamera();
-	playerPerspective = true;
-
-	input = Input("input_map.txt");
-
-	viewFrustum = Frustum();
-	blackboard = Blackboard();
 
 	return S_OK;
 }
@@ -597,7 +679,7 @@ void Application::readInitFile(std::string fileName)
 	}
 }
 
-void Application::initialiseAgents(unsigned int numAgents, vector<BoundingBox>& boundingBoxes, XMFLOAT2 floorSize)
+void Application::initialiseAgents(vector<BoundingBox>& boundingBoxes, XMFLOAT2 floorSize)
 {
 	*agentMesh = *cubeMesh;
 
@@ -644,6 +726,17 @@ void Application::initObjects()
 	initialisePipe();
 	initialiseGrass();
 
+	camera = Camera(XM_PIDIV2, _WindowWidth / (FLOAT)_WindowHeight, 0.00001f, 100.0f);
+	camera.setPosition(XMFLOAT4(0.0f, 15.0f, 0.0f, 1.0f));
+	camera.Pitch(XM_PIDIV2);
+
+	player = Player(XMFLOAT3(1.0f, 1.5f, 1.0f), _WindowWidth, _WindowHeight);
+
+	currentCamera = player.getCamera();
+	playerPerspective = true;
+
+	input = Input("input_map.txt");
+
 	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, cubeMesh, basicVertexLayout);
 
 	readInitFile("worldData.txt");
@@ -667,32 +760,19 @@ void Application::initObjects()
 		}
 	}
 
-	initialiseAgents(numAgents, bbs, floorSize);
+	viewFrustum = Frustum();
+	blackboard = Blackboard();
+	initialiseAgents(bbs, floorSize);
 
 	//Lights
-	perFrameCB.dirLight = DirectionalLight();
-	perFrameCB.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	perFrameCB.dirLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	perFrameCB.dirLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	perFrameCB.dirLight.lightVecW = XMFLOAT3(0.115f, -0.57735f, -0.94f);
-
-	perFrameCB.pointLight = PointLight();
-	perFrameCB.pointLight.ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	perFrameCB.pointLight.specular = XMFLOAT4(0.7, 0.7, 0.7, 10.0);
-	perFrameCB.pointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	perFrameCB.pointLight.range = 5;
-	perFrameCB.pointLight.attenuation = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-	perFrameCB.spotLight = SpotLight();
-	perFrameCB.spotLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	perFrameCB.spotLight.specular = XMFLOAT4(0.5, 0.5, 0.5, 10.0);
-	perFrameCB.spotLight.diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-	perFrameCB.spotLight.attenuation = XMFLOAT3(0, 1, 0);
-	perFrameCB.spotLight.spot = 96;
+	perFrameCB.dirLight = DirectionalLight(XMFLOAT4(0.5, 0.5, 0.5, 1.0), XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f), XMFLOAT4(0.5, 0.5, 0.5, 1.0), XMFLOAT3(0.115f, -0.57735f, -0.94f));
+	perFrameCB.pointLight = PointLight(XMFLOAT4(0.7, 0.7, 0.7, 10.0), XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f), XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f), XMFLOAT3(0,0,0), 5, XMFLOAT3(0.0f, 1.0f, 0.0f));
+	perFrameCB.spotLight = SpotLight(XMFLOAT4(0.5, 0.5, 0.5, 10.0), XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.5, 0.5, 0.5, 1.0), XMFLOAT3(0,0,0), 5, XMFLOAT3(0, 1, 0), XMFLOAT3(1, 0, 0), 96);
 }
 
 void Application::Cleanup()
 {
+	if (_pd3dDevice) _pd3dDevice->Release();
     if (_pImmediateContext) _pImmediateContext->ClearState();
 	if (_pImmediateContext) _pImmediateContext->Release();
 	if (_pSwapChain) _pSwapChain->Release();
@@ -722,15 +802,9 @@ void Application::Cleanup()
 	if (frameConstantBuffer) frameConstantBuffer->Release();
 	
 	delete cubeMesh;
-	delete houseMesh;
 	delete pipeMesh;
 	delete grassMesh;
 	delete agentMesh;
-
-	//How 'bout we don't look to closely at this
-	//skybox.~Skybox();
-	//navGraph.~Graph();
-	//if (_pd3dDevice) _pd3dDevice->Release();
 }
 
 void Application::fireBox()
@@ -914,6 +988,8 @@ void Application::Update()
 
 	splines.clear();
 
+	vector<XMFLOAT3> cp = vector<XMFLOAT3>(2);
+
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
 		auto splineIterator = splines.begin() + i;
@@ -925,9 +1001,8 @@ void Application::Update()
 		fPos += XMLoadFloat3(&f);
 		XMStoreFloat3(&f, fPos);
 
-		vector<XMFLOAT3> cp = vector<XMFLOAT3>();
-		cp.push_back(f);
-		cp.push_back(p);
+		cp.at(0) = f;
+		cp.at(1) = p;
 		
 		if (agents.at(i).canSeePlayer(player.Position(), bbs))
 		{

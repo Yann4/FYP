@@ -39,7 +39,7 @@ public:
 	GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* constantBuffer, ID3D11Buffer* objectBuffer, MeshData* mesh, DirectX::XMFLOAT3 pos);
 	virtual ~GameObject();
 
-	virtual void Update(float deltaTime);
+	virtual void Update(double deltaTime);
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam);
 
 	void setScale(float x, float y, float z);

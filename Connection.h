@@ -21,4 +21,14 @@ public:
 
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Camera& cam);
 	inline void setColour(DirectX::XMFLOAT3 colour) { spline->changeColour(DirectX::XMFLOAT4(colour.x, colour.y, colour.z, 1.0)); }
+
+	Connection& operator=(Connection other)
+	{
+		std::swap(spline, other.spline);
+
+		std::swap(start, other.start);
+
+		std::swap(end, other.end);
+		return *this;
+	}
 };

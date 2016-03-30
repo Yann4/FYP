@@ -32,6 +32,7 @@
 #include <random>
 #include <thread>
 #include <mutex>
+#include <algorithm>
 
 class Application
 {
@@ -80,9 +81,6 @@ private:
 	Frustum viewFrustum;
 
 	MeshData* cubeMesh;
-	
-	std::vector<Material> houseMaterials;
-	MeshData* houseMesh;
 
 	MeshData* pipeMesh;
 	std::vector<Material> pipeMaterials;
@@ -130,7 +128,7 @@ private:
 	HRESULT initialiseGrass();
 	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
 
-	void initialiseAgents(unsigned int numAgents, std::vector<DirectX::BoundingBox>& objects, DirectX::XMFLOAT2 floorSize);
+	void initialiseAgents(std::vector<DirectX::BoundingBox>& objects, DirectX::XMFLOAT2 floorSize);
 
 	void initObjects();
 
@@ -145,7 +143,14 @@ private:
 
 public:
 	Application();
-	Application(const Application& other){}
+	Application(const Application& other);
+
+	Application& operator=(const Application& other)
+	{
+		*this = Application(other);
+		return *this;
+	}
+
 	~Application();
 
 	HRESULT Initialise(HINSTANCE hInstance, int nCmdShow);
