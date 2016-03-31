@@ -6,6 +6,16 @@ using std::vector;
 Blackboard::Blackboard()
 {
 	playerPosition = Data<XMFLOAT3>(XMFLOAT3(0, 0, 0), 0, 0);
+	agentLocations = vector<XMFLOAT3>(0);
+	scaredAgents = vector<bool>(0);
+}
+
+Blackboard::Blackboard(unsigned int numAgents)
+{
+	playerPosition = Data<XMFLOAT3>(XMFLOAT3(0, 0, 0), 0, 0);
+	agentLocations = vector<XMFLOAT3>(numAgents);
+	scaredAgents = vector<bool>(numAgents);
+	std::fill(scaredAgents.begin(), scaredAgents.end(), false);
 }
 
 void Blackboard::Update(double deltaTime)
@@ -50,4 +60,38 @@ vector<Sound*> Blackboard::getSoundsWithinRange(XMFLOAT3 agentPosition, float he
 	}
 
 	return noisesInRange;
+}
+
+bool Blackboard::isAgentAlone(unsigned int agentIndex)
+{
+	const float aloneRadius = 3.0f;
+
+	XMVECTOR examinedPos = XMLoadFloat3(&agentLocations.at(agentIndex));
+
+	for (unsigned int i = 0; i < agentLocations.size(); i++)
+	{
+		if (i == agentIndex)
+		{
+			continue;
+		}
+
+		XMVECTOR otherPos = XMLoadFloat3(&agentLocations.at(i));
+
+		if (XMVectorGetX(XMVector3LengthSq(otherPos - examinedPos)) < powf(aloneRadius, 2.0f))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Blackboard::isAgentScared(unsigned int agentIndex)
+{
+	return scaredAgents.at(agentIndex);
+}
+
+void Blackboard::setAgentScaredState(unsigned int agentIndex, bool isScared)
+{
+	scaredAgents.at(agentIndex) = isScared;
 }

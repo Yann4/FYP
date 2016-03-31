@@ -40,6 +40,25 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 
 	velocity = XMFLOAT3(0, 0, 0);
 
+	blackboard->setAgentPosition(agentID, position);
+
+	Data<XMFLOAT3> playerPos = blackboard->getPlayerPosition();
+
+	if (playerPos.confidence > 70)
+	{
+		XMVECTOR pPos = XMLoadFloat3(&playerPos.info);
+		XMVECTOR aPos = XMLoadFloat3(&position);
+
+		XMVECTOR ap = pPos - aPos;
+		const float panicRadius = 2.0f;
+
+		if (XMVectorGetX(XMVector3LengthSq(ap)) > powf(panicRadius, 2.0f) || !blackboard->isAgentAlone(agentID))
+		{
+			blackboard->setAgentScaredState(agentID, false);
+		}
+	}
+
+
 	return facing;
 }
 
@@ -110,6 +129,12 @@ void Agent::forceToVelocity(XMFLOAT3 force, double delta)
 	XMVECTOR acceleration = XMLoadFloat3(&force);
 
 	vel += acceleration * delta;
+
+	if (XMVectorGetX(XMVector3Length(vel)) > maxSpeed)
+	{
+		vel = XMVector3Normalize(vel);
+		vel *= maxSpeed;
+	}
 
 	XMStoreFloat3(&velocity, vel);
 }

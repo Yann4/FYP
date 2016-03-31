@@ -50,9 +50,12 @@ class Blackboard
 private:
 	Data<DirectX::XMFLOAT3> playerPosition;
 	std::vector<Sound> noises;
+	std::vector<DirectX::XMFLOAT3> agentLocations;
+	std::vector<bool> scaredAgents;
 
 public:
 	Blackboard();
+	Blackboard(unsigned int numAgents);
 
 	void Update(double deltaTime);
 
@@ -71,6 +74,17 @@ public:
 	}
 
 	std::vector<Sound*> getSoundsWithinRange(DirectX::XMFLOAT3 agentPosition, float hearingRange);
+
+	//Information relevant to agent location
+	inline void setAgentPosition(unsigned int agentIndex, DirectX::XMFLOAT3 position){
+		agentLocations.at(agentIndex) = position;
+	}
+
+	bool isAgentAlone(unsigned int agentIndex);
+
+	//Information relevant to scared state
+	bool isAgentScared(unsigned int agentIndex);
+	void setAgentScaredState(unsigned int agentIndex, bool isScared);
 
 private:
 	void UpdateSoundFalloff(double deltaTime);

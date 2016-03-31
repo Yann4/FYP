@@ -15,6 +15,7 @@ private:
 	DirectX::XMFLOAT3 facing;
 	
 	DirectX::XMFLOAT3 velocity;
+	const float maxSpeed = 0.5f;
 
 	Graph* navGraph;
 

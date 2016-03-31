@@ -395,6 +395,7 @@
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="HideState.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="InvestigateState.cpp" />
     <ClCompile Include="Marpo.cpp" />
@@ -429,6 +430,7 @@
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="HideState.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InvestigateState.h" />
     <ClInclude Include="Light.h" />

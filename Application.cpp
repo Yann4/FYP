@@ -83,6 +83,8 @@ Application::Application()
 	currentCamera = nullptr;
 
 	graphYPosition = 1.0f;
+
+	blackboard = Blackboard(numAgents);
 }
 
 Application::Application(const Application& other)
@@ -761,7 +763,6 @@ void Application::initObjects()
 	}
 
 	viewFrustum = Frustum();
-	blackboard = Blackboard();
 	initialiseAgents(bbs, floorSize);
 
 	//Lights

@@ -33,7 +33,7 @@ void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 		if (currentState != nullptr)
 		{
 			//Run the update
-			currentState->Update(deltaTime, objects);
+ 			currentState->Update(deltaTime, objects);
 
 			//Check if it's finished
 			if (currentState->shouldExit())
@@ -74,6 +74,14 @@ void Marpo::checkForStatesToPush()
 		pushWithPriority(new InvestigateState(is), prio);
 	}
 
+	//Checking HideState
+	HideState hs = HideState(owner, blackboard, &immediate, navGraph);
+	prio = hs.shouldEnter();
+
+	if (prio != NONE)
+	{
+		pushWithPriority(new HideState(hs), prio);
+	}
 }
 
 void Marpo::pushWithPriority(State* state, Priority prio)
