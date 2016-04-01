@@ -25,6 +25,7 @@ private:
 	const float distThreshold = 0.5f;
 public:
 	ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph);
+	ExploreState(const ExploreState& other);
 	~ExploreState();
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

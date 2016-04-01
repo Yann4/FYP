@@ -38,7 +38,7 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 
 	UpdateMatrix();
 
-	velocity = XMFLOAT3(0, 0, 0);
+	//velocity = XMFLOAT3(0, 0, 0);
 
 	blackboard->setAgentPosition(agentID, position);
 
@@ -70,6 +70,7 @@ bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& obje
 	
 	if (distToPlayer > viewDistance)
 	{
+		handle.canSeePlayer = false;
 		return false;
 	}
 
@@ -95,18 +96,22 @@ bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& obje
 			{
 				if (toIntersection < distToPlayer)
 				{
+					handle.canSeePlayer = false;
 					return false;
 				}
 
 				blackboard->updatePlayerPosition(playerPosition);
+				handle.canSeePlayer = true;
 				return true;
 			}
 		}
 
 		blackboard->updatePlayerPosition(playerPosition);
+		handle.canSeePlayer = true;
 		return true;
 	}
 
+	handle.canSeePlayer = false;
 	return false;
 }
 
@@ -143,6 +148,7 @@ void Agent::move(double delta)
 {
 	XMVECTOR displacement = XMLoadFloat3(&velocity);
 	displacement *= delta;
+	float s = XMVectorGetX(XMVector3Length(displacement));
 
 	XMVECTOR heading = XMVector3Normalize(displacement);
 	
@@ -161,13 +167,15 @@ void Agent::move(double delta)
 	heading = newPos - oldPos;
 	heading = XMVector3Normalize(heading);
 
-	XMVECTOR prevHeading = XMLoadFloat3(&facing);
+	XMFLOAT3 look(objMatrix._13, objMatrix._23, objMatrix._33);
+	XMVECTOR prevHeading = XMLoadFloat3(&look);
 
 	XMFLOAT3 defaultForwards = XMFLOAT3(1, 0, 0);
 	XMVECTOR fw = XMLoadFloat3(&defaultForwards);
+	fw += newPos;
 
-	XMVECTOR angle = XMVector3Dot(heading, fw);
-	float theta = acosf(XMVectorGetX(angle));
+	XMVECTOR dotProd = XMVector3Dot(heading, fw);
+	float theta = acosf(max(-1.0f, min(XMVectorGetX(dotProd), 1.0f)));
 	
 	setRotation(0, -rotation.y, 0);
 	setRotation(0, theta, 0);

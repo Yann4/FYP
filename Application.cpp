@@ -85,6 +85,9 @@ Application::Application()
 	graphYPosition = 1.0f;
 
 	blackboard = Blackboard(numAgents);
+
+	timeLastFrame = GetTickCount64();
+	timeStarted = timeLastFrame;
 }
 
 Application::Application(const Application& other)
@@ -862,7 +865,7 @@ void Application::pushEvent(Event toPush)
 	inputEventQueue.push(toPush);
 }
 
-void Application::handleMessages()
+void Application::handleMessages(double delta)
 {
 	vector<Event> playerEvents = vector<Event>();
 	while (!inputEventQueue.empty())
@@ -925,7 +928,7 @@ void Application::handleMessages()
 		inputEventQueue.pop();
 	}
 
-	player.inputUpdate(playerEvents);
+	player.inputUpdate(playerEvents, delta);
 }
 
 void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
@@ -938,28 +941,15 @@ void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
 void Application::Update()
 {
     // Update our time
-    static double t = 0.0f;
+	double deltaTime = GetTickCount64() - timeLastFrame;
+	deltaTime /= 1000.0;
+	timeLastFrame = GetTickCount64();
 
-    if (_driverType == D3D_DRIVER_TYPE_REFERENCE)
-    {
-        t += (float) XM_PI * 0.0125f;
-    }
-    else
-    {
-        static ULONGLONG dwTimeStart = 0;
-        ULONGLONG dwTimeCur = GetTickCount64();
-
-		if (dwTimeStart == 0)
-		{
-			dwTimeStart = dwTimeCur;
-		}
-
-        t = (dwTimeCur - dwTimeStart) / 1000.0f;
-    }
-
+	//Deal with input
 	input.handleInput(&Application::pushEvent);
-	handleMessages();
+	handleMessages(deltaTime);
 
+	//Update the player and the camera
 	player.Update();
 	
 	if (!playerPerspective)
@@ -967,8 +957,13 @@ void Application::Update()
 		camera.Update();
 	}
 
-	skybox.Update(player.getCamera());
+	//Construct view frustum for culling
+	viewFrustum.constructFrustum(currentCamera->viewDistance() * 2, currentCamera->fov() * 2, currentCamera->aspectRatio() * 2, 0, currentCamera->zFar() * 2, currentCamera->getView());
 
+	skybox.Update(currentCamera);
+
+	//Get the bounding boxes FIX//////////////////////////////////////////////////////////////////
+	//Can be stored throughout and just appended to
 	std::vector<BoundingBox> bbs;
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
@@ -978,6 +973,7 @@ void Application::Update()
 		}
 	}
 
+	//Update navGraph if it's needed
 	if (graphMutex.try_lock())
 	{
 		graphMutex.unlock();
@@ -988,16 +984,18 @@ void Application::Update()
 		}
 	}
 
-	blackboard.Update(t);
+	//Blackboard update for deprication of confidence etc.
+	blackboard.Update(deltaTime);
 
+	//Clear splines so they can be updated
 	splines.clear();
-
 	vector<XMFLOAT3> cp = vector<XMFLOAT3>(2);
 
+	//Update agents, and recreate the splines facing forwards
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
 		auto splineIterator = splines.begin() + i;
-		XMFLOAT3 f = agents.at(i).Update(t, bbs);
+		XMFLOAT3 f = agents.at(i).Update(deltaTime, bbs);
 		
 		XMFLOAT3 p = agents.at(i).Pos();
 
@@ -1017,11 +1015,12 @@ void Application::Update()
 		}
 	}
 
+	//Deal with collision - should be in a different function /////////////////////////////////////////////////////////////////////////////////////////////////
 	Collision::AABB playerBB = Collision::AABB(player.Position(), player.Size());
 
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
-		objects.at(i).Update(t);
+		objects.at(i).Update(deltaTime);
 		
 		if (!objects.at(i).getCollider())
 		{
@@ -1076,8 +1075,6 @@ void Application::Update()
 			}
 		}
 	}
-
-	viewFrustum.constructFrustum(currentCamera->viewDistance() * 2, currentCamera->fov() * 2, currentCamera->aspectRatio() * 2, 0, currentCamera->zFar() * 2, currentCamera->getView());
 }
 
 void Application::Draw()

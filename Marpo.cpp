@@ -54,34 +54,21 @@ void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 
 void Marpo::checkForStatesToPush()
 {
-	Priority prio;
-
 	//Checking ExploreState
 	ExploreState es = ExploreState(owner, &longTerm, &immediate, navGraph);
-	prio = es.shouldEnter();
-	
-	if (prio != NONE)
-	{
-		pushWithPriority(new ExploreState(owner, &longTerm, &immediate, navGraph), prio);
-	}
+	pushWithPriority(new ExploreState(es), es.shouldEnter());
 
 	//Checking InvestigateState
 	InvestigateState is = InvestigateState(owner, blackboard, &immediate, navGraph);
-	prio = is.shouldEnter();
-	
-	if (prio != NONE)
-	{
-		pushWithPriority(new InvestigateState(is), prio);
-	}
+	pushWithPriority(new InvestigateState(is), is.shouldEnter());
 
 	//Checking HideState
 	HideState hs = HideState(owner, blackboard, &immediate, navGraph);
-	prio = hs.shouldEnter();
+	pushWithPriority(new HideState(hs), hs.shouldEnter());
 
-	if (prio != NONE)
-	{
-		pushWithPriority(new HideState(hs), prio);
-	}
+	//Checking AttackState
+	AttackState as = AttackState(owner, blackboard);
+	pushWithPriority(new AttackState(as), as.shouldEnter());
 }
 
 void Marpo::pushWithPriority(State* state, Priority prio)

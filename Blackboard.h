@@ -52,6 +52,7 @@ private:
 	std::vector<Sound> noises;
 	std::vector<DirectX::XMFLOAT3> agentLocations;
 	std::vector<bool> scaredAgents;
+	bool playerTagged;
 
 public:
 	Blackboard();
@@ -85,6 +86,10 @@ public:
 	//Information relevant to scared state
 	bool isAgentScared(unsigned int agentIndex);
 	void setAgentScaredState(unsigned int agentIndex, bool isScared);
+
+	//Information relevant to attacking the player
+	inline bool hasPlayerBeenTagged() { return playerTagged; }
+	inline void tagPlayer() { playerTagged = true; }
 
 private:
 	void UpdateSoundFalloff(double deltaTime);

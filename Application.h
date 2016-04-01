@@ -43,6 +43,9 @@ private:
 	D3D_DRIVER_TYPE         _driverType;
 	D3D_FEATURE_LEVEL       _featureLevel;
 
+	ULONGLONG				timeLastFrame;
+	ULONGLONG				timeStarted;
+
 	ID3D11Device*           _pd3dDevice;
 	ID3D11DeviceContext*    _pImmediateContext;
 	IDXGISwapChain*         _pSwapChain;
@@ -96,7 +99,7 @@ private:
 
 	Player player;
 	std::vector<Agent> agents;
-	const unsigned int numAgents = 1;
+	const unsigned int numAgents = 2;
 
 	Blackboard blackboard;
 
@@ -136,7 +139,7 @@ private:
 
 	void fireBox();
 	static void pushEvent(Event toPush);
-	void handleMessages();
+	void handleMessages(double delta);
 
 	UINT _WindowHeight;
 	UINT _WindowWidth;

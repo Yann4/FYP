@@ -9,6 +9,7 @@
 #include "InvestigateState.h"
 #include "StunnedState.h"
 #include "HideState.h"
+#include "AttackState.h"
 
 #include <stack>
 #include <array>

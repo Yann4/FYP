@@ -385,6 +385,7 @@
   <ItemGroup>
     <ClCompile Include="Agent.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="AttackState.cpp" />
     <ClCompile Include="Blackboard.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -420,6 +421,7 @@
     <ClInclude Include="Agent.h" />
     <ClInclude Include="AgentController.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="AttackState.h" />
     <ClInclude Include="Blackboard.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Camera.h" />

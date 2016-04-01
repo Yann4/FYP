@@ -13,7 +13,7 @@ Player::Player(XMFLOAT3 position, float windowWidth, float windowHeight)
 	camera.setPosition(XMFLOAT4(position.x, position.y, position.z, 1.0f));
 }
 
-void Player::inputUpdate(std::vector<Event> events)
+void Player::inputUpdate(std::vector<Event> events, double deltaTime)
 {
 	XMFLOAT4 cameraPos = camera.getPosition();
 	XMFLOAT3 position = XMFLOAT3(cameraPos.x, cameraPos.y, cameraPos.z);
@@ -31,21 +31,25 @@ void Player::inputUpdate(std::vector<Event> events)
 	XMVECTOR right = XMVector3Rotate(forwards, XMQuaternionRotationNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XM_PIDIV2));
 	right = XMVector3Normalize(right);
 
+	XMVECTOR vel = forwards * speed * deltaTime;
+	XMFLOAT3 v;
+	XMStoreFloat3(&v, XMVector3Length(vel));
+
 	for (unsigned int i = 0; i < events.size(); i++)
 	{
 		switch (events.at(i))
 		{
 		case WALK_FORWARDS:
-			pos += forwards * speed;
+			pos += forwards * speed * deltaTime;
 			break;
 		case WALK_BACKWARDS:
-			pos -= forwards * speed;
+			pos -= forwards * speed * deltaTime;
 			break;
 		case STRAFE_LEFT:
-			pos -= right * speed;
+			pos -= right * speed * deltaTime;
 			break;
 		case STRAFE_RIGHT:
-			pos += right * speed;
+			pos += right * speed * deltaTime;
 			break;
 		}
 	}

@@ -11,14 +11,14 @@ class Player
 private:	
 	Camera camera;
 
-	const float speed = 0.001f;
+	const float speed = 1.0f;
 	const DirectX::XMFLOAT3 size = DirectX::XMFLOAT3(1, 2, 1);
 public:
 	Player();
 	Player(DirectX::XMFLOAT3 position, float windowWidth, float windowHeight);
 
 	void Update();
-	void inputUpdate(std::vector<Event> events);
+	void inputUpdate(std::vector<Event> events, double deltaTime);
 
 	void moveFromCollision(DirectX::XMFLOAT3 moveBy);
 

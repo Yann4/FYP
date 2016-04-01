@@ -28,7 +28,7 @@ namespace Steering
 	};
 
 	//AggregateForces() will truncate to a maximum of this value
-	constexpr float MaxForce = 0.0001f;
+	constexpr float MaxForce = 3.0f;
 
 	//Returns the force seeking from the current position to the destination
 	DirectX::XMFLOAT3 seekForce(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 destination);

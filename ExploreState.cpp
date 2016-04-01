@@ -18,6 +18,19 @@ ExploreState::ExploreState(Controller* owner, std::stack<State*>* longTerm, std:
 	pushedRoute = false;
 }
 
+ExploreState::ExploreState(const ExploreState& other)
+{
+	owner = other.owner;
+	navGraph = other.navGraph;
+	destination = other.destination;
+
+	longTermStack = other.longTermStack;
+	immediateStack = other.immediateStack;
+	stackSize = other.stackSize;
+	graphFullyExplored = other.graphFullyExplored;
+	pushedRoute = other.pushedRoute;
+}
+
 ExploreState::~ExploreState()
 {
 	navGraph = nullptr;
