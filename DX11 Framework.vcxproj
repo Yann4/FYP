@@ -392,6 +392,7 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DX11 Framework.cpp" />
+    <ClCompile Include="ExitPoint.cpp" />
     <ClCompile Include="ExploreState.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -428,6 +429,7 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="data structs.h" />
     <ClInclude Include="DDSTextureLoader.h" />
+    <ClInclude Include="ExitPoint.h" />
     <ClInclude Include="ExploreState.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />

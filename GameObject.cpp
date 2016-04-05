@@ -67,6 +67,31 @@ void GameObject::setRotation(float x, float y, float z)
 	rotation.x += x;
 	rotation.y += y;
 	rotation.z += z;
+
+	if (rotation.x > 100.0f)
+	{
+		rotation.x -= 100.0f;
+	}
+	else if (rotation.x < -100.0f)
+	{
+		rotation.x += 100.0f;
+	}
+	if (rotation.y > 100.0f)
+	{
+		rotation.y -= 100.0f;
+	}
+	else if (rotation.y < -100.0f)
+	{
+		rotation.y += 100.0f;
+	}
+	if (rotation.z > 100.0f)
+	{
+		rotation.z -= 100.0f;
+	}
+	else if (rotation.z < -100.0f)
+	{
+		rotation.z += 100.0f;
+	}
 	
 	XMStoreFloat4x4(&temp, XMMatrixRotationRollPitchYaw(x, y, z));
 	transformations.push(temp);

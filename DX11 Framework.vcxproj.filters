@@ -141,6 +141,9 @@
     <ClInclude Include="AttackState.h">
       <Filter>AI Components\Finite State Machine\States</Filter>
     </ClInclude>
+    <ClInclude Include="ExitPoint.h">
+      <Filter>Objects\Props</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -220,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="AttackState.cpp">
       <Filter>AI Components\Finite State Machine\States</Filter>
+    </ClCompile>
+    <ClCompile Include="ExitPoint.cpp">
+      <Filter>Objects\Props</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

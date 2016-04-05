@@ -25,6 +25,7 @@
 #include "Agent.h"
 #include "Blackboard.h"
 #include "Player.h"
+#include "ExitPoint.h"
 
 #include <queue>
 #include <fstream>
@@ -95,6 +96,7 @@ private:
 	std::vector<Material> agentMaterial;
 
 	std::vector<GameObject> objects;
+	ExitPoint exit;
 	std::vector<Spline> splines;
 
 	Player player;

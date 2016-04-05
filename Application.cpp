@@ -85,6 +85,7 @@ Application::Application()
 	graphYPosition = 1.0f;
 
 	blackboard = Blackboard(numAgents);
+	exit = ExitPoint();
 
 	timeLastFrame = GetTickCount64();
 	timeStarted = timeLastFrame;
@@ -611,6 +612,7 @@ void Application::readInitFile(std::string fileName)
 	CRATE
 	SPLINE
 	PIPE
+	EXIT
 	*/
 
 	std::fstream worldFile;
@@ -665,6 +667,18 @@ void Application::readInitFile(std::string fileName)
 				temp.setMovementState(false);
 				temp.setIsGround(true);
 				objects.push_back(temp);
+			}
+			else if (name == "EXIT")
+			{
+				GameObject temp = GameObject(_pImmediateContext, frameConstantBuffer, objectConstantBuffer, cubeMesh, position);
+				temp.setScale(scale.x, scale.y, scale.z);
+				temp.setRotation(rotation.x, rotation.y, rotation.z);
+				temp.UpdateMatrix();
+				temp.setCullState(false);
+				temp.setCollider(false);
+				temp.setMovementState(true);
+				temp.setIsGround(false);
+				exit = ExitPoint(temp);
 			}
 		}
 		else if (std::regex_match(line, captures, splineMatch))
@@ -984,6 +998,8 @@ void Application::Update()
 		}
 	}
 
+	exit.Update(deltaTime);
+
 	//Blackboard update for deprication of confidence etc.
 	blackboard.Update(deltaTime);
 
@@ -1106,6 +1122,8 @@ void Application::Draw()
 	{
 		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
+
+	exit.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 
 	for (Agent a : agents)
 	{
