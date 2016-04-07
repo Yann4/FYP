@@ -68,31 +68,6 @@ void GameObject::setRotation(float x, float y, float z)
 	rotation.y += y;
 	rotation.z += z;
 
-	if (rotation.x > 100.0f)
-	{
-		rotation.x -= 100.0f;
-	}
-	else if (rotation.x < -100.0f)
-	{
-		rotation.x += 100.0f;
-	}
-	if (rotation.y > 100.0f)
-	{
-		rotation.y -= 100.0f;
-	}
-	else if (rotation.y < -100.0f)
-	{
-		rotation.y += 100.0f;
-	}
-	if (rotation.z > 100.0f)
-	{
-		rotation.z -= 100.0f;
-	}
-	else if (rotation.z < -100.0f)
-	{
-		rotation.z += 100.0f;
-	}
-	
 	XMStoreFloat4x4(&temp, XMMatrixRotationRollPitchYaw(x, y, z));
 	transformations.push(temp);
 
@@ -106,7 +81,7 @@ void GameObject::setTranslation(float x, float y, float z)
 	XMStoreFloat4x4(&temp, XMMatrixTranslation(x, y, z));
 	transformations.push(temp);
 
-	XMStoreFloat3(&position, XMVector3Transform(XMLoadFloat3(&position), XMMatrixTranslation(x, y, z)));
+	//XMStoreFloat3(&position, XMVector3Transform(XMLoadFloat3(&position), XMMatrixTranslation(x, y, z)));
 }
 
 void GameObject::UpdateMatrix()
@@ -128,6 +103,12 @@ void GameObject::UpdateMatrix()
 		XMMATRIX p = XMLoadFloat4x4(&objMatrix);
 		p *= tr;
 		XMStoreFloat4x4(&objMatrix, p);
+	}
+
+	XMVECTOR pos, rot, sc;
+	if (XMMatrixDecompose(&sc, &rot, &pos, XMLoadFloat4x4(&objMatrix)))
+	{
+		XMStoreFloat3(&position, pos);
 	}
 }
 #pragma endregion
