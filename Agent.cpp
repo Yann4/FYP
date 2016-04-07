@@ -38,8 +38,6 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 
 	UpdateMatrix();
 
-	//velocity = XMFLOAT3(0, 0, 0);
-
 	blackboard->setAgentPosition(agentID, position);
 
 	Data<XMFLOAT3> playerPos = blackboard->getPlayerPosition();

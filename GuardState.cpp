@@ -2,8 +2,8 @@
 
 using namespace DirectX;
 
-GuardState::GuardState(Controller* owner, DirectX::XMFLOAT3 locationToGuard, Blackboard* blackboard) : 
-	State(owner), locationToGuard(locationToGuard), blackboard(blackboard)
+GuardState::GuardState(Controller* owner, DirectX::XMFLOAT3 locationToGuard, Blackboard* blackboard, Graph* graph, std::stack<State*>* immediate) :
+	State(owner), locationToGuard(locationToGuard), blackboard(blackboard), graph(graph), immediate(immediate)
 {
 	currentDestination = 0;
 }
@@ -15,11 +15,15 @@ GuardState::GuardState(const GuardState& other)
 	blackboard = other.blackboard;
 	owner = other.owner;
 	currentDestination = other.currentDestination;
+	graph = other.graph;
+	immediate = other.immediate;
 }
 
 GuardState::~GuardState()
 {
 	blackboard = nullptr;
+	graph = nullptr;
+	immediate = nullptr;
 }
 
 void GuardState::Update(double deltaTime, std::vector<BoundingBox>& objects)
@@ -28,19 +32,19 @@ void GuardState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 	{
 		generatePatrol(objects);
 		blackboard->flipAgentGuarding(owner->agentID);
+		currentDestination = nearestNodeOnPath();
+		immediate->push(new RouteToState(owner, immediate, graph, path.at(currentDestination)));
 	}
-
-	if (atNextNode())
+	else
 	{
+		currentDestination = nearestNodeOnPath();
 		if (++currentDestination >= path.size())
 		{
 			currentDestination = 0;
 		}
-	}
 
-	XMFLOAT3 arrive = Steering::arriveForce(owner->position, path.at(currentDestination), 0.5f);
-	XMFLOAT3 avoid = Steering::obstacleAvoidForce(objects, owner->position, owner->facing);
-	owner->force = Steering::aggregateForces(XMFLOAT3(0, 0, 0), arrive, avoid);
+		immediate->push(new RouteToState(owner, immediate, graph, path.at(currentDestination)));
+	}
 }
 
 Priority GuardState::shouldEnter()
@@ -58,7 +62,7 @@ Priority GuardState::shouldEnter()
 			return NONE;
 		}
 
-		return IMMEDIATE;
+		return LONG_TERM;
 	}
 }
 
@@ -75,7 +79,7 @@ Priority GuardState::Exit(State** toPush)
 
 void GuardState::generatePatrol(std::vector<BoundingBox>& objects)
 {
-	const float patrolRadius = 2.0f;
+	const float patrolRadius = 4.0f;
 	const unsigned int detail = 8;
 
 	const float anglePerPoint = XM_2PI / 8;
@@ -110,12 +114,22 @@ void GuardState::generatePatrol(std::vector<BoundingBox>& objects)
 			float distance;
 			if (objects.at(j).Intersects(centrePoint, fromCentre, distance) && distance < patrolRadius)
 			{
-				XMStoreFloat3(&point, centrePoint + (pointOnSurface * distance));
+				pointOnSurface = XMVectorSet(locationToGuard.x + (distance * cosf(angle)), locationToGuard.y, locationToGuard.z + (distance * sinf(angle)), 1.0f);
+				XMStoreFloat3(&point, pointOnSurface);
+				if (angle == XM_PI)
+				{
+					point.z = locationToGuard.z;
+				}
 				break;
 			}
 		}
 
 		path.push_back(point);
+	}
+
+	for (unsigned int i = 0; i < path.size(); i++)
+	{
+		graph->giveNode(path.at(i));
 	}
 }
 
@@ -124,7 +138,7 @@ bool GuardState::atNextNode()
 	XMVECTOR currentPosition = XMLoadFloat3(&owner->position);
 	XMVECTOR destination = XMLoadFloat3(&path.at(currentDestination));
 
-	const float threshold = 0.5f;
+	const float threshold = 0.2f;
 
 	if (XMVectorGetX(XMVector3LengthEst(currentPosition - destination)) < threshold)
 	{
@@ -132,4 +146,27 @@ bool GuardState::atNextNode()
 	}
 
 	return false;
+}
+
+unsigned int GuardState::nearestNodeOnPath()
+{
+	XMVECTOR aPos = XMLoadFloat3(&owner->position);
+	XMVECTOR nPos = XMLoadFloat3(&path.at(0));
+
+	unsigned int nearest = 0;
+	float distance = XMVectorGetX(XMVector3LengthSq(aPos - nPos));
+
+	for (unsigned int i = 1; i < path.size(); i++)
+	{
+		nPos = XMLoadFloat3(&path.at(i));
+		float s = XMVectorGetX(XMVector3LengthSq(aPos - nPos));
+
+		if (s < distance)
+		{
+			nearest = i;
+			distance = s;
+		}
+	}
+
+	return nearest;
 }
