@@ -98,6 +98,7 @@ private:
 	std::vector<GameObject> objects;
 	ExitPoint exit;
 	std::vector<Spline> splines;
+	std::vector<Spline> agentSplines;
 
 	Player player;
 	std::vector<Agent> agents;

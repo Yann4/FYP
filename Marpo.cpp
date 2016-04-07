@@ -69,6 +69,10 @@ void Marpo::checkForStatesToPush()
 	//Checking AttackState
 	AttackState as = AttackState(owner, blackboard);
 	pushWithPriority(new AttackState(as), as.shouldEnter());
+
+	//Checking GuardState
+	GuardState gs = GuardState(owner, blackboard->getExitLocation(), blackboard);
+	pushWithPriority(new GuardState(gs), gs.shouldEnter());
 }
 
 void Marpo::pushWithPriority(State* state, Priority prio)

@@ -28,6 +28,21 @@ Spline::Spline(std::vector<XMFLOAT3> controlPoints, ID3D11DeviceContext * contex
 	createBuffers();
 }
 
+Spline::Spline(const Spline& other)
+{
+	context = other.context;
+	if(context) context->AddRef();
+	splineLayout = other.splineLayout;
+	if(splineLayout) splineLayout->AddRef();
+	vertexBuffer = other.vertexBuffer;
+	if(vertexBuffer) vertexBuffer->AddRef();
+	indexBuffer = other.indexBuffer;
+	if(indexBuffer) indexBuffer->AddRef();
+	constBuffer = other.constBuffer;
+	if(constBuffer) constBuffer->AddRef();
+	colour = other.colour;
+}
+
 Spline::~Spline()
 {
 	if (context) context->Release();

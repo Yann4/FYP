@@ -42,6 +42,7 @@ private:
 public:
 	Spline();
 	Spline(std::vector<DirectX::XMFLOAT3> controlPoints, ID3D11DeviceContext* context, ID3D11Device* device, ID3D11InputLayout* layout, DirectX::XMFLOAT4 colour = DirectX::XMFLOAT4(0,0,0,1));
+	Spline(const Spline& other);
 	~Spline();
 
 private:

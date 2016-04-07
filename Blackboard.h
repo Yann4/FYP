@@ -54,6 +54,9 @@ private:
 	std::vector<bool> scaredAgents;
 	bool playerTagged;
 
+	DirectX::XMFLOAT3 exitLocation;
+	std::vector<unsigned int> agentsGuardingExit;
+
 public:
 	Blackboard();
 	Blackboard(unsigned int numAgents);
@@ -90,6 +93,14 @@ public:
 	//Information relevant to attacking the player
 	inline bool hasPlayerBeenTagged() { return playerTagged; }
 	inline void tagPlayer() { playerTagged = true; }
+
+	//Information relevant to guarding the objective
+	inline unsigned int numAgentsGuarding() { return agentsGuardingExit.size(); }
+	inline bool isAgentGuarding(unsigned int agentIndex) { return std::find(agentsGuardingExit.begin(), agentsGuardingExit.end(), agentIndex) != agentsGuardingExit.end(); }
+	void flipAgentGuarding(unsigned int agentIndex);
+
+	inline void setExitLocation(DirectX::XMFLOAT3 exitLoc) { exitLocation = exitLoc; }
+	inline DirectX::XMFLOAT3 getExitLocation() { return exitLocation; }
 
 private:
 	void UpdateSoundFalloff(double deltaTime);

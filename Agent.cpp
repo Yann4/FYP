@@ -148,7 +148,6 @@ void Agent::move(double delta)
 {
 	XMVECTOR displacement = XMLoadFloat3(&velocity);
 	displacement *= delta;
-	float s = XMVectorGetX(XMVector3Length(displacement));
 
 	XMVECTOR heading = XMVector3Normalize(displacement);
 	

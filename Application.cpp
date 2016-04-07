@@ -76,7 +76,8 @@ Application::Application()
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = vector<GameObject>();
 	agents = vector<Agent>();
-	splines = vector<Spline>(numAgents);
+	agentSplines = vector<Spline>(numAgents);
+	splines = vector<Spline>();
 	flashlightOn = false;
 	renderGraph = false;
 
@@ -112,6 +113,7 @@ Application::Application(const Application& other)
 	player = other.player;
 
 	splines = other.splines;
+	agentSplines = other.agentSplines;
 	objects = other.objects;
 
 	agentMaterial = other.agentMaterial;
@@ -679,6 +681,7 @@ void Application::readInitFile(std::string fileName)
 				temp.setMovementState(true);
 				temp.setIsGround(false);
 				exit = ExitPoint(temp);
+				blackboard.setExitLocation(position);
 			}
 		}
 		else if (std::regex_match(line, captures, splineMatch))
@@ -1004,13 +1007,13 @@ void Application::Update()
 	blackboard.Update(deltaTime);
 
 	//Clear splines so they can be updated
-	splines.clear();
+	agentSplines.clear();
 	vector<XMFLOAT3> cp = vector<XMFLOAT3>(2);
 
 	//Update agents, and recreate the splines facing forwards
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
-		auto splineIterator = splines.begin() + i;
+		auto splineIterator = agentSplines.begin() + i;
 		XMFLOAT3 f = agents.at(i).Update(deltaTime, bbs);
 		
 		XMFLOAT3 p = agents.at(i).Pos();
@@ -1024,10 +1027,10 @@ void Application::Update()
 		
 		if (agents.at(i).canSeePlayer(player.Position(), bbs))
 		{
-			splines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(1, 0, 0, 1));
+			agentSplines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(1, 0, 0, 1));
 		}else
 		{
-			splines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(0, 1, 0, 1));
+			agentSplines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(0, 1, 0, 1));
 		}
 	}
 
@@ -1141,6 +1144,11 @@ void Application::Draw()
 	for (unsigned int i = 0; i < splines.size(); i++)
 	{
 		splines.at(i).Draw(linePS, lineVS, *currentCamera, false);
+	}
+
+	for (unsigned int i = 0; i < agentSplines.size(); i++)
+	{
+		agentSplines.at(i).Draw(linePS, lineVS, *currentCamera, false);
 	}
 
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
