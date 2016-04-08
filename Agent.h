@@ -41,6 +41,8 @@ public:
 	void updateController();
 
 	inline DirectX::XMFLOAT3 getFacing() { return facing; }
+
+	void stun();
 private:
 	void forceToVelocity(DirectX::XMFLOAT3 force, double delta);
 	void move(double delta);

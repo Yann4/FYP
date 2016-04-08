@@ -1,6 +1,7 @@
 #pragma once
 
 #include "State.h"
+#include <DirectXMath.h>
 
 class StunnedState : public State
 {

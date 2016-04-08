@@ -569,11 +569,11 @@ HRESULT Application::InitDevice()
     return S_OK;
 }
 
-void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotation)
+GameObject* Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotation)
 {
 	if (!graphMutex.try_lock())
 	{
-		return;
+		return nullptr;
 	}
 	graphMutex.unlock();
 
@@ -596,6 +596,7 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.45f, graphYPosition, position.z - scale.z - 0.45f));
 	navGraph.giveNode(XMFLOAT3(position.x + scale.x + 0.45f, graphYPosition, position.z + scale.z + 0.45f));
 
+	return &objects.back();
 }
 
 void Application::readInitFile(std::string fileName)
@@ -855,8 +856,23 @@ void Application::fireBox()
 			posVect = XMVector3Transform(posVect, XMMatrixTranslation(cameraForwards.x * distance, cameraForwards.y * distance, cameraForwards.z * distance));
 			XMStoreFloat3(&cameraPos, posVect);
 			cameraPos.y = graphYPosition;
-			placeCrate(cameraPos, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0, 0, 0));
+			GameObject* fired = placeCrate(cameraPos, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0, 0, 0));
+			BoundingBox firedBB = fired->getBoundingBox();
+			firedBB.Extents.x *= 2.0f;
+			firedBB.Extents.y *= 2.0f;
+			firedBB.Extents.z *= 2.0f;
+
 			blackboard.noiseMade(cameraPos, 50);
+
+			for (unsigned int i = 0; i < agents.size(); i++)
+			{
+				if (firedBB.Intersects(agents.at(i).getBoundingBox()))
+				{
+					agents.at(i).stun();
+				}
+			}
+
+			break;
 		}
 	}
 }
