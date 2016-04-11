@@ -11,6 +11,7 @@ class TravelToPositionState : public State
 private:
 	DirectX::XMFLOAT3 position;
 	Blackboard* blackboard;
+	bool invalidPath;
 public:
 	TravelToPositionState(Controller* owner, DirectX::XMFLOAT3 destination, Blackboard* blackboard);
 	
@@ -19,6 +20,9 @@ public:
 	bool shouldExit();
 	Priority Exit(State** toPush);
 
+private:
+	bool validTarget(std::vector<DirectX::BoundingBox>& objects);
 public:
 	const float distThreshold = 0.5f;
+
 };

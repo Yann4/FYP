@@ -67,6 +67,7 @@ public:
 	std::vector<DirectX::XMFLOAT3> getUnvisitedLocations();
 	std::vector<Node*> getUnvisitedNodes();
 	DirectX::XMFLOAT3 getNearestUnvisitedLocation(DirectX::XMFLOAT3 currentPos);
+	void setGraphUnvisited();
 
 	void visitLocation(DirectX::XMFLOAT3 location);
 private:

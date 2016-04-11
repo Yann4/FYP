@@ -309,9 +309,9 @@ Node* Graph::getNearestNode(XMFLOAT3 position)
 
 vector<XMFLOAT3> Graph::getUnvisitedLocations()
 {
-	while (graphBusy)
+	if (graphBusy)
 	{
-		Sleep(2);
+		return vector<XMFLOAT3>();
 	}
 
 	vector<XMFLOAT3> unvisited = vector<XMFLOAT3>();
@@ -325,6 +325,19 @@ vector<XMFLOAT3> Graph::getUnvisitedLocations()
 	}
 
 	return unvisited;
+}
+
+void Graph::setGraphUnvisited()
+{
+	if (graphBusy)
+	{
+		return;
+	}
+
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
+	{
+		graphNodes.at(i)->setVisited(false);
+	}
 }
 
 std::vector<Node*> Graph::getUnvisitedNodes()
@@ -341,6 +354,8 @@ std::vector<Node*> Graph::getUnvisitedNodes()
 
 	return unvisited;
 }
+
+
 
 XMFLOAT3 Graph::getNearestUnvisitedLocation(XMFLOAT3 currentPos)
 {

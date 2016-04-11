@@ -10,6 +10,10 @@ ExploreState::ExploreState(Controller* owner, std::stack<State*>* longTerm, std:
 	if (destination.x == owner->position.x && destination.z == owner->position.z)
 	{
 		graphFullyExplored = true;
+		if (!navGraph->isBusy())
+		{
+			navGraph->setGraphUnvisited();
+		}
 	}
 	else
 	{
@@ -42,7 +46,12 @@ ExploreState::~ExploreState()
 
 void ExploreState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
-	if (!pushedRoute && !graphFullyExplored)
+	if (graphFullyExplored && !navGraph->isBusy())
+	{
+		navGraph->setGraphUnvisited();
+		destination = navGraph->getNearestUnvisitedLocation(owner->position);
+	}
+	else if (!pushedRoute && !graphFullyExplored)
 	{
 		immediateStack->push(new RouteToState(owner, immediateStack, navGraph, blackboard, destination));
 		

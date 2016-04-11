@@ -99,6 +99,12 @@ bool Node::hasVisionOf(Node& other, std::vector<BoundingBox>& objects)
 		XMVECTOR otherPos = XMLoadFloat3(&otherPosition);
 	
 		XMVECTOR direction = XMVector3Normalize(myPos - otherPos);
+		
+		if (XMVector3Equal(direction, XMVectorSet(0, 0, 0, 0)))
+		{
+			continue;
+		}
+
 		float len;
 
 		if (objects.at(i).Intersects(otherPos, direction, len))

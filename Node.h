@@ -72,7 +72,7 @@ public:
 	}
 
 	inline bool Visited() { return visited; }
-	inline void setVisited() { visited = true; }
+	inline void setVisited(bool visitedState = true) { visited = visitedState; }
 private:
 	bool hasVisionOf(Node& other, std::vector<DirectX::BoundingBox>& objects);
 };
