@@ -969,12 +969,79 @@ void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
 	graphMutex.unlock();
 }
 
+void Application::handleCollisions()
+{
+	Collision::AABB playerBB = Collision::AABB(player.Position(), player.Size());
+
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+		if (!objects.at(i).getCollider())
+		{
+			continue;
+		}
+
+		XMFLOAT3 size = objects.at(i).Size();
+
+		Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
+		Collision::MTV mtv;
+
+		if (Collision::boundingBoxCollision(playerBB, objAABB, mtv))
+		{
+			player.moveFromCollision(XMFLOAT3(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude));
+		}
+
+		for (unsigned int j = 0; j < objects.size(); j++)
+		{
+			if (i == j || !objects.at(j).getCollider())
+			{
+				continue;
+			}
+
+			Collision::AABB closeAABB = Collision::AABB(objects.at(j).Pos(), objects.at(j).Size());
+
+			if (Collision::boundingBoxCollision(objAABB, closeAABB, mtv))
+			{
+				if (objects.at(i).getIsGround())
+				{
+					objects.at(j).setOnGround(true);
+				}
+				if (objects.at(j).getIsGround())
+				{
+					objects.at(i).setOnGround(true);
+				}
+				objects.at(i).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+			}
+		}
+
+		for (unsigned int j = 0; j < agents.size(); j++)
+		{
+			Collision::AABB agentAABB = Collision::AABB(agents.at(j).Pos(), agents.at(j).Size());
+
+			if (Collision::boundingBoxCollision(agentAABB, objAABB, mtv))
+			{
+				if (objects.at(i).getIsGround())
+				{
+					agents.at(j).setOnGround(true);
+				}
+
+				agents.at(j).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
+			}
+		}
+	}
+}
+
 void Application::Update()
 {
     // Update our time
 	double deltaTime = GetTickCount64() - timeLastFrame;
 	deltaTime /= 1000.0;
 	timeLastFrame = GetTickCount64();
+
+	//Handle object update
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+		objects.at(i).Update(deltaTime);
+	}
 
 	//Deal with input
 	input.handleInput(&Application::pushEvent);
@@ -1037,66 +1104,7 @@ void Application::Update()
 		}
 	}
 
-	//Deal with collision - should be in a different function /////////////////////////////////////////////////////////////////////////////////////////////////
-	Collision::AABB playerBB = Collision::AABB(player.Position(), player.Size());
-
-	for (unsigned int i = 0; i < objects.size(); i++)
-	{
-		objects.at(i).Update(deltaTime);
-		
-		if (!objects.at(i).getCollider())
-		{
-			continue;
-		}
-
-		XMFLOAT3 size = objects.at(i).Size();		
-
-		Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
-		Collision::MTV mtv;
-
-		if (Collision::boundingBoxCollision(playerBB, objAABB, mtv))
-		{
-			player.moveFromCollision(XMFLOAT3(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude));
-		}
-
-		for (unsigned int j = 0; j < objects.size(); j++)
-		{
-			if (i == j || !objects.at(j).getCollider())
-			{
-				continue;
-			}
-
-			Collision::AABB closeAABB = Collision::AABB(objects.at(j).Pos(), objects.at(j).Size());
-			
-			if(Collision::boundingBoxCollision(objAABB, closeAABB, mtv))
-			{
-				if (objects.at(i).getIsGround())
-				{
-					objects.at(j).setOnGround(true);
-				}
-				if (objects.at(j).getIsGround())
-				{
-					objects.at(i).setOnGround(true);
-				}
-				objects.at(i).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
-			}
-		}
-
-		for (unsigned int j = 0; j < agents.size(); j++)
-		{
-			Collision::AABB agentAABB = Collision::AABB(agents.at(j).Pos(), agents.at(j).Size());
-
-			if (Collision::boundingBoxCollision(agentAABB, objAABB, mtv))
-			{
-				if (objects.at(i).getIsGround())
-				{
-					agents.at(j).setOnGround(true);
-				}
-
-				agents.at(j).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
-			}
-		}
-	}
+	handleCollisions();
 }
 
 void Application::Draw()
@@ -1104,10 +1112,11 @@ void Application::Draw()
     //
     // Clear the back buffer
     //
-    float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f}; // red,green,blue,alpha
+    float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f};
     _pImmediateContext->ClearRenderTargetView(_pRenderTargetView, ClearColor);
 	_pImmediateContext->ClearDepthStencilView(_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+	//Update the constant buffer used for this frame
 	perFrameCB.eyePos = XMFLOAT3(currentCamera->getPosition().x, currentCamera->getPosition().y, currentCamera->getPosition().z);
 
 	perFrameCB.pointLight.position = perFrameCB.eyePos;

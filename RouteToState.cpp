@@ -5,16 +5,7 @@ using namespace DirectX;
 RouteToState::RouteToState(Controller* owner, std::stack<State*>* immediateStack, Graph* navGraph, XMFLOAT3 destination) : State(owner),
 	immediateStack(immediateStack), navGraph(navGraph), targetDestination(destination)
 {
-	while (navGraph->isBusy())
-	{
-		Sleep(2);
-	}
-
-	path = navGraph->findPath(owner->position, targetDestination);
-
-	navGraph->visitLocation(owner->position);
-
-	path.push(owner->position);
+	getPath();
 }
 
 RouteToState::~RouteToState()
@@ -25,15 +16,22 @@ RouteToState::~RouteToState()
 
 void RouteToState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
-	if (atNextNode())
+	if (!haveValidPath(objects))
 	{
-		path.pop();
-		
-		navGraph->visitLocation(owner->position);
-
-		if (!path.empty())
+		getPath();
+	}
+	else
+	{
+		if (atNextNode())
 		{
-			immediateStack->push(new TravelToPositionState(owner, path.top()));
+			path.pop();
+
+			navGraph->visitLocation(owner->position);
+
+			if (!path.empty())
+			{
+				immediateStack->push(new TravelToPositionState(owner, path.top()));
+			}
 		}
 	}
 }
@@ -67,4 +65,57 @@ bool RouteToState::atNextNode()
 	float distance = XMVectorGetX(XMVector3LengthEst(agentPos - nextPos));
 
 	return distance < distThreshold;
+}
+
+void RouteToState::getPath()
+{
+	if (!navGraph->isBusy())
+	{
+		path = navGraph->findPath(owner->position, targetDestination);
+
+		navGraph->visitLocation(owner->position);
+
+		path.push(owner->position);
+	}
+}
+
+bool RouteToState::haveValidPath(std::vector<BoundingBox>& objects)
+{
+	//If we have objects in the path, and line of sight to the next position in the path, the path is valid
+	//Also, check that we're not closer to the destination than the next position. Perform broad-phase check,
+	//and if we are, recalculate and accept that path
+
+	if (path.empty())
+	{
+		return false;
+	}
+
+	if (atNextNode())
+	{
+		return true;
+	}
+
+	XMFLOAT3 nextPos = path.top();
+	XMVECTOR next = XMLoadFloat3(&nextPos);
+
+	XMVECTOR ourPos = XMLoadFloat3(&owner->position);
+
+	XMVECTOR toNode = next - ourPos;
+
+	float distToNext = XMVectorGetX(toNode);
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+		float dist;
+		if (objects.at(i).Intersects(ourPos, XMVector3Normalize(toNode), dist) && dist < distToNext)
+		{
+			return false;
+		}
+	}
+
+	if (XMVectorGetX(XMVector3Length(ourPos - XMLoadFloat3(&targetDestination))) < distToNext)
+	{
+		getPath();
+	}
+
+	return true;
 }

@@ -9,6 +9,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <stack>
+#include <random>
 
 class InvestigateState : public State
 {
@@ -16,7 +17,6 @@ private:
 	Blackboard* blackboard;
 
 	DirectX::XMFLOAT3 disturbanceLocation;
-	std::vector<Sound*> noises;
 	bool disturbanceFound;
 
 	const float hearingRange = 5.0f;
@@ -33,4 +33,7 @@ public:
 	Priority shouldEnter();
 	bool shouldExit();
 	Priority Exit(State** toPush);
+
+private:
+	void getDisturbance();
 };

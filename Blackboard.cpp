@@ -38,6 +38,7 @@ void Blackboard::UpdateSoundFalloff(double deltaTime)
 		{
 			noises.erase(noises.begin() + i);
 			i--;
+			continue;
 		}
 	}
 }

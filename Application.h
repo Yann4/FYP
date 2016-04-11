@@ -145,6 +145,8 @@ private:
 	static void pushEvent(Event toPush);
 	void handleMessages(double delta);
 
+	void handleCollisions();
+
 	UINT _WindowHeight;
 	UINT _WindowWidth;
 

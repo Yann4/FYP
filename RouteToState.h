@@ -30,4 +30,6 @@ public:
 
 private:
 	bool atNextNode();
+	void getPath();
+	bool haveValidPath(std::vector<DirectX::BoundingBox>& objects);
 };
