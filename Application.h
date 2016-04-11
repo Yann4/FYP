@@ -133,7 +133,7 @@ private:
 	HRESULT initialiseCube();
 	HRESULT initialisePipe();
 	HRESULT initialiseGrass();
-	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
+	GameObject* placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
 
 	void initialiseAgents(DirectX::XMFLOAT2 floorSize);
 

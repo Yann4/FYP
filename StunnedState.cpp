@@ -1,16 +1,24 @@
 #include "StunnedState.h"
 
 StunnedState::StunnedState(Controller* owner, double stunDuration) : State(owner), stunDurationRemaining(stunDuration)
-{}
+{
+	
+}
 
 void StunnedState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 {
+	owner->force = DirectX::XMFLOAT3(0, 0, 0);
 	stunDurationRemaining -= deltaTime;
 }
 
 Priority StunnedState::shouldEnter()
 {
-	return REACTIONARY;
+	if (owner->getStunned && !owner->isStunned)
+	{
+		owner->isStunned = true;
+		return REACTIONARY;
+	}
+	return NONE;
 }
 
 bool StunnedState::shouldExit()
@@ -20,5 +28,7 @@ bool StunnedState::shouldExit()
 
 Priority StunnedState::Exit(State** toPush)
 {
+	owner->getStunned = false;
+	owner->getStunned = false;
 	return NONE;
 }

@@ -9,6 +9,8 @@ public:
 	DirectX::XMFLOAT3 facing;
 	unsigned int agentID;
 	bool canSeePlayer;
+	bool getStunned;
+	bool isStunned;
 public:
 	Controller() {};
 	
@@ -16,5 +18,7 @@ public:
 	{
 		force = DirectX::XMFLOAT3(0, 0, 0);
 		canSeePlayer = false;
+		getStunned = false;
+		isStunned = false;
 	}
 };

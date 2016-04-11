@@ -56,7 +56,6 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 		}
 	}
 
-
 	return facing;
 }
 
@@ -176,4 +175,10 @@ void Agent::move(double delta)
 	
 	setRotation(0, -rotation.y, 0);
 	setRotation(0, theta, 0);
+}
+
+void Agent::stun()
+{
+	handle.getStunned = true;
+	velocity = XMFLOAT3(0, 0, 0);
 }

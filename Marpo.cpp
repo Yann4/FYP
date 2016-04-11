@@ -73,6 +73,10 @@ void Marpo::checkForStatesToPush()
 	//Checking GuardState
 	GuardState gs = GuardState(owner, blackboard->getExitLocation(), blackboard, navGraph, &immediate);
 	pushWithPriority(new GuardState(gs), gs.shouldEnter());
+
+	//Checking StunnedState
+	StunnedState ss = StunnedState(owner, 10);
+	pushWithPriority(new StunnedState(ss), ss.shouldEnter());
 }
 
 void Marpo::pushWithPriority(State* state, Priority prio)
@@ -91,6 +95,10 @@ void Marpo::pushWithPriority(State* state, Priority prio)
 			reactionary.push(state);
 			break;
 		}
+	}
+	else
+	{
+		delete state;
 	}
 }
 
