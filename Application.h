@@ -96,6 +96,7 @@ private:
 	std::vector<Material> agentMaterial;
 
 	std::vector<GameObject> objects;
+	std::vector<DirectX::BoundingBox> obstacleBoxes;
 	ExitPoint exit;
 	std::vector<Spline> splines;
 	std::vector<Spline> agentSplines;
@@ -134,7 +135,7 @@ private:
 	HRESULT initialiseGrass();
 	void placeCrate(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 rotation);
 
-	void initialiseAgents(std::vector<DirectX::BoundingBox>& objects, DirectX::XMFLOAT2 floorSize);
+	void initialiseAgents(DirectX::XMFLOAT2 floorSize);
 
 	void initObjects();
 

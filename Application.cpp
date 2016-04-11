@@ -78,6 +78,7 @@ Application::Application()
 	agents = vector<Agent>();
 	agentSplines = vector<Spline>(numAgents);
 	splines = vector<Spline>();
+	obstacleBoxes = vector<BoundingBox>();
 	flashlightOn = false;
 	renderGraph = false;
 
@@ -112,6 +113,7 @@ Application::Application(const Application& other)
 	agents = other.agents;
 	player = other.player;
 
+	obstacleBoxes = other.obstacleBoxes;
 	splines = other.splines;
 	agentSplines = other.agentSplines;
 	objects = other.objects;
@@ -583,6 +585,7 @@ void Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 rotatio
 	temp.UpdateMatrix();
 	temp.setCollider(true);
 	objects.push_back(temp);
+	obstacleBoxes.push_back(temp.getBoundingBox());
 
 	/*
 	from top down:
@@ -701,7 +704,7 @@ void Application::readInitFile(std::string fileName)
 	}
 }
 
-void Application::initialiseAgents(vector<BoundingBox>& boundingBoxes, XMFLOAT2 floorSize)
+void Application::initialiseAgents(XMFLOAT2 floorSize)
 {
 	*agentMesh = *cubeMesh;
 
@@ -715,9 +718,9 @@ void Application::initialiseAgents(vector<BoundingBox>& boundingBoxes, XMFLOAT2 
 	const float agentSize = agentMesh->size.x * 0.2f;
 	const float radius = agentSize * numAgents;
 
-	for (unsigned int i = 0; i < boundingBoxes.size(); i++)
+	for (unsigned int i = 0; i < obstacleBoxes.size(); i++)
 	{
-		if (boundingBoxes.at(i).Contains(BoundingSphere(position, radius)))
+		if (obstacleBoxes.at(i).Contains(BoundingSphere(position, radius)))
 		{
 			position = XMFLOAT3(distrX(engine), 1.0f, distrZ(engine));
 			i = 0;
@@ -766,7 +769,6 @@ void Application::initObjects()
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
 
-	vector<BoundingBox> bbs = std::vector<BoundingBox>();
 	XMFLOAT2 floorSize = XMFLOAT2(0, 0);
 
 	for (unsigned int i = 0; i < objects.size(); i++)
@@ -776,14 +778,10 @@ void Application::initObjects()
 			floorSize.x += objects.at(i).Size().x;
 			floorSize.y += objects.at(i).Size().z;
 		}
-		else
-		{
-			bbs.push_back(objects.at(i).getBoundingBox());
-		}
 	}
 
 	viewFrustum = Frustum();
-	initialiseAgents(bbs, floorSize);
+	initialiseAgents(floorSize);
 
 	//Lights
 	perFrameCB.dirLight = DirectionalLight(XMFLOAT4(0.5, 0.5, 0.5, 1.0), XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f), XMFLOAT4(0.5, 0.5, 0.5, 1.0), XMFLOAT3(0.115f, -0.57735f, -0.94f));
@@ -979,17 +977,6 @@ void Application::Update()
 
 	skybox.Update(currentCamera);
 
-	//Get the bounding boxes FIX//////////////////////////////////////////////////////////////////
-	//Can be stored throughout and just appended to
-	std::vector<BoundingBox> bbs;
-	for (unsigned int i = 0; i < objects.size(); i++)
-	{
-		if (!objects.at(i).getIsGround())
-		{
-			bbs.push_back(objects.at(i).getBoundingBox());
-		}
-	}
-
 	//Update navGraph if it's needed
 	if (graphMutex.try_lock())
 	{
@@ -997,7 +984,7 @@ void Application::Update()
 		if (navGraph.needsRecalculating())
 		{
 			/*Update the navigation graph*/
-			std::thread(&Application::updateGraph, this, bbs).detach();
+			std::thread(&Application::updateGraph, this, obstacleBoxes).detach();
 		}
 	}
 
@@ -1014,7 +1001,7 @@ void Application::Update()
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
 		auto splineIterator = agentSplines.begin() + i;
-		XMFLOAT3 f = agents.at(i).Update(deltaTime, bbs);
+		XMFLOAT3 f = agents.at(i).Update(deltaTime, obstacleBoxes);
 		
 		XMFLOAT3 p = agents.at(i).Pos();
 
@@ -1025,7 +1012,7 @@ void Application::Update()
 		cp.at(0) = f;
 		cp.at(1) = p;
 		
-		if (agents.at(i).canSeePlayer(player.Position(), bbs))
+		if (agents.at(i).canSeePlayer(player.Position(), obstacleBoxes))
 		{
 			agentSplines.emplace(splineIterator, cp, _pImmediateContext, _pd3dDevice, basicVertexLayout, XMFLOAT4(1, 0, 0, 1));
 		}else
