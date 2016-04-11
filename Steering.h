@@ -39,13 +39,15 @@ namespace Steering
 	//Projects whiskers out from the position and uses them to generate a force steering away from obstacles
 	DirectX::XMFLOAT3 obstacleAvoidForce(std::vector<DirectX::BoundingBox>& objects, DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 forwards);
 
+	DirectX::XMFLOAT3 separationForce(DirectX::XMFLOAT3 position, const std::vector<DirectX::XMFLOAT3>& separateFrom, float personalSpace = 0.5f);
+
 	//Returns a force moving towards a target, intended for use with a stack of targets
 	//Modifies the stack reference passed in
 	DirectX::XMFLOAT3 pathFollowing(DirectX::XMFLOAT3 position, std::stack<DirectX::XMFLOAT3>& path);
 
 	//Aggregates steering forces to a single force using predetermined tweaker values
 	DirectX::XMFLOAT3 aggregateForces(DirectX::XMFLOAT3 seek = DirectX::XMFLOAT3(0, 0, 0),
-		DirectX::XMFLOAT3 arrive = DirectX::XMFLOAT3(0, 0, 0), DirectX::XMFLOAT3 obstacleAvoid = DirectX::XMFLOAT3(0, 0, 0));
+		DirectX::XMFLOAT3 arrive = DirectX::XMFLOAT3(0, 0, 0), DirectX::XMFLOAT3 obstacleAvoid = DirectX::XMFLOAT3(0, 0, 0), DirectX::XMFLOAT3 separation = DirectX::XMFLOAT3(0, 0, 0));
 
 	DirectX::XMFLOAT3 normalOfIntersection(DirectX::BoundingBox box, DirectX::XMFLOAT3 position);
 };

@@ -86,6 +86,9 @@ public:
 
 	bool isAgentAlone(unsigned int agentIndex);
 
+	//Gets a vector of the agent locations, without the one that is passed in, if it isn't -1
+	std::vector<DirectX::XMFLOAT3> agentPositions(int discounting = -1);
+
 	//Information relevant to scared state
 	bool isAgentScared(unsigned int agentIndex);
 	void setAgentScaredState(unsigned int agentIndex, bool isScared);

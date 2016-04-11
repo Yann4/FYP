@@ -9,6 +9,7 @@ Blackboard::Blackboard()
 	agentLocations = vector<XMFLOAT3>(0);
 	scaredAgents = vector<bool>(0);
 	agentsGuardingExit = vector<unsigned int>();
+	playerTagged = false;
 }
 
 Blackboard::Blackboard(unsigned int numAgents)
@@ -20,6 +21,7 @@ Blackboard::Blackboard(unsigned int numAgents)
 	std::fill(scaredAgents.begin(), scaredAgents.end(), false);
 	
 	agentsGuardingExit = vector<unsigned int>();
+	playerTagged = false;
 }
 
 void Blackboard::Update(double deltaTime)
@@ -89,6 +91,20 @@ bool Blackboard::isAgentAlone(unsigned int agentIndex)
 	}
 
 	return true;
+}
+
+vector<XMFLOAT3> Blackboard::agentPositions(int discounting)
+{
+	vector<XMFLOAT3> positions;
+
+	for (unsigned int i = 0; i < agentLocations.size(); i++)
+	{
+		if (i != discounting)
+		{
+			positions.push_back(agentLocations.at(i));
+		}
+	}
+	return positions;
 }
 
 bool Blackboard::isAgentScared(unsigned int agentIndex)

@@ -55,7 +55,7 @@ void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 void Marpo::checkForStatesToPush()
 {
 	//Checking ExploreState
-	ExploreState es = ExploreState(owner, &longTerm, &immediate, navGraph);
+	ExploreState es = ExploreState(owner, &longTerm, &immediate, navGraph, blackboard);
 	pushWithPriority(new ExploreState(es), es.shouldEnter());
 
 	//Checking InvestigateState

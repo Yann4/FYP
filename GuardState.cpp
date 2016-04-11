@@ -33,7 +33,7 @@ void GuardState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 		generatePatrol(objects);
 		blackboard->flipAgentGuarding(owner->agentID);
 		currentDestination = nearestNodeOnPath();
-		immediate->push(new RouteToState(owner, immediate, graph, path.at(currentDestination)));
+		immediate->push(new RouteToState(owner, immediate, graph, blackboard, path.at(currentDestination)));
 	}
 	else
 	{
@@ -43,7 +43,7 @@ void GuardState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 			currentDestination = 0;
 		}
 
-		immediate->push(new RouteToState(owner, immediate, graph, path.at(currentDestination)));
+		immediate->push(new RouteToState(owner, immediate, graph, blackboard, path.at(currentDestination)));
 	}
 }
 

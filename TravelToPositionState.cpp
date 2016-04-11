@@ -3,15 +3,16 @@
 using namespace DirectX;
 using namespace Steering;
 
-TravelToPositionState::TravelToPositionState(Controller* owner, XMFLOAT3 position) : State(owner), position(position)
+TravelToPositionState::TravelToPositionState(Controller* owner, XMFLOAT3 position, Blackboard* blackboard) : State(owner), position(position), blackboard(blackboard)
 {}
 
 void TravelToPositionState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
 	XMFLOAT3 seek = seekForce(owner->position, position);
 	XMFLOAT3 oa = obstacleAvoidForce(objects, position, owner->facing);
+	XMFLOAT3 separate = separationForce(owner->position, blackboard->agentPositions(owner->agentID));
 
-	XMFLOAT3 force = aggregateForces(seek, XMFLOAT3(0, 0, 0), oa);
+	XMFLOAT3 force = aggregateForces(seek, XMFLOAT3(0, 0, 0), oa, separate);
 	owner->force = force;
 }
 

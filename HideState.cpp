@@ -93,6 +93,6 @@ bool HideState::shouldExit()
 
 Priority HideState::Exit(State** toPush)
 {
-	*toPush = new RouteToState(owner, immediate, navGraph, hidePosition);
+	*toPush = new RouteToState(owner, immediate, navGraph, blackboard, hidePosition);
 	return IMMEDIATE;
 }

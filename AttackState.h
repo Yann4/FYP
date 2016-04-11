@@ -10,7 +10,6 @@ class AttackState : public State
 {
 private:
 	Blackboard* blackboard;
-	bool attackedPlayer;
 	const float tagDistance = 0.5f;
 
 public:

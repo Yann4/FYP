@@ -2,8 +2,8 @@
 
 using namespace DirectX;
 
-RouteToState::RouteToState(Controller* owner, std::stack<State*>* immediateStack, Graph* navGraph, XMFLOAT3 destination) : State(owner),
-	immediateStack(immediateStack), navGraph(navGraph), targetDestination(destination)
+RouteToState::RouteToState(Controller* owner, std::stack<State*>* immediateStack, Graph* navGraph, Blackboard* blackboard, XMFLOAT3 destination) : State(owner),
+	immediateStack(immediateStack), navGraph(navGraph), blackboard(blackboard), targetDestination(destination)
 {
 	getPath();
 }
@@ -12,6 +12,7 @@ RouteToState::~RouteToState()
 {
 	immediateStack = nullptr;
 	navGraph = nullptr;
+	blackboard = nullptr;
 }
 
 void RouteToState::Update(double deltaTime, std::vector<BoundingBox>& objects)
@@ -30,7 +31,7 @@ void RouteToState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 
 			if (!path.empty())
 			{
-				immediateStack->push(new TravelToPositionState(owner, path.top()));
+				immediateStack->push(new TravelToPositionState(owner, path.top(), blackboard));
 			}
 		}
 	}

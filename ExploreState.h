@@ -12,6 +12,7 @@ class ExploreState : public State
 {
 private:
 	Graph* navGraph;
+	Blackboard* blackboard;
 	DirectX::XMFLOAT3 destination;
 
 	std::stack<State*>* longTermStack;
@@ -24,7 +25,7 @@ private:
 	bool pushedRoute;
 	const float distThreshold = 0.5f;
 public:
-	ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph);
+	ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph, Blackboard* blackboard);
 	ExploreState(const ExploreState& other);
 	~ExploreState();
 

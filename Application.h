@@ -103,7 +103,7 @@ private:
 
 	Player player;
 	std::vector<Agent> agents;
-	const unsigned int numAgents = 1;
+	const unsigned int numAgents = 5;
 
 	Blackboard blackboard;
 

@@ -972,7 +972,7 @@ void Application::updateGraph(std::vector<BoundingBox>& objectsBBs)
 void Application::handleCollisions()
 {
 	Collision::AABB playerBB = Collision::AABB(player.Position(), player.Size());
-
+	Collision::MTV mtv;
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
 		if (!objects.at(i).getCollider())
@@ -983,7 +983,7 @@ void Application::handleCollisions()
 		XMFLOAT3 size = objects.at(i).Size();
 
 		Collision::AABB objAABB = Collision::AABB(objects.at(i).Pos(), objects.at(i).Size());
-		Collision::MTV mtv;
+		
 
 		if (Collision::boundingBoxCollision(playerBB, objAABB, mtv))
 		{

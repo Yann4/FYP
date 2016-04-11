@@ -57,7 +57,7 @@ bool InvestigateState::shouldExit()
 
 Priority InvestigateState::Exit(State** toPush)
 {
-	*toPush = new RouteToState(owner, immediate, navGraph, disturbanceLocation);
+	*toPush = new RouteToState(owner, immediate, navGraph, blackboard, disturbanceLocation);
 	return IMMEDIATE;
 }
 

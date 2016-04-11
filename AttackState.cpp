@@ -5,14 +5,12 @@ using namespace DirectX;
 
 AttackState::AttackState(Controller* owner, Blackboard* blackboard) : State(owner), blackboard(blackboard)
 {
-	attackedPlayer = false;
 }
 
 AttackState::AttackState(const AttackState& other)
 {
 	owner = other.owner;
 	blackboard = other.blackboard;
-	attackedPlayer = other.attackedPlayer;
 }
 
 AttackState::~AttackState()
@@ -29,21 +27,32 @@ void AttackState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& ob
 	
 	if (XMVectorGetX(XMVector3LengthSq(player - agent)) < tagDistance)
 	{
-		attackedPlayer = true;
+		blackboard->tagPlayer();
 	}
 	
-	XMFLOAT3 arrive = arriveForce(owner->position, playerPos.info, 0.5f);
-	XMFLOAT3 obstacleAvoid = obstacleAvoidForce(objects, owner->position, owner->facing);
+	XMFLOAT3 playerPosition = playerPos.info;
+	playerPosition.y = owner->position.y;
 
-	owner->force = aggregateForces(XMFLOAT3(0, 0, 0), arrive, obstacleAvoid);
+	XMFLOAT3 arrive = arriveForce(owner->position, playerPosition, 0.5f);
+	XMFLOAT3 obstacleAvoid = obstacleAvoidForce(objects, owner->position, owner->facing);
+	XMFLOAT3 separate = separationForce(owner->position, blackboard->agentPositions(owner->agentID));
+	
+
+	owner->force = aggregateForces(XMFLOAT3(0, 0, 0), arrive, obstacleAvoid, separate);
 }
 
 Priority AttackState::shouldEnter()
 {
 	//If is not alone and can see the player && player hasn't been tagged
-	if (owner->canSeePlayer && !blackboard->hasPlayerBeenTagged() && !blackboard->isAgentAlone(owner->agentID))
+	if (owner->canSeePlayer)
 	{
-		return IMMEDIATE;
+		if (!blackboard->hasPlayerBeenTagged())
+		{
+			if (!blackboard->isAgentAlone(owner->agentID))
+			{
+				return IMMEDIATE;
+			}
+		}
 	}
 
 	return NONE;
@@ -51,11 +60,10 @@ Priority AttackState::shouldEnter()
 
 bool AttackState::shouldExit()
 {
-	return attackedPlayer;
+	return blackboard->hasPlayerBeenTagged();
 }
 
 Priority AttackState::Exit(State** toPush)
 {
-	blackboard->tagPlayer();
 	return NONE;
 }

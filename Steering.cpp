@@ -288,17 +288,47 @@ XMFLOAT3 Steering::pathFollowing(XMFLOAT3 position, stack<XMFLOAT3>& path)
 	return seekForce(position, next);
 }
 
-XMFLOAT3 Steering::aggregateForces(XMFLOAT3 seek, XMFLOAT3 arrive, XMFLOAT3 obstacleAvoid)
+XMFLOAT3 Steering::separationForce(XMFLOAT3 position, const vector<XMFLOAT3>& separateFrom, float personalSpace)
+{
+	const float decayCoeff = 2.0f;
+
+	XMVECTOR pos = XMLoadFloat3(&position);
+	XMVECTOR force = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+	for (unsigned int i = 0; i < separateFrom.size(); i++)
+	{
+		XMVECTOR otherPos = XMLoadFloat3(&separateFrom.at(i));
+		XMVECTOR direction = pos - otherPos;
+
+		float distance = XMVectorGetX(XMVector3Length(direction));
+
+		if (distance < personalSpace)
+		{
+
+			float strength = std::min(decayCoeff / powf(distance, 2.0f), MaxForce);
+			force += strength * XMVector3Normalize(direction);
+		}
+	}
+
+	XMFLOAT3 resultant;
+	XMStoreFloat3(&resultant, force);
+
+	return resultant;
+}
+
+XMFLOAT3 Steering::aggregateForces(XMFLOAT3 seek, XMFLOAT3 arrive, XMFLOAT3 obstacleAvoid, XMFLOAT3 separation)
 {
 	float seekTweak = 0.7f;
 	float arriveTweak = 0.7f;
 	float oaTweak = 0.9f;
+	float separationTweak = 2.0f;
 
 	XMVECTOR seekV = XMLoadFloat3(&seek);
 	XMVECTOR arriveV = XMLoadFloat3(&arrive);
 	XMVECTOR oaV = XMLoadFloat3(&obstacleAvoid);
+	XMVECTOR sV = XMLoadFloat3(&separation);
 
-	XMVECTOR resultant = (seekV * seekTweak) + (arriveV * arriveTweak) + (oaV * oaTweak);
+	XMVECTOR resultant = (seekV * seekTweak) + (arriveV * arriveTweak) + (oaV * oaTweak) + (sV * separationTweak);
 
 	if (XMVectorGetX(XMVector3Length(resultant)) > MaxForce)
 	{
