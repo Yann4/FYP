@@ -3,9 +3,19 @@
 using namespace DirectX;
 using namespace Steering;
 
+TravelToPositionState::TravelToPositionState() : State()
+{
+	blackboard = nullptr;
+}
+
 TravelToPositionState::TravelToPositionState(Controller* owner, XMFLOAT3 position, Blackboard* blackboard) : State(owner), position(position), blackboard(blackboard)
 {
 	invalidPath = false;
+}
+
+TravelToPositionState::~TravelToPositionState()
+{
+	blackboard = nullptr;
 }
 
 void TravelToPositionState::Update(double deltaTime, std::vector<BoundingBox>& objects)

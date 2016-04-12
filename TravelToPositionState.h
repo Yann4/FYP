@@ -13,7 +13,9 @@ private:
 	Blackboard* blackboard;
 	bool invalidPath;
 public:
+	TravelToPositionState();
 	TravelToPositionState(Controller* owner, DirectX::XMFLOAT3 destination, Blackboard* blackboard);
+	~TravelToPositionState();
 	
 	void Update (double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 	Priority shouldEnter();

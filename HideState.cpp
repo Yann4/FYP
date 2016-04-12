@@ -2,6 +2,13 @@
 
 using namespace DirectX;
 
+HideState::HideState() : State()
+{
+	blackboard = nullptr;
+	immediate = nullptr;
+	navGraph = nullptr;
+}
+
 HideState::HideState(Controller* owner, Blackboard* blackboard, std::stack<State*>* immediate, Graph* navGraph) : State(owner), blackboard(blackboard), immediate(immediate), navGraph(navGraph)
 {
 	hidingSpotFound = false;

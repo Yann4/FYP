@@ -2,6 +2,13 @@
 
 using namespace DirectX;
 
+GuardState::GuardState() : State()
+{
+	blackboard = nullptr;
+	graph = nullptr;
+	immediate = nullptr;
+}
+
 GuardState::GuardState(Controller* owner, DirectX::XMFLOAT3 locationToGuard, Blackboard* blackboard, Graph* graph, std::stack<State*>* immediate) :
 	State(owner), locationToGuard(locationToGuard), blackboard(blackboard), graph(graph), immediate(immediate)
 {

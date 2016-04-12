@@ -25,6 +25,7 @@ private:
 	bool pushedRoute;
 	const float distThreshold = 0.5f;
 public:
+	ExploreState();
 	ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph, Blackboard* blackboard);
 	ExploreState(const ExploreState& other);
 	~ExploreState();

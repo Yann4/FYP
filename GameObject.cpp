@@ -33,6 +33,10 @@ GameObject::GameObject(ID3D11DeviceContext* devContext, ID3D11Buffer* frameConst
 GameObject::~GameObject()
 {
 	mesh = nullptr;
+
+	//if(context) context->Release();
+	//if(frameConstBuffer) frameConstBuffer->Release();
+	//if(objectConstBuffer) objectConstBuffer->Release();
 }
 
 

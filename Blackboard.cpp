@@ -12,6 +12,19 @@ Blackboard::Blackboard()
 	playerTagged = false;
 }
 
+Blackboard::Blackboard(const Blackboard& other)
+{
+	playerPosition = other.playerPosition;
+	noises = other.noises;
+	agentLocations = other.agentLocations;
+	scaredAgents = other.scaredAgents;
+	playerTagged = other.playerTagged;
+
+	exitLocation = other.exitLocation;
+	agentsGuardingExit = other.agentsGuardingExit;
+	subject = other.subject;
+}
+
 Blackboard::Blackboard(unsigned int numAgents)
 {
 	playerPosition = Data<XMFLOAT3>(XMFLOAT3(0, 0, 0), 0, 0);

@@ -24,6 +24,7 @@ private:
 	std::stack<State*>* immediate;
 
 public:
+	GuardState();
 	GuardState(Controller* owner, DirectX::XMFLOAT3 locationToGuard, Blackboard* blackboard, Graph* graph, std::stack<State*>* immediate);
 	GuardState(const GuardState& other);
 	~GuardState();

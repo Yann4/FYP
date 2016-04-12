@@ -51,6 +51,9 @@
     <Filter Include="AI Components\Finite State Machine\States">
       <UniqueIdentifier>{36b32f71-5bd3-476d-a280-bafd28709e82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AI Components\Finite State Machine\Blackboard">
+      <UniqueIdentifier>{54c320ab-8cf7-4478-b33a-64618402440b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -126,9 +129,6 @@
     <ClInclude Include="Steering.h">
       <Filter>AI Components</Filter>
     </ClInclude>
-    <ClInclude Include="Blackboard.h">
-      <Filter>AI Components</Filter>
-    </ClInclude>
     <ClInclude Include="InvestigateState.h">
       <Filter>AI Components\Finite State Machine\States</Filter>
     </ClInclude>
@@ -146,6 +146,18 @@
     </ClInclude>
     <ClInclude Include="GuardState.h">
       <Filter>AI Components\Finite State Machine\States</Filter>
+    </ClInclude>
+    <ClInclude Include="Blackboard.h">
+      <Filter>AI Components\Finite State Machine\Blackboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Observer.h">
+      <Filter>AI Components\Finite State Machine\Blackboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Events.h">
+      <Filter>AI Components\Finite State Machine\Blackboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>AI Components\Finite State Machine\Blackboard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -212,9 +224,6 @@
     <ClCompile Include="Steering.cpp">
       <Filter>AI Components</Filter>
     </ClCompile>
-    <ClCompile Include="Blackboard.cpp">
-      <Filter>AI Components</Filter>
-    </ClCompile>
     <ClCompile Include="InvestigateState.cpp">
       <Filter>AI Components\Finite State Machine\States</Filter>
     </ClCompile>
@@ -232,6 +241,9 @@
     </ClCompile>
     <ClCompile Include="GuardState.cpp">
       <Filter>AI Components\Finite State Machine\States</Filter>
+    </ClCompile>
+    <ClCompile Include="Blackboard.cpp">
+      <Filter>AI Components\Finite State Machine\Blackboard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -64,9 +64,9 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 	constexpr int searchRadius = 10;
 
 	//Remove all existing connections
-	for (auto node : graphNodes)
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
 	{
-		node->clearConnections();
+		graphNodes.at(i)->clearConnections();
 	}
 
 	vector<unsigned int> nodesChecked;

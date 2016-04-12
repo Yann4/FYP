@@ -2,6 +2,14 @@
 
 using namespace DirectX;
 
+ExploreState::ExploreState() : State()
+{
+	navGraph = nullptr;
+	blackboard = nullptr;
+	longTermStack = nullptr;
+	immediateStack = nullptr;
+}
+
 ExploreState::ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph, Blackboard* blackboard):
 	State(owner), longTermStack(longTerm), immediateStack(immediate), navGraph(navGraph), blackboard(blackboard)
 {

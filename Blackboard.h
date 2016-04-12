@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Subject.h"
+
 #include <DirectXMath.h>
 #include <vector>
 
@@ -13,7 +15,7 @@ struct Data
 	Data() :confidence(0), condifenceDepreciation(0)
 	{}
 
-	Data(T info, int confidence = 100, int depreciation = 1) : confidence(confidence), condifenceDepreciation(depreciation), info(info)
+	Data(T info, float confidence = 100.0f, float depreciation = 1.0f) : confidence(confidence), condifenceDepreciation(depreciation), info(info)
 	{}
 
 	void Update(double deltaTime)
@@ -35,7 +37,7 @@ struct Sound
 	bool soundFalloff(double deltaTime)
 	{
 		float falloffFactor = 1.0f;
-		volume -= falloffFactor * deltaTime;
+		volume -= falloffFactor * (float)deltaTime;
 		if (volume >= 0)
 		{
 			return false;
@@ -57,8 +59,11 @@ private:
 	DirectX::XMFLOAT3 exitLocation;
 	std::vector<unsigned int> agentsGuardingExit;
 
+	Subject subject;
+
 public:
 	Blackboard();
+	Blackboard(const Blackboard& other);
 	Blackboard(unsigned int numAgents);
 
 	void Update(double deltaTime);
@@ -66,6 +71,10 @@ public:
 	//Information relevant to player position
 	inline void updatePlayerPosition(DirectX::XMFLOAT3 position, float confidence = 100.0f) {
 		playerPosition.info = position; playerPosition.confidence = confidence;
+		if (confidence = 100.0f)
+		{
+			subject.notify(position, PLAYER_SEEN);
+		}
 	}
 
 	inline Data<DirectX::XMFLOAT3> getPlayerPosition() {
@@ -105,6 +114,14 @@ public:
 	inline void setExitLocation(DirectX::XMFLOAT3 exitLoc) { exitLocation = exitLoc; }
 	inline DirectX::XMFLOAT3 getExitLocation() { return exitLocation; }
 
+	inline void registerObserver(Observer* observer)
+	{
+		subject.addObserver(observer);
+	}
+	inline void deregisterObserver(Observer* observer) 
+	{
+		subject.removeObserver(observer); 
+	}
 private:
 	void UpdateSoundFalloff(double deltaTime);
 	void UpdateDataConfidence(double deltaTime);

@@ -2,6 +2,13 @@
 
 using namespace DirectX;
 
+RouteToState::RouteToState() : State()
+{
+	navGraph = nullptr;
+	blackboard = nullptr;
+	immediateStack = nullptr;
+}
+
 RouteToState::RouteToState(Controller* owner, std::stack<State*>* immediateStack, Graph* navGraph, Blackboard* blackboard, XMFLOAT3 destination) : State(owner),
 	immediateStack(immediateStack), navGraph(navGraph), blackboard(blackboard), targetDestination(destination)
 {

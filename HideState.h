@@ -22,6 +22,7 @@ private:
 	Graph* navGraph;
 
 public:
+	HideState();
 	HideState(Controller* owner, Blackboard* blackboard, std::stack<State*>* immediate, Graph* navGraph);
 	HideState(const HideState& other);
 	~HideState();

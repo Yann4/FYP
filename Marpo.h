@@ -29,8 +29,11 @@ private:
 	std::stack<State*> immediate;
 	std::stack<State*> reactionary;
 
+	InvestigateState is;
 public:
 	Marpo();
+	//Marpo(const Marpo& other);
+	~Marpo();
 
 	void Initialise(Controller* owner, Graph* graph, Blackboard* bb);
 

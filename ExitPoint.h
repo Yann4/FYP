@@ -21,6 +21,7 @@ private:
 public:
 	ExitPoint();
 	ExitPoint(GameObject obj, float spinSpeed = 1.0f, float bobDiff = 0.4f, float bobSpeed = 0.2f);
+	ExitPoint(const ExitPoint& other);
 
 	void Update(double delta);
 	void Draw(ID3D11PixelShader* pShader, ID3D11VertexShader* vShader, Frustum& frustum, Camera& cam);

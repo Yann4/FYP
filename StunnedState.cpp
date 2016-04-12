@@ -1,5 +1,9 @@
 #include "StunnedState.h"
 
+StunnedState::StunnedState() : State()
+{
+}
+
 StunnedState::StunnedState(Controller* owner, double stunDuration) : State(owner), stunDurationRemaining(stunDuration)
 {
 	

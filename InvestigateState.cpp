@@ -1,19 +1,18 @@
 #include "InvestigateState.h"
 using namespace DirectX;
 
+InvestigateState::InvestigateState() : State()
+{
+	blackboard = nullptr;
+	disturbanceLocation = XMFLOAT3(0, 0, 0);
+	disturbanceFound = false;
+	immediate = nullptr;
+	navGraph = nullptr;
+}
+
 InvestigateState::InvestigateState(Controller* owner, Blackboard* blackboard, std::stack<State*>* immediate, Graph* navGraph) : State(owner), blackboard(blackboard), immediate(immediate), navGraph(navGraph)
 {
 	disturbanceFound = false;
-}
-
-InvestigateState::InvestigateState(const InvestigateState& other)
-{
-	owner = other.owner;
-	blackboard = other.blackboard;
-	disturbanceLocation = other.disturbanceLocation;
-	disturbanceFound = other.disturbanceFound;
-	immediate = other.immediate;
-	navGraph = other.navGraph;
 }
 
 InvestigateState::~InvestigateState()
@@ -23,15 +22,15 @@ InvestigateState::~InvestigateState()
 
 void InvestigateState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 {
-	if (!disturbanceFound)
+	/*if (!disturbanceFound)
 	{
 		getDisturbance();
-	}
+	}*/
 }
 
 Priority InvestigateState::shouldEnter()
 {
-	std::vector<Sound*> noises = blackboard->getSoundsWithinRange(owner->position, hearingRange);
+	/*std::vector<Sound*> noises = blackboard->getSoundsWithinRange(owner->position, hearingRange);
 	
 	for (unsigned int i = 0; i < noises.size(); i++)
 	{
@@ -47,6 +46,12 @@ Priority InvestigateState::shouldEnter()
 		return IMMEDIATE;
 	}
 
+	return NONE;*/
+
+	if (disturbanceFound)
+	{
+		return IMMEDIATE;
+	}
 	return NONE;
 }
 
@@ -78,4 +83,24 @@ void InvestigateState::getDisturbance()
 	disturbanceLocation = noises.at(index)->position;
 	noises.at(index)->agentsInvestigating.push_back(owner->agentID);
 	disturbanceFound = true;
+}
+
+void InvestigateState::onNotify(const DirectX::XMFLOAT3& entity, ActionEvent e)
+{
+	if (owner == nullptr)
+	{
+		return;
+	}
+
+	if (e == PLAYER_SEEN)
+	{
+		XMVECTOR noise = XMLoadFloat3(&entity);
+		XMVECTOR pos = XMLoadFloat3(&owner->position);
+
+		if (XMVectorGetX(XMVector3LengthEst(noise - pos)) <= hearingRange)
+		{
+			disturbanceLocation = entity;
+			disturbanceFound = true;
+		}
+	}
 }

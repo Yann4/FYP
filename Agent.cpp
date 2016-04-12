@@ -144,7 +144,7 @@ void Agent::forceToVelocity(XMFLOAT3 force, double delta)
 void Agent::move(double delta)
 {
 	XMVECTOR displacement = XMLoadFloat3(&velocity);
-	displacement *= delta;
+	displacement *= (float)delta;
 
 	XMVECTOR heading = XMVector3Normalize(displacement);
 	

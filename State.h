@@ -12,6 +12,7 @@ protected:
 	Controller* owner;
 public:
 	State();
+	//State(const State& other);
 	State(Controller* owner);
 
 	virtual ~State();

@@ -430,6 +430,7 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="data structs.h" />
     <ClInclude Include="DDSTextureLoader.h" />
+    <ClInclude Include="Events.h" />
     <ClInclude Include="ExitPoint.h" />
     <ClInclude Include="ExploreState.h" />
     <ClInclude Include="Frustum.h" />
@@ -442,6 +443,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="Marpo.h" />
     <ClInclude Include="Node.h" />
+    <ClInclude Include="Observer.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Player.h" />
@@ -452,6 +454,7 @@
     <ClInclude Include="State.h" />
     <ClInclude Include="Steering.h" />
     <ClInclude Include="StunnedState.h" />
+    <ClInclude Include="Subject.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TimeSlice.h" />
     <ClInclude Include="TravelToPositionState.h" />

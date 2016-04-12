@@ -9,6 +9,7 @@ private:
 	double stunDurationRemaining;
 
 public:
+	StunnedState();
 	StunnedState(Controller* owner, double stunDuration);
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

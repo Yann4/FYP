@@ -13,6 +13,7 @@ private:
 	const float tagDistance = 0.5f;
 
 public:
+	AttackState();
 	AttackState(Controller* owner, Blackboard* blackboard);
 	AttackState(const AttackState& other);
 	~AttackState();

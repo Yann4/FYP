@@ -684,7 +684,7 @@ void Application::readInitFile(std::string fileName)
 				temp.setCollider(false);
 				temp.setMovementState(true);
 				temp.setIsGround(false);
-				exit = ExitPoint(temp);
+				exit = ExitPoint(temp, 1.0f, 0.4f, 0.2f);
 				blackboard.setExitLocation(position);
 			}
 		}

@@ -10,6 +10,32 @@ Marpo::Marpo()
 
 	owner = nullptr;
 	navGraph = nullptr;
+	blackboard = nullptr;
+}
+
+/*
+Marpo::Marpo(const Marpo& other)
+{
+	owner = other.owner;
+	navGraph = other.navGraph;
+	blackboard = other.blackboard;
+	longTerm = other.longTerm;
+	immediate = other.immediate;
+	reactionary = other.reactionary;
+
+	//is = other.is;
+}*/
+
+Marpo::~Marpo()
+{
+	if (blackboard != nullptr)
+	{
+		blackboard->deregisterObserver(&is);
+	}
+
+	owner = nullptr;
+	navGraph = nullptr;
+	blackboard = nullptr;
 }
 
 void Marpo::Initialise(Controller* ownerController, Graph* graph, Blackboard* bb)
@@ -17,6 +43,9 @@ void Marpo::Initialise(Controller* ownerController, Graph* graph, Blackboard* bb
 	owner = ownerController;
 	navGraph = graph;
 	blackboard = bb;
+
+	is = InvestigateState(owner, blackboard, &immediate, navGraph);
+	blackboard->registerObserver(&is);
 }
 
 void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
@@ -59,7 +88,6 @@ void Marpo::checkForStatesToPush()
 	pushWithPriority(new ExploreState(es), es.shouldEnter());
 
 	//Checking InvestigateState
-	InvestigateState is = InvestigateState(owner, blackboard, &immediate, navGraph);
 	pushWithPriority(new InvestigateState(is), is.shouldEnter());
 
 	//Checking HideState

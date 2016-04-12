@@ -3,6 +3,11 @@
 using namespace Steering;
 using namespace DirectX;
 
+AttackState::AttackState() : State()
+{
+	blackboard = nullptr;
+}
+
 AttackState::AttackState(Controller* owner, Blackboard* blackboard) : State(owner), blackboard(blackboard)
 {
 }
@@ -36,7 +41,6 @@ void AttackState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& ob
 	XMFLOAT3 arrive = arriveForce(owner->position, playerPosition, 0.5f);
 	XMFLOAT3 obstacleAvoid = obstacleAvoidForce(objects, owner->position, owner->facing);
 	XMFLOAT3 separate = separationForce(owner->position, blackboard->agentPositions(owner->agentID));
-	
 
 	owner->force = aggregateForces(XMFLOAT3(0, 0, 0), arrive, obstacleAvoid, separate);
 }

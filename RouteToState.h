@@ -21,6 +21,7 @@ private:
 	const float distThreshold = 0.5f;
 
 public:
+	RouteToState();
 	RouteToState(Controller* owner, std::stack<State*>* immediateStack, Graph* navGraph, Blackboard* blackboard, DirectX::XMFLOAT3 destination);
 	~RouteToState();
 

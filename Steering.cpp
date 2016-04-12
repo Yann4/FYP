@@ -189,7 +189,7 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 	float dist = -1.0f;
 	float nearestDist = -1.0f;
 
-	XMVECTOR intersectionWhisker;
+	XMVECTOR intersectionWhisker = XMVectorSet(0, 1, 0, 1);
 
 	//Check intersections with all of the whiskers, but the whisker with the most imminent collision is the one that will be used
 	if (nearestBox.Intersects(pos, fWhisker, dist))

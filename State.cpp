@@ -2,15 +2,21 @@
 
 State::State()
 {
+	owner = nullptr;
 }
 
 State::State(Controller* owner) : owner(owner)
 {
 }
+/*
+State::State(const State& other)
+{
+	owner = other.owner;
+}*/
 
 State::~State()
 {
-	
+	owner = nullptr;
 }
 
 void State::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)

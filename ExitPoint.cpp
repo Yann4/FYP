@@ -21,20 +21,31 @@ ExitPoint::ExitPoint(GameObject obj, float spinSpeed, float bobDiff, float bobSp
 	size = fmaxf(obj.Size().x, obj.Size().z);
 }
 
+ExitPoint::ExitPoint(const ExitPoint& other)
+{
+	prop = other.prop;
+	spinSpeed = other.spinSpeed;
+	bobDifference = other.bobDifference;
+	bobSpeed = other.bobSpeed;
+	bobbingUp = other.bobbingUp;
+	centrePosition = other.centrePosition;
+	size = other.size;
+}
+
 void ExitPoint::Update(double delta)
 {
 	XMFLOAT3 rot = prop.Rotation();
-	float spinThisFrame = (XM_2PI * spinSpeed) * delta;
+	double spinThisFrame = (XM_2PI * spinSpeed) * delta;
 
 	prop.setRotation(rot.x, spinThisFrame, rot.z);
 
 	if (bobbingUp)
 	{
-		prop.setTranslation(0, bobSpeed * delta, 0);
+		prop.setTranslation(0, bobSpeed * (float)delta, 0);
 	}
 	else
 	{
-		prop.setTranslation(0, -bobSpeed * delta, 0);
+		prop.setTranslation(0, -bobSpeed * (float)delta, 0);
 	}
 
 	prop.Update(delta);
