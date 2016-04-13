@@ -14,16 +14,6 @@ HideState::HideState(Controller* owner, Blackboard* blackboard, std::stack<State
 	hidingSpotFound = false;
 }
 
-HideState::HideState(const HideState& other)
-{
-	hidePosition = other.hidePosition;
-	owner = other.owner;
-	hidingSpotFound = other.hidingSpotFound;
-	blackboard = other.blackboard;
-	immediate = other.immediate;
-	navGraph = other.navGraph;
-}
-
 HideState::~HideState()
 {
 	blackboard = nullptr;

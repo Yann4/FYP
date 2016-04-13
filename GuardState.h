@@ -26,7 +26,6 @@ private:
 public:
 	GuardState();
 	GuardState(Controller* owner, DirectX::XMFLOAT3 locationToGuard, Blackboard* blackboard, Graph* graph, std::stack<State*>* immediate);
-	GuardState(const GuardState& other);
 	~GuardState();
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

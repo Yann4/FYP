@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <stack>
 #include <cmath>
+#include <random>
 
 #include "Node.h"
 
@@ -14,6 +15,7 @@ class Graph
 {
 private:
 	std::vector<Node*> graphNodes;
+	std::vector<Node*> busyBuffer;
 
 	bool graphUpToDate;
 	bool colourConnectionsRed;
@@ -28,6 +30,7 @@ private:
 	unsigned int top_id;
 
 	bool graphBusy;
+	bool addedWhileBusy;
 
 public:
 	Graph();
@@ -40,7 +43,7 @@ public:
 
 	void DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam);
 
-	inline bool needsRecalculating() { return !graphUpToDate; }
+	inline bool needsRecalculating() { return !graphUpToDate || addedWhileBusy; }
 
 	inline void flipColouringConnections() 
 	{
@@ -59,17 +62,45 @@ public:
 		}
 	}
 
-	inline std::stack<DirectX::XMFLOAT3> findPath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end) { return aStar(start, end); }
+	inline std::stack<DirectX::XMFLOAT3> findPath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end)
+	{ 
+		return aStar(start, end);
+	}
 
-	inline bool isBusy() { return graphBusy; }
-	inline void flipBusy() { graphBusy = !graphBusy; }
+	inline bool isBusy() 
+	{ 
+		return graphBusy; 
+	}
+	inline void flipBusy() 
+	{ 
+		graphBusy = !graphBusy;
+	}
 
 	std::vector<DirectX::XMFLOAT3> getUnvisitedLocations();
 	std::vector<Node*> getUnvisitedNodes();
 	DirectX::XMFLOAT3 getNearestUnvisitedLocation(DirectX::XMFLOAT3 currentPos);
+	DirectX::XMFLOAT3 getRandomUnvisitedLocation();
+
 	void setGraphUnvisited();
+	inline bool fullyVisited()
+	{
+		if (graphBusy)
+		{
+			return false;
+		}
+
+		for (unsigned int i = 0; i < graphNodes.size(); i++)
+		{
+			if (!graphNodes.at(i)->Visited())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
 	void visitLocation(DirectX::XMFLOAT3 location);
+
 private:
 	Node* getNearestNode(DirectX::XMFLOAT3 position);
 

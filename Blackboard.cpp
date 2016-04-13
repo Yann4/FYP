@@ -32,6 +32,8 @@ Blackboard::Blackboard(unsigned int numAgents)
 	
 	scaredAgents = vector<bool>(numAgents);
 	std::fill(scaredAgents.begin(), scaredAgents.end(), false);
+
+	beingExplored = vector<XMFLOAT3>(numAgents);
 	
 	agentsGuardingExit = vector<unsigned int>();
 	playerTagged = false;

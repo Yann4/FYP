@@ -8,41 +8,14 @@ ExploreState::ExploreState() : State()
 	blackboard = nullptr;
 	longTermStack = nullptr;
 	immediateStack = nullptr;
+	destination = XMFLOAT3(0, -999, 0);
 }
 
 ExploreState::ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph, Blackboard* blackboard):
-	State(owner), longTermStack(longTerm), immediateStack(immediate), navGraph(navGraph), blackboard(blackboard)
+	State(owner), longTermStack(longTerm), immediateStack(immediate), navGraph(navGraph), blackboard(blackboard), destination(XMFLOAT3())
 {
-	destination = navGraph->getNearestUnvisitedLocation(owner->position);
-
-	if (destination.x == owner->position.x && destination.z == owner->position.z)
-	{
-		graphFullyExplored = true;
-		if (!navGraph->isBusy())
-		{
-			navGraph->setGraphUnvisited();
-		}
-	}
-	else
-	{
-		graphFullyExplored = false;
-	}
-
-	pushedRoute = false;
-}
-
-ExploreState::ExploreState(const ExploreState& other)
-{
-	owner = other.owner;
-	navGraph = other.navGraph;
-	blackboard = other.blackboard;
-	destination = other.destination;
-
-	longTermStack = other.longTermStack;
-	immediateStack = other.immediateStack;
-	stackSize = other.stackSize;
-	graphFullyExplored = other.graphFullyExplored;
-	pushedRoute = other.pushedRoute;
+	destination = XMFLOAT3(0, -999, 0);
+	invalidDestination = true;
 }
 
 ExploreState::~ExploreState()
@@ -54,23 +27,31 @@ ExploreState::~ExploreState()
 
 void ExploreState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
-	if (graphFullyExplored && !navGraph->isBusy())
+	if (navGraph->fullyVisited() && !navGraph->isBusy())
 	{
 		navGraph->setGraphUnvisited();
-		destination = navGraph->getNearestUnvisitedLocation(owner->position);
+		setDestNode();
 	}
-	else if (!pushedRoute && !graphFullyExplored)
+	
+	if (invalidDestination)
+	{
+		setDestNode();
+		return;
+	}
+
+	if (!atDestNode())
 	{
 		immediateStack->push(new RouteToState(owner, immediateStack, navGraph, blackboard, destination));
-		
-		stackSize = immediateStack->size() + 1;
-		pushedRoute = true;
+	}
+	else
+	{
+		setDestNode();
 	}
 }
 
 Priority ExploreState::shouldEnter()
 {
-	if (longTermStack->empty() && !graphFullyExplored)
+	if (longTermStack->empty())
 	{
 		return LONG_TERM;
 	}
@@ -80,11 +61,56 @@ Priority ExploreState::shouldEnter()
 
 bool ExploreState::shouldExit()
 {
-	return immediateStack->size() < stackSize;
+	return false;
 }
 
 Priority ExploreState::Exit(State** toPush)
 {
-	*toPush = new ExploreState(owner, longTermStack, immediateStack, navGraph, blackboard);
-	return LONG_TERM;
+	return NONE;
+}
+
+bool ExploreState::atDestNode()
+{
+
+	XMVECTOR agentPos = XMLoadFloat3(&owner->position);
+	XMVECTOR nextPos = XMLoadFloat3(&destination);
+
+	float distance = XMVectorGetX(XMVector3LengthEst(agentPos - nextPos));
+
+	if (distance < distThreshold)
+	{
+		blackboard->explored(owner->agentID);
+		return true;
+	}
+
+	return false;
+}
+
+void ExploreState::setDestNode()
+{
+	if (navGraph->isBusy())
+	{
+		invalidDestination = true;
+		return;
+	}
+
+	
+	auto dests = navGraph->getUnvisitedLocations();
+
+	bool set = false;
+	for (unsigned int i = 0; i < dests.size(); i++ ) 
+	{
+		if (blackboard->shouldExplore(dests.at(i)))
+		{
+			blackboard->setExploring(dests.at(i), owner->agentID);
+			destination = dests.at(i);
+			invalidDestination = false;
+			set = true;
+		}
+	}
+
+	if (!set)
+	{
+		invalidDestination = true;
+	}
 }

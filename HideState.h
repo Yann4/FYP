@@ -24,7 +24,6 @@ private:
 public:
 	HideState();
 	HideState(Controller* owner, Blackboard* blackboard, std::stack<State*>* immediate, Graph* navGraph);
-	HideState(const HideState& other);
 	~HideState();
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

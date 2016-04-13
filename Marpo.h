@@ -32,7 +32,6 @@ private:
 	InvestigateState is;
 public:
 	Marpo();
-	//Marpo(const Marpo& other);
 	~Marpo();
 
 	void Initialise(Controller* owner, Graph* graph, Blackboard* bb);

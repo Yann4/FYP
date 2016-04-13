@@ -13,19 +13,6 @@ Marpo::Marpo()
 	blackboard = nullptr;
 }
 
-/*
-Marpo::Marpo(const Marpo& other)
-{
-	owner = other.owner;
-	navGraph = other.navGraph;
-	blackboard = other.blackboard;
-	longTerm = other.longTerm;
-	immediate = other.immediate;
-	reactionary = other.reactionary;
-
-	//is = other.is;
-}*/
-
 Marpo::~Marpo()
 {
 	if (blackboard != nullptr)

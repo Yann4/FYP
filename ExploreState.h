@@ -18,20 +18,21 @@ private:
 	std::stack<State*>* longTermStack;
 	std::stack<State*>* immediateStack;
 
-	unsigned int stackSize;
-
-	bool graphFullyExplored;
-
-	bool pushedRoute;
 	const float distThreshold = 0.5f;
+
+	bool invalidDestination;
+
 public:
 	ExploreState();
 	ExploreState(Controller* owner, std::stack<State*>* longTerm, std::stack<State*>* immediate, Graph* navGraph, Blackboard* blackboard);
-	ExploreState(const ExploreState& other);
 	~ExploreState();
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);
 	Priority shouldEnter();
 	bool shouldExit();
 	Priority Exit(State** toPush);
+
+private:
+	bool atDestNode();
+	void setDestNode();
 };

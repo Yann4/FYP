@@ -15,7 +15,7 @@ private:
 public:
 	AttackState();
 	AttackState(Controller* owner, Blackboard* blackboard);
-	AttackState(const AttackState& other);
+
 	~AttackState();
 
 	void Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects);

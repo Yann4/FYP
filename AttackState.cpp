@@ -12,12 +12,6 @@ AttackState::AttackState(Controller* owner, Blackboard* blackboard) : State(owne
 {
 }
 
-AttackState::AttackState(const AttackState& other)
-{
-	owner = other.owner;
-	blackboard = other.blackboard;
-}
-
 AttackState::~AttackState()
 {
 	blackboard = nullptr;
@@ -47,16 +41,10 @@ void AttackState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& ob
 
 Priority AttackState::shouldEnter()
 {
-	//If is not alone and can see the player && player hasn't been tagged
-	if (owner->canSeePlayer)
+	if (owner->canSeePlayer && !blackboard->hasPlayerBeenTagged() && !blackboard->isAgentAlone(owner->agentID) && !owner->attackingPlayer)
 	{
-		if (!blackboard->hasPlayerBeenTagged())
-		{
-			if (!blackboard->isAgentAlone(owner->agentID))
-			{
-				return IMMEDIATE;
-			}
-		}
+		owner->attackingPlayer = true;
+		return IMMEDIATE;
 	}
 
 	return NONE;
@@ -69,5 +57,6 @@ bool AttackState::shouldExit()
 
 Priority AttackState::Exit(State** toPush)
 {
+	owner->attackingPlayer = false;
 	return NONE;
 }

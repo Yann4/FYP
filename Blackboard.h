@@ -54,6 +54,7 @@ private:
 	std::vector<Sound> noises;
 	std::vector<DirectX::XMFLOAT3> agentLocations;
 	std::vector<bool> scaredAgents;
+	std::vector<DirectX::XMFLOAT3> beingExplored;
 	bool playerTagged;
 
 	DirectX::XMFLOAT3 exitLocation;
@@ -84,6 +85,7 @@ public:
 	//Information relevant to noises
 	inline void noiseMade(DirectX::XMFLOAT3 position, float volume) {
 		noises.push_back(Sound(position, volume));
+		subject.notify(position, NOISE_MADE);
 	}
 
 	std::vector<Sound*> getSoundsWithinRange(DirectX::XMFLOAT3 agentPosition, float hearingRange);
@@ -121,6 +123,29 @@ public:
 	inline void deregisterObserver(Observer* observer) 
 	{
 		subject.removeObserver(observer); 
+	}
+
+	inline void setExploring(DirectX::XMFLOAT3 exploring, unsigned int id)
+	{
+		beingExplored.at(id) = exploring;
+	}
+
+	inline void explored(unsigned int id)
+	{
+		beingExplored.at(id) = DirectX::XMFLOAT3();
+	}
+
+	inline bool shouldExplore(DirectX::XMFLOAT3 loc)
+	{
+		DirectX::XMVECTOR l = DirectX::XMLoadFloat3(&loc);
+		for (unsigned int i = 0; i < beingExplored.size(); i++)
+		{
+			if (DirectX::XMVector3Equal(l, DirectX::XMLoadFloat3(&beingExplored.at(i))))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 private:
 	void UpdateSoundFalloff(double deltaTime);

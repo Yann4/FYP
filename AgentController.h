@@ -11,6 +11,7 @@ public:
 	bool canSeePlayer;
 	bool getStunned;
 	bool isStunned;
+	bool attackingPlayer;
 public:
 	Controller() {};
 	
@@ -20,5 +21,6 @@ public:
 		canSeePlayer = false;
 		getStunned = false;
 		isStunned = false;
+		attackingPlayer = false;
 	}
 };

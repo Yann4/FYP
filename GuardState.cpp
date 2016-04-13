@@ -15,17 +15,6 @@ GuardState::GuardState(Controller* owner, DirectX::XMFLOAT3 locationToGuard, Bla
 	currentDestination = 0;
 }
 
-GuardState::GuardState(const GuardState& other)
-{
-	locationToGuard = other.locationToGuard;
-	path = other.path;
-	blackboard = other.blackboard;
-	owner = other.owner;
-	currentDestination = other.currentDestination;
-	graph = other.graph;
-	immediate = other.immediate;
-}
-
 GuardState::~GuardState()
 {
 	blackboard = nullptr;
@@ -102,7 +91,7 @@ void GuardState::generatePatrol(std::vector<BoundingBox>& objects)
 	//Then make sure it's not inside a box
 	for (unsigned int i = 0; i < detail; i++)
 	{
-		float angle = currentAngle;//std::max(-1.0f, std::min(currentAngle * i, 1.0f));
+		float angle = currentAngle;
 		currentAngle += anglePerPoint;
 
 		pointOnSurface = XMVectorSet(locationToGuard.x + (patrolRadius * cosf(angle)), locationToGuard.y, locationToGuard.z + (patrolRadius * sinf(angle)), 1.0f);

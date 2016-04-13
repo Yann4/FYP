@@ -41,6 +41,10 @@ void RouteToState::Update(double deltaTime, std::vector<BoundingBox>& objects)
 				immediateStack->push(new TravelToPositionState(owner, path.top(), blackboard));
 			}
 		}
+		else
+		{
+			getPath();
+		}
 	}
 }
 
@@ -110,7 +114,7 @@ bool RouteToState::haveValidPath(std::vector<BoundingBox>& objects)
 
 	XMVECTOR toNode = next - ourPos;
 
-	float distToNext = XMVectorGetX(toNode);
+	float distToNext = XMVectorGetX(XMVector3Length(toNode));
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
 		float dist;

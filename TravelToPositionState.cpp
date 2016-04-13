@@ -25,11 +25,11 @@ void TravelToPositionState::Update(double deltaTime, std::vector<BoundingBox>& o
 		invalidPath = true;
 	}
 
-	XMFLOAT3 seek = seekForce(owner->position, position);
+	XMFLOAT3 arrive = arriveForce(owner->position, position, 0.5f);
 	XMFLOAT3 oa = obstacleAvoidForce(objects, position, owner->facing);
 	XMFLOAT3 separate = separationForce(owner->position, blackboard->agentPositions(owner->agentID));
 
-	XMFLOAT3 force = aggregateForces(seek, XMFLOAT3(0, 0, 0), oa, separate);
+	XMFLOAT3 force = aggregateForces(XMFLOAT3(0, 0, 0), arrive, oa, separate);
 	owner->force = force;
 }
 
@@ -80,6 +80,11 @@ bool TravelToPositionState::validTarget(std::vector<DirectX::BoundingBox>& objec
 		{
 			return false;
 		}
+	}
+
+	if (distToNext > 10.0f)
+	{
+		return false;
 	}
 
 	return true;

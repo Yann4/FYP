@@ -8,7 +8,9 @@ Graph::Graph() : context(nullptr), device(nullptr),
 constBuffer(nullptr), objBuffer(nullptr), nodeMesh(nullptr), splineInputLayout(nullptr)
 {
 	graphNodes = vector<Node*>();
+	busyBuffer = vector<Node*>();
 	graphUpToDate = true;
+	addedWhileBusy = false;
 	colourConnectionsRed = false;
 	graphBusy = false;
 }
@@ -46,16 +48,38 @@ Graph::~Graph()
 
 void Graph::giveNode(XMFLOAT3 position)
 {
-	graphNodes.push_back(new Node(position, context, device, constBuffer, objBuffer, nodeMesh, splineInputLayout, top_id++));
-	graphUpToDate = false;
+	if (!graphBusy)
+	{
+		graphNodes.push_back(new Node(position, context, device, constBuffer, objBuffer, nodeMesh, splineInputLayout, top_id++));
+		graphUpToDate = false;
+	}
+	else
+	{
+		busyBuffer.push_back(new Node(position, context, device, constBuffer, objBuffer, nodeMesh, splineInputLayout, top_id++));
+		addedWhileBusy = true;
+	}
 }
 
 void Graph::calculateGraph(vector<BoundingBox>& objects)
 {
 	if (graphUpToDate)
 	{
-		return;
+		if (addedWhileBusy)
+		{
+			for (unsigned int i = 0; i < busyBuffer.size(); i++)
+			{
+				graphNodes.push_back(busyBuffer.at(i));
+			}
+			busyBuffer.clear();
+			addedWhileBusy = false;
+			graphUpToDate = false;
+		}
+		else
+		{
+			return;
+		}
 	}
+	
 	flipBusy();
 
 	//Remove/Consolidate as many nodes as possible
@@ -113,6 +137,7 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 
 	trimConnections();
 	graphUpToDate = true;
+
 	flipBusy();
 }
 
@@ -325,6 +350,22 @@ vector<XMFLOAT3> Graph::getUnvisitedLocations()
 	}
 
 	return unvisited;
+}
+
+DirectX::XMFLOAT3 Graph::getRandomUnvisitedLocation()
+{
+	vector<XMFLOAT3> unv = getUnvisitedLocations();
+
+	if (unv.empty())
+	{
+		return XMFLOAT3();
+	}
+
+	std::random_device rdev;
+	std::mt19937 engine(rdev());
+	std::uniform_int_distribution<int> distr(0, unv.size() - 1);
+
+	return unv.at(distr(engine));
 }
 
 void Graph::setGraphUnvisited()

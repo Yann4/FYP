@@ -8,11 +8,6 @@ State::State()
 State::State(Controller* owner) : owner(owner)
 {
 }
-/*
-State::State(const State& other)
-{
-	owner = other.owner;
-}*/
 
 State::~State()
 {
