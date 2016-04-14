@@ -36,7 +36,4 @@ public:
 	Priority Exit(State** toPush);
 
 	void onNotify(const DirectX::XMFLOAT3& entity, ActionEvent e);
-
-private:
-	void getDisturbance();
 };

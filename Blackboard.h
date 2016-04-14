@@ -83,7 +83,8 @@ public:
 	};
 
 	//Information relevant to noises
-	inline void noiseMade(DirectX::XMFLOAT3 position, float volume) {
+	inline void noiseMade(DirectX::XMFLOAT3 position, float volume)
+	{
 		noises.push_back(Sound(position, volume));
 		subject.notify(position, NOISE_MADE);
 	}

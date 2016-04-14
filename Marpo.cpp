@@ -39,6 +39,8 @@ void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 {
 	checkForStatesToPush();
 
+	unsigned int s = immediate.size();
+
 	stack<State*>* currentStack = getTopStack();
 
 	//If there's a State to run

@@ -52,7 +52,7 @@ Priority AttackState::shouldEnter()
 
 bool AttackState::shouldExit()
 {
-	return blackboard->hasPlayerBeenTagged();
+	return blackboard->hasPlayerBeenTagged() || !owner->canSeePlayer;
 }
 
 Priority AttackState::Exit(State** toPush)

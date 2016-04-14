@@ -22,22 +22,14 @@ InvestigateState::~InvestigateState()
 
 void InvestigateState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 {
+
 }
 
 Priority InvestigateState::shouldEnter()
 {
 	if (disturbanceFound)
 	{
-		std::vector<Sound*> noises = blackboard->getSoundsWithinRange(owner->position, hearingRange);
-
-		for (unsigned int i = 0; i < noises.size(); i++)
-		{
-			if (std::find(noises.at(i)->agentsInvestigating.begin(), noises.at(i)->agentsInvestigating.end(), owner->agentID) != noises.at(i)->agentsInvestigating.end())
-			{
-				return NONE;
-			}
-		}
-
+		disturbanceFound = false;
 		return IMMEDIATE;
 	}
 
