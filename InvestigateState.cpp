@@ -21,9 +21,7 @@ InvestigateState::~InvestigateState()
 }
 
 void InvestigateState::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
-{
-
-}
+{}
 
 Priority InvestigateState::shouldEnter()
 {
