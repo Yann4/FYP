@@ -102,6 +102,7 @@ private:
 	std::vector<Spline> agentSplines;
 
 	Player player;
+	DirectX::XMFLOAT3 playerSpawn;
 	std::vector<Agent> agents;
 	const unsigned int numAgents = 5;
 

@@ -75,8 +75,11 @@ Application::Application()
 	cameraPanSpeed = 0.25f;
 	lastMousePos = XMFLOAT2(0, 0);
 	objects = vector<GameObject>();
+	
+	playerSpawn = XMFLOAT3(0, 0, 0);
 	agents = vector<Agent>();
 	agentSplines = vector<Spline>(numAgents);
+	
 	splines = vector<Spline>();
 	obstacleBoxes = vector<BoundingBox>();
 	flashlightOn = false;
@@ -634,6 +637,7 @@ void Application::readInitFile(std::string fileName)
 	std::regex const splineMatch("(SPLINE)");
 	std::regex const endSplineMatch("(END)");
 	std::regex const posMatch("\\((-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*)\\)");
+	std::regex const playerMatch("(PLAYER) \\((-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*),(-*[[:digit:]]+.*[[:digit:]]*)\\)");
 
 	while (std::getline(worldFile, line))
 	{
@@ -702,6 +706,11 @@ void Application::readInitFile(std::string fileName)
 			}
 			splines.push_back(Spline(controlPoints, _pImmediateContext, _pd3dDevice, basicVertexLayout));			
 		}
+		else if (std::regex_match(line, captures, playerMatch))
+		{
+			XMFLOAT3 position(std::stof(captures[2]), std::stof(captures[3]), std::stof(captures[4]));
+			playerSpawn = position;
+		}
 	}
 }
 
@@ -756,16 +765,16 @@ void Application::initObjects()
 	camera.setPosition(XMFLOAT4(0.0f, 15.0f, 0.0f, 1.0f));
 	camera.Pitch(XM_PIDIV2);
 
-	player = Player(XMFLOAT3(1.0f, 1.5f, 1.0f), _WindowWidth, _WindowHeight);
-
-	currentCamera = player.getCamera();
-	playerPerspective = true;
-
 	input = Input("input_map.txt");
 
 	navGraph = Graph(_pImmediateContext, _pd3dDevice, frameConstantBuffer, objectConstantBuffer, cubeMesh, basicVertexLayout);
 
 	readInitFile("worldData.txt");
+
+	player = Player(playerSpawn, _WindowWidth, _WindowHeight);
+
+	currentCamera = player.getCamera();
+	playerPerspective = true;
 
 	skybox = Skybox();
 	skybox.init(_pImmediateContext, _pd3dDevice, L"snowcube.dds");
@@ -916,18 +925,6 @@ void Application::handleMessages(double delta)
 			break;
 		case STRAFE_RIGHT:
 			playerEvents.push_back(next);
-			break;
-		case YAW_LEFT:
-			//camera.Yaw(-0.001f);
-			break;
-		case YAW_RIGHT:
-			//camera.Yaw(0.001f);
-			break;
-		case PITCH_UP:
-			//camera.Pitch(-0.001f);
-			break;
-		case PITCH_DOWN:
-			//camera.Pitch(0.001f);
 			break;
 		case PLACE_CRATE:
 			fireBox();
@@ -1084,8 +1081,8 @@ void Application::Update()
 	for (unsigned int i = 0; i < agents.size(); i++)
 	{
 		auto splineIterator = agentSplines.begin() + i;
-		XMFLOAT3 f = agents.at(i).Update(deltaTime, obstacleBoxes);
-		
+		agents.at(i).Update(deltaTime, obstacleBoxes);
+		XMFLOAT3 f = agents.at(i).getFacing();
 		XMFLOAT3 p = agents.at(i).Pos();
 
 		XMVECTOR fPos = XMLoadFloat3(&p);
@@ -1118,8 +1115,8 @@ void Application::Draw()
 
 	//Update the constant buffer used for this frame
 	perFrameCB.eyePos = XMFLOAT3(currentCamera->getPosition().x, currentCamera->getPosition().y, currentCamera->getPosition().z);
-
 	perFrameCB.pointLight.position = perFrameCB.eyePos;
+
 	if (flashlightOn)
 	{
 		perFrameCB.spotLight.range = 15;
@@ -1133,24 +1130,27 @@ void Application::Draw()
 
 	_pImmediateContext->UpdateSubresource(frameConstantBuffer, 0, nullptr, &perFrameCB, 0, 0);
 
-	for (GameObject object : objects)
+	//Begin drawing objects in the world
+	for (unsigned int i = 0; i < objects.size(); i++)
 	{
-		object.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
+		objects.at(i).Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
 
 	exit.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 
-	for (Agent a : agents)
+	for (unsigned int i = 0; i < agents.size(); i++)
 	{
-		a.Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
+		agents.at(i).Draw(_pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
 
+	//If the graph should be rendered and it is available, render it
 	if (renderGraph && graphMutex.try_lock())
 	{
 		graphMutex.unlock();
 		navGraph.DrawGraph(linePS, lineVS, _pPixelShader, _pVertexShader, viewFrustum, *currentCamera);
 	}
 
+	//Draw any and all splines within the world after setting the layout
 	_pImmediateContext->IASetInputLayout(basicVertexLayout);
 	
 	for (unsigned int i = 0; i < splines.size(); i++)
@@ -1162,10 +1162,12 @@ void Application::Draw()
 	{
 		agentSplines.at(i).Draw(linePS, lineVS, *currentCamera, false);
 	}
-
+	//Don't forget to set the layout back to the regular vertex layout
 	_pImmediateContext->IASetInputLayout(_pVertexLayout);
 
+	//Draw the skybox last because it is the most likely to be drawn over
 	skybox.Draw(skyboxVS, skyboxPS, currentCamera);
+
     //
     // Present our back buffer to our front buffer
     //

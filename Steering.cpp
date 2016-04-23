@@ -150,15 +150,13 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 
 	//Unit length whisker vectors
 	XMVECTOR fWhisker = XMVector3Normalize(XMLoadFloat3(&forwards));
-	XMVECTOR lWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationNormal(rotationAxis, whiskerAngleRad)));
-	XMVECTOR rWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationNormal(rotationAxis, -whiskerAngleRad)));
 
 	BoundingBox nearestBox = BoundingBox();
 	float nearestBoxDistSq = (std::numeric_limits<float>::max)();
 
-	for (BoundingBox box : objects)
+	for (unsigned int i = 0; i < objects.size(); i++)
 	{
-		XMVECTOR boxPos = XMLoadFloat3(&box.Center);
+		XMVECTOR boxPos = XMLoadFloat3(&objects.at(i).Center);
 
 		/*
 		Basically a broad-phase bounding circle collision detection.
@@ -170,7 +168,7 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 		XMVECTOR dSq = XMVector3LengthSq(boxPos - pos);
 		
 		//No point in checking the y axis as the agents only operate on the xz plane
-		float boxRadius = fmaxf(box.Extents.x, box.Extents.z);
+		float boxRadius = fmaxf(objects.at(i).Extents.x, objects.at(i).Extents.z);
 
 		if (XMVectorGetX(dSq) > pow(whiskerLength + boxRadius, 2))
 		{
@@ -182,9 +180,12 @@ XMFLOAT3 Steering::obstacleAvoidForce(vector<BoundingBox>& objects, XMFLOAT3 pos
 		if (XMVectorGetX(dSq) < nearestBoxDistSq)
 		{
 			nearestBoxDistSq = XMVectorGetX(dSq);
-			nearestBox = box;
+			nearestBox = objects.at(i);
 		}
 	}
+
+	XMVECTOR lWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationNormal(rotationAxis, whiskerAngleRad)));
+	XMVECTOR rWhisker = XMVector3Normalize(XMVector3Rotate(fWhisker, XMQuaternionRotationNormal(rotationAxis, -whiskerAngleRad)));
 
 	float dist = -1.0f;
 	float nearestDist = -1.0f;

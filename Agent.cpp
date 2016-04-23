@@ -27,7 +27,7 @@ Agent::~Agent()
 	blackboard = nullptr;
 }
 
-XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
+void Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 {
 	updateController();
 
@@ -55,8 +55,6 @@ XMFLOAT3 Agent::Update(double deltaTime, std::vector<BoundingBox>& objects)
 			blackboard->setAgentScaredState(agentID, false);
 		}
 	}
-
-	return facing;
 }
 
 bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& objects)
