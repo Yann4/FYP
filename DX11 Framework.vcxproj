@@ -37,7 +37,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'" Label="Configuration">
@@ -401,6 +401,7 @@
     <ClCompile Include="HideState.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="InvestigateState.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Marpo.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -441,6 +442,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="InvestigateState.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="Marpo.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Observer.h" />

@@ -26,6 +26,7 @@
 #include "Blackboard.h"
 #include "Player.h"
 #include "ExitPoint.h"
+#include "Logger.h"
 
 #include <queue>
 #include <fstream>
