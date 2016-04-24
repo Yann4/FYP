@@ -98,6 +98,7 @@ private:
 
 	std::vector<GameObject> objects;
 	std::vector<DirectX::BoundingBox> obstacleBoxes;
+	unsigned int numBoxesFired = 0;
 	ExitPoint exit;
 	std::vector<Spline> splines;
 	std::vector<Spline> agentSplines;
@@ -140,6 +141,7 @@ private:
 	void initialiseAgents(DirectX::XMFLOAT2 floorSize);
 
 	void initObjects();
+	void resetMap();
 
 	void updateGraph(std::vector<DirectX::BoundingBox>& objects);
 

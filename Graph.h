@@ -14,6 +14,7 @@
 class Graph
 {
 private:
+	std::vector<Node*> initialState;
 	std::vector<Node*> graphNodes;
 	std::vector<Node*> busyBuffer;
 
@@ -101,6 +102,7 @@ public:
 
 	void visitLocation(DirectX::XMFLOAT3 location);
 
+	void resetGraph();
 private:
 	Node* getNearestNode(DirectX::XMFLOAT3 position);
 

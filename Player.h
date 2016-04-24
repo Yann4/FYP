@@ -27,6 +27,8 @@ public:
 	inline DirectX::XMFLOAT3 Position() { DirectX::XMFLOAT4 p = camera.getPosition(); return DirectX::XMFLOAT3(p.x, p.y, p.z); }
 	inline DirectX::XMFLOAT3 Size() { return size; }
 
+	void moveTo(DirectX::XMFLOAT3 pos);
+
 	Player& operator=(Player other)
 	{
 		std::swap(camera, other.camera);

@@ -18,6 +18,7 @@ constBuffer(nullptr), objBuffer(nullptr), nodeMesh(nullptr), splineInputLayout(n
 Graph::Graph(ID3D11DeviceContext* context, ID3D11Device* device, ID3D11Buffer* constBuffer, ID3D11Buffer* objBuffer, MeshData* mesh, ID3D11InputLayout* splineInputLayout): context(context), device(device),
 constBuffer(constBuffer), objBuffer(objBuffer), nodeMesh(mesh), splineInputLayout(splineInputLayout)
 {
+	initialState = vector<Node*>();
 	graphNodes = vector<Node*>();
 	graphUpToDate = true;
 	colourConnectionsRed = false;
@@ -43,6 +44,11 @@ Graph::~Graph()
 	for (unsigned int i = 0; i < graphNodes.size(); i++)
 	{
 		delete graphNodes[i];
+	}
+
+	for (unsigned int i = 0; i < initialState.size(); i++)
+	{
+		delete initialState[i];
 	}
 }
 
@@ -80,6 +86,14 @@ void Graph::calculateGraph(vector<BoundingBox>& objects)
 		}
 	}
 	
+	if (initialState.empty())
+	{
+		for (unsigned int i = 0; i < graphNodes.size(); i++)
+		{
+			initialState.push_back(new Node(*graphNodes.at(i)));
+		}
+	}
+
 	flipBusy();
 
 	//Remove/Consolidate as many nodes as possible
@@ -280,6 +294,26 @@ void Graph::trimConnections()
 			}
 		}
 	}
+}
+
+void Graph::resetGraph()
+{
+	if (graphBusy)
+	{
+		return;
+	}
+
+	for (unsigned int i = 0; i < graphNodes.size(); i++)
+	{
+		delete graphNodes[i];
+	}
+	graphNodes.erase(graphNodes.begin(), graphNodes.end());
+
+	for (unsigned int i = 0; i < initialState.size(); i++)
+	{
+		graphNodes.push_back(new Node(*initialState.at(i)));
+	}
+	graphUpToDate = false;
 }
 
 void Graph::DrawGraph(ID3D11PixelShader* ConnectionPShader, ID3D11VertexShader* ConnectionVShader, ID3D11PixelShader* NodePShader, ID3D11VertexShader* NodeVShader, Frustum& frustum, Camera& cam)

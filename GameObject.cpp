@@ -126,6 +126,12 @@ void GameObject::moveFromCollision(float x, float y, float z)
 	}
 }
 
+void GameObject::moveTo(float x, float y, float z)
+{
+	setTranslation(-position.x, -position.y, -position.z);
+	setTranslation(x, y, z);
+}
+
 BoundingBox GameObject::getBoundingBox()
 {
 	XMFLOAT3 size = Size();

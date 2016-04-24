@@ -48,6 +48,7 @@ public:
 	void UpdateMatrix();
 
 	void moveFromCollision(float x, float y, float z);
+	void moveTo(float x, float y, float z);
 
 	DirectX::BoundingBox getBoundingBox();
 

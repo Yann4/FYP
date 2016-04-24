@@ -587,6 +587,7 @@ GameObject* Application::placeCrate(XMFLOAT3 position, XMFLOAT3 scale, XMFLOAT3 
 	temp.setRotation(rotation.x, rotation.y, rotation.z);
 	temp.UpdateMatrix();
 	temp.setCollider(true);
+
 	objects.push_back(temp);
 	obstacleBoxes.push_back(temp.getBoundingBox());
 
@@ -799,6 +800,65 @@ void Application::initObjects()
 	perFrameCB.spotLight = SpotLight(XMFLOAT4(0.5, 0.5, 0.5, 10.0), XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.5, 0.5, 0.5, 1.0), XMFLOAT3(0,0,0), 5, XMFLOAT3(0, 1, 0), XMFLOAT3(1, 0, 0), 96);
 }
 
+void Application::resetMap()
+{
+	player.moveTo(playerSpawn);
+	
+	if (numBoxesFired > 0)
+	{
+		objects.erase(objects.end() - numBoxesFired, objects.end());
+		obstacleBoxes.erase(obstacleBoxes.end() - numBoxesFired, obstacleBoxes.end());
+	}
+
+	navGraph.resetGraph();
+
+	XMFLOAT2 floorSize = XMFLOAT2(0, 0);
+
+	for (unsigned int i = 0; i < objects.size(); i++)
+	{
+		if (objects.at(i).getIsGround())
+		{
+			floorSize.x += objects.at(i).Size().x;
+			floorSize.y += objects.at(i).Size().z;
+		}
+	}
+
+	std::random_device device;
+	std::mt19937 engine(device());
+	std::uniform_real_distribution<float> distrX(-floorSize.x / 2.0f, floorSize.x / 2.0f);
+	std::uniform_real_distribution<float> distrZ(-floorSize.y / 2.0f, floorSize.y / 2.0f);
+
+	XMFLOAT3 position = XMFLOAT3(distrX(engine), 1.0f, distrZ(engine));
+
+	const float agentSize = agentMesh->size.x * 0.2f;
+	const float radius = agentSize * numAgents;
+
+	for (unsigned int i = 0; i < obstacleBoxes.size(); i++)
+	{
+		if (obstacleBoxes.at(i).Contains(BoundingSphere(position, radius)))
+		{
+			position = XMFLOAT3(distrX(engine), 1.0f, distrZ(engine));
+			i = 0;
+		}
+	}
+
+	XMVECTOR centre = XMLoadFloat3(&position);
+	XMVECTOR direction = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+
+	float rotationAngle = XM_2PI / numAgents;
+
+	XMVECTOR rotationVector = XMQuaternionRotationNormal(XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotationAngle);
+
+	for (unsigned int i = 0; i < numAgents; i++)
+	{
+		XMStoreFloat3(&position, centre + direction);
+		direction = XMVector3Rotate(direction, rotationVector);
+
+		agents.at(i).moveTo(position.x, position.y, position.z);
+		agents.back().UpdateMatrix();
+	}
+}
+
 void Application::Cleanup()
 {
 	if (_pd3dDevice) _pd3dDevice->Release();
@@ -863,6 +923,7 @@ void Application::fireBox()
 			posVect = XMVector3Transform(posVect, XMMatrixTranslation(cameraForwards.x * distance, cameraForwards.y * distance, cameraForwards.z * distance));
 			XMStoreFloat3(&cameraPos, posVect);
 			cameraPos.y = graphYPosition;
+			numBoxesFired++;
 			Logger::Instance() << "[Box fired]" << Logger::endl;
 			GameObject* fired = placeCrate(cameraPos, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0, 0, 0));
 			BoundingBox firedBB = fired->getBoundingBox();
@@ -942,7 +1003,7 @@ void Application::handleMessages(double delta)
 			playerPerspective = !playerPerspective;
 			break;
 		case TOGGLE_FLASHLIGHT:
-			flashlightOn = !flashlightOn;
+			resetMap();
 			break;
 		case TOGGLE_GRAPH_RENDER:
 			renderGraph = !renderGraph;
@@ -1025,6 +1086,11 @@ void Application::handleCollisions()
 				agents.at(j).moveFromCollision(mtv.axis.x * mtv.magnitude, mtv.axis.y * mtv.magnitude, mtv.axis.z * mtv.magnitude);
 			}
 		}
+	}
+
+	if (exit.collidesWith(player.Position(), 0.5f))
+	{
+		resetMap();
 	}
 }
 

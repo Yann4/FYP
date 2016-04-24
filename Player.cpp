@@ -58,6 +58,11 @@ void Player::inputUpdate(std::vector<Event> events, double deltaTime)
 	camera.setPosition(cameraPos);
 }
 
+void Player::moveTo(XMFLOAT3 pos)
+{
+	camera.setPosition(XMFLOAT4(pos.x, pos.y, pos.z, 1.0f));
+}
+
 void Player::Update()
 {
 	camera.Update();
