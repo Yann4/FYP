@@ -33,6 +33,7 @@ public:
 	bool shouldExit();
 	Priority Exit(State** toPush);
 
+	const std::string StateName() { return "Guard"; }
 private:
 	void generatePatrol(std::vector<DirectX::BoundingBox>& objects);
 	bool atNextNode();

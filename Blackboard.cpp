@@ -86,8 +86,13 @@ vector<Sound*> Blackboard::getSoundsWithinRange(XMFLOAT3 agentPosition, float he
 
 bool Blackboard::isAgentAlone(unsigned int agentIndex)
 {
-	const float aloneRadius = 3.0f;
+	if (agentLocations.size() == 1)
+	{
+		return false;
+	}
 
+	const float aloneRadius = 3.0f;
+	
 	XMVECTOR examinedPos = XMLoadFloat3(&agentLocations.at(agentIndex));
 
 	for (unsigned int i = 0; i < agentLocations.size(); i++)

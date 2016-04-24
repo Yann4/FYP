@@ -63,7 +63,9 @@ void Marpo::Update(double deltaTime, std::vector<DirectX::BoundingBox>& objects)
 
 				delete currentState;
 				currentStack->pop();
-
+				
+				Logger::Instance() << owner->agentID << " " << getTopStack()->top()->StateName() << Logger::endl;
+				
 				pushWithPriority(st, prio);
 			}
 		}
@@ -100,6 +102,8 @@ void Marpo::pushWithPriority(State* state, Priority prio)
 {
 	if (prio != NONE)
 	{
+		Logger::Instance() << owner->agentID << " " << state->StateName() << Logger::endl;
+
 		switch (prio)
 		{
 		case LONG_TERM:

@@ -863,6 +863,7 @@ void Application::fireBox()
 			posVect = XMVector3Transform(posVect, XMMatrixTranslation(cameraForwards.x * distance, cameraForwards.y * distance, cameraForwards.z * distance));
 			XMStoreFloat3(&cameraPos, posVect);
 			cameraPos.y = graphYPosition;
+			Logger::Instance() << "[Box fired]" << Logger::endl;
 			GameObject* fired = placeCrate(cameraPos, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0, 0, 0));
 			BoundingBox firedBB = fired->getBoundingBox();
 			firedBB.Extents.x *= 2.0f;

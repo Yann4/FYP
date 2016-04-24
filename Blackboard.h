@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Subject.h"
+#include "Logger.h"
 
 #include <DirectXMath.h>
 #include <vector>

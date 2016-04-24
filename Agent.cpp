@@ -96,12 +96,28 @@ bool Agent::canSeePlayer(XMFLOAT3 playerPosition, std::vector<BoundingBox>& obje
 				}
 
 				blackboard->updatePlayerPosition(playerPosition);
+					if (blackboard->isAgentAlone(agentID))
+					{
+						Logger::Instance() << "[Player seen by agent " << agentID << " while alone]" << Logger::endl;
+					}
+					else
+					{
+						Logger::Instance() << "[Player seen by agent " << agentID << " while not alone]" << Logger::endl;
+					}
 				handle.canSeePlayer = true;
 				return true;
 			}
 		}
 
 		blackboard->updatePlayerPosition(playerPosition);
+			if (blackboard->isAgentAlone(agentID))
+			{
+				Logger::Instance() << "[Player seen by agent " << agentID << " while alone]" << Logger::endl;
+			}
+			else
+			{
+				Logger::Instance() << "[Player seen by agent " << agentID << " while not alone]" << Logger::endl;
+			}
 		handle.canSeePlayer = true;
 		return true;
 	}

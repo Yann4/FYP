@@ -5,6 +5,7 @@ enum Priority { LONG_TERM, IMMEDIATE, REACTIONARY, NONE };
 #include "AgentController.h"
 #include <DirectXCollision.h>
 #include <vector>
+#include <string>
 
 class State
 {
@@ -24,4 +25,6 @@ public:
 	//Returns priority of state to be pushed if required
 	//If NONE, `toPush` hasn't been altered
 	virtual Priority Exit(State** toPush);
+
+	virtual const std::string StateName() { return "State"; }
 };

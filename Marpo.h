@@ -2,6 +2,8 @@
 #include "AgentController.h"
 #include "Blackboard.h"
 
+#include "Logger.h"
+
 #include "State.h"
 #include "TravelToPositionState.h"
 #include "RouteToState.h"

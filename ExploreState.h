@@ -32,6 +32,7 @@ public:
 	bool shouldExit();
 	Priority Exit(State** toPush);
 
+	const std::string StateName() { return "Explore"; }
 private:
 	bool atDestNode();
 	void setDestNode();

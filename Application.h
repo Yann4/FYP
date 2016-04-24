@@ -105,7 +105,7 @@ private:
 	Player player;
 	DirectX::XMFLOAT3 playerSpawn;
 	std::vector<Agent> agents;
-	const unsigned int numAgents = 5;
+	const unsigned int numAgents = 3;
 
 	Blackboard blackboard;
 

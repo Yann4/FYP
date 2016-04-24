@@ -30,6 +30,8 @@ public:
 	bool shouldExit();
 	Priority Exit(State** toPush);
 
+	const std::string StateName() { return "RouteTo"; }
+
 private:
 	bool atNextNode();
 	void getPath();

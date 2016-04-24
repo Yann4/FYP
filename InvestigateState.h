@@ -35,5 +35,7 @@ public:
 	bool shouldExit();
 	Priority Exit(State** toPush);
 
+	const std::string StateName() { return "Investigate"; }
+
 	void onNotify(const DirectX::XMFLOAT3& entity, ActionEvent e);
 };

@@ -16,4 +16,6 @@ public:
 	Priority shouldEnter();
 	bool shouldExit();
 	Priority Exit(State** toPush);
+
+	const std::string StateName() { return "Stunned"; }
 };

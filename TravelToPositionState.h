@@ -22,6 +22,8 @@ public:
 	bool shouldExit();
 	Priority Exit(State** toPush);
 
+	const std::string StateName() { return "TravelToPosition"; }
+
 private:
 	bool validTarget(std::vector<DirectX::BoundingBox>& objects);
 public:
